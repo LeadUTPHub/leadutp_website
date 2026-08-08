@@ -22,3 +22,9 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# Agent tooling and local assistant instructions
+.agents/
+.claude/
+.junie/
+skills/
