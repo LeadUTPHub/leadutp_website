@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 750" role="img" aria-labelledby="title desc">
+  <title id="title">Visual temporal de evento LEAD UTP</title>
+  <desc id="desc">Composición abstracta con líneas, puntos y formas de la identidad de LEAD UTP.</desc>
+  <rect width="1200" height="750" fill="#edf0fb"/>
+  <path d="M-45 590 455 90m-200 705L840 210m-70 585 445-445" stroke="#020c3e" stroke-width="3" opacity=".14"/>
+  <path d="M0 582C185 510 260 388 389 279c118-100 264-150 811-154v625H0Z" fill="#020c3e"/>
+  <path d="M610 750c88-188 242-276 590-344v344Z" fill="#7856ee" opacity=".92"/>
+  <circle cx="778" cy="280" r="142" fill="#d93340" opacity=".9"/>
+  <circle cx="778" cy="280" r="95" fill="#a6249d" opacity=".72"/>
+  <g fill="#fff" opacity=".82">
+    <circle cx="120" cy="615" r="7"/><circle cx="170" cy="565" r="7"/><circle cx="220" cy="515" r="7"/><circle cx="270" cy="465" r="7"/>
+    <circle cx="320" cy="415" r="7"/><circle cx="370" cy="365" r="7"/><circle cx="420" cy="315" r="7"/>
+  </g>
+  <text x="72" y="665" fill="#fff" font-family="Arial, sans-serif" font-size="28" font-weight="700" letter-spacing="6">LEAD UTP</text>
+</svg>

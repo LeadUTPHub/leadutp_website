@@ -1,0 +1,66 @@
+---
+import FeaturedEvent from '../components/events/FeaturedEvent.astro';
+import PastEventGrid from '../components/events/PastEventGrid.astro';
+import UpcomingEventList from '../components/events/UpcomingEventList.astro';
+import Container from '../components/ui/Container.astro';
+import SectionHeader from '../components/ui/SectionHeader.astro';
+import {
+	events,
+	getFeaturedEvent,
+	getPastEvents,
+	getUpcomingEvents,
+} from '../data/events';
+import Layout from '../layouts/Layout.astro';
+
+const featuredEvent = getFeaturedEvent(events);
+const upcomingEvents = getUpcomingEvents(events);
+const pastEvents = getPastEvents(events);
+const agendaEvents = upcomingEvents.filter((event) => event.slug !== featuredEvent?.slug);
+---
+
+<Layout title="Eventos LEAD | LEAD UTP" description="Conecta, aprende y crece con las experiencias académicas y tecnológicas de LEAD UTP.">
+	<section class="border-b border-white/8 bg-canvas-navy/35 pb-12 pt-13 sm:pt-16 sm:pb-16 lg:pt-20 lg:pb-20">
+		<Container>
+			<header class="mx-auto max-w-2xl text-center">
+				<h1 class="font-display text-4xl font-semibold tracking-[-0.065em] text-foreground sm:text-5xl lg:text-6xl">
+					Eventos <span class="text-optional-3">LEAD</span>
+				</h1>
+				<p class="mx-auto mt-4 max-w-xl text-base leading-7 text-foreground-secondary sm:text-lg">
+					Conecta, aprende y crece con nuestra comunidad. Descubre las próximas experiencias académicas y tecnológicas diseñadas para impulsar tu futuro.
+				</p>
+			</header>
+
+			{featuredEvent && <div class="mt-10 sm:mt-12"><FeaturedEvent event={featuredEvent} /></div>}
+		</Container>
+	</section>
+
+	<section id="proximos-eventos" class="pt-16 sm:pt-20 lg:pt-22" aria-labelledby="proximos-eventos-title">
+		<Container>
+			<SectionHeader
+				id="proximos-eventos-title"
+				title="Próximos eventos"
+				description="Descubre las próximas experiencias de la comunidad LEAD."
+			>
+				<p slot="action" class="text-sm font-semibold text-foreground-muted">
+					{upcomingEvents.length} {upcomingEvents.length === 1 ? 'evento programado' : 'eventos programados'}
+				</p>
+			</SectionHeader>
+			<div class="mt-7 sm:mt-8"><UpcomingEventList events={agendaEvents} /></div>
+		</Container>
+	</section>
+
+	<section id="eventos-pasados" class="mt-16 border-t border-white/8 pb-24 pt-8 sm:mt-20 sm:pt-10 lg:mt-22 lg:pb-28" aria-labelledby="eventos-pasados-title">
+		<Container>
+			<SectionHeader
+				id="eventos-pasados-title"
+				title="Eventos pasados"
+				description="Una mirada a los momentos que hemos compartido como comunidad."
+			>
+				<p slot="action" class="text-sm font-semibold text-foreground-muted">
+					{pastEvents.length} {pastEvents.length === 1 ? 'evento realizado' : 'eventos realizados'}
+				</p>
+			</SectionHeader>
+			<div class="mt-7 sm:mt-8"><PastEventGrid events={pastEvents} /></div>
+		</Container>
+	</section>
+</Layout>

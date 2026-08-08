@@ -1,0 +1,94 @@
+---
+import { ChevronDown } from '@lucide/astro';
+import type { Event } from '../../data/events';
+import PastEventCard from './PastEventCard.astro';
+
+interface Props {
+	events: Event[];
+	id?: string;
+	initialCount?: number;
+}
+
+const {
+	events,
+	id = 'past-event-list',
+	initialCount = 3,
+} = Astro.props;
+---
+
+<past-event-grid data-initial-count={initialCount}>
+	<div id={id} class="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+		{events.map((event) => <div data-past-event-item><PastEventCard event={event} /></div>)}
+	</div>
+
+	{
+		events.length > initialCount && (
+			<div class="mt-8 flex flex-col items-center gap-2">
+				<button
+					type="button"
+					hidden
+					data-expand-button
+					aria-controls={id}
+					aria-expanded="false"
+					class="inline-flex min-h-11 items-center justify-center gap-2 rounded-md px-4 text-sm font-bold text-foreground transition-colors duration-200 hover:bg-surface hover:text-white focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-optional-3 motion-reduce:transition-none"
+				>
+					<span data-expand-label>Ver más eventos</span>
+					<ChevronDown data-expand-icon class="size-4 transition-transform duration-200 motion-reduce:transition-none" aria-hidden="true" />
+				</button>
+				<p data-visible-status aria-live="polite" class="text-xs text-foreground-muted">
+					{events.length} eventos disponibles
+				</p>
+			</div>
+		)
+	}
+</past-event-grid>
+
+<script>
+	class PastEventGridElement extends HTMLElement {
+		connectedCallback() {
+			if (this.dataset.ready === 'true') return;
+			this.dataset.ready = 'true';
+
+			const items = Array.from(this.querySelectorAll<HTMLElement>('[data-past-event-item]'));
+			const button = this.querySelector<HTMLButtonElement>('[data-expand-button]');
+			const label = this.querySelector<HTMLElement>('[data-expand-label]');
+			const icon = this.querySelector<HTMLElement>('[data-expand-icon]');
+			const status = this.querySelector<HTMLElement>('[data-visible-status]');
+			const initialCount = Number(this.dataset.initialCount ?? 3);
+
+			if (!button || !label || items.length <= initialCount) return;
+
+			let expanded = false;
+			button.hidden = false;
+
+			const update = () => {
+				const visibleCount = expanded ? items.length : Math.min(initialCount, items.length);
+
+				items.forEach((item, index) => {
+					item.hidden = index >= visibleCount;
+				});
+
+				button.setAttribute('aria-expanded', String(expanded));
+				label.textContent = expanded
+					? 'Mostrar menos'
+					: `Ver ${items.length - initialCount} eventos más`;
+				icon?.classList.toggle('rotate-180', expanded);
+
+				if (status) {
+					status.textContent = `Mostrando ${visibleCount} de ${items.length}`;
+				}
+			};
+
+			button.addEventListener('click', () => {
+				expanded = !expanded;
+				update();
+			});
+
+			update();
+		}
+	}
+
+	if (!customElements.get('past-event-grid')) {
+		customElements.define('past-event-grid', PastEventGridElement);
+	}
+</script>

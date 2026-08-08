@@ -1,0 +1,66 @@
+---
+import { ArrowUpRight, Calendar, Clock, MapPin } from '@lucide/astro';
+import { Image } from 'astro:assets';
+import type { Event } from '../../data/events';
+import {
+	canRegisterForEvent,
+	formatEventDate,
+	formatEventTimeRange,
+	getEventStatusLabel,
+} from '../../data/events';
+import Badge from '../ui/Badge.astro';
+import Button from '../ui/Button.astro';
+
+interface Props {
+	event: Event;
+}
+
+const { event } = Astro.props;
+const timeLabel = formatEventTimeRange(event);
+const statusLabel = getEventStatusLabel(event);
+const showRegistration = canRegisterForEvent(event);
+const hasImage = Boolean(event.image && event.imageAlt);
+---
+
+<article class="overflow-hidden rounded-xl border border-white/10 bg-surface">
+	<div class:list={['grid', hasImage && 'lg:grid-cols-[1.2fr_1fr]']}>
+		{hasImage && event.image && event.imageAlt && <div class="relative min-h-72 overflow-hidden bg-canvas-navy sm:min-h-96 lg:min-h-full">
+			{
+				event.imageIsTemporary ? (
+					<img src={event.image.src} width={event.image.width} height={event.image.height} alt={event.imageAlt} class="absolute inset-0 h-full w-full object-cover" />
+				) : (
+					<Image src={event.image} alt={event.imageAlt} class="absolute inset-0 h-full w-full object-cover" widths={[640, 900, 1200]} sizes="(min-width: 1024px) 55vw, 100vw" />
+				)
+			}
+		</div>}
+		<div class="flex flex-col px-6 py-8 sm:px-9 sm:py-10 lg:px-10 lg:py-11">
+			<div class="flex flex-wrap items-center gap-3">
+				<Badge tone={event.badgeTone}>{event.category}</Badge>
+				{
+					statusLabel && (
+						<span class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.12em] text-white/85">
+							<span class:list={['size-1.5 rounded-full', event.status === 'cancelled' ? 'bg-secondary' : 'bg-optional-3']} aria-hidden="true"></span>
+							{statusLabel}
+						</span>
+					)
+				}
+			</div>
+			<h2 class="mt-5 font-display text-3xl font-semibold leading-[1.04] tracking-[-0.055em] text-foreground sm:text-4xl">
+				{event.title}
+			</h2>
+			{event.description && <p class="mt-5 max-w-xl text-base leading-7 text-foreground-secondary">{event.description}</p>}
+			<div class="mt-7 grid gap-3 text-sm text-foreground-secondary">
+				<div class="flex items-center gap-3"><Calendar class="size-4 text-secondary" aria-hidden="true" /><time datetime={event.date}>{formatEventDate(event.date)}</time></div>
+				{timeLabel && <div class="flex items-center gap-3"><Clock class="size-4 text-secondary" aria-hidden="true" /><span>{timeLabel}</span></div>}
+				{event.location && <div class="flex items-center gap-3"><MapPin class="size-4 text-secondary" aria-hidden="true" /><span>{event.location}</span></div>}
+			</div>
+			{
+				showRegistration && event.registrationUrl && (
+					<div class="mt-8">
+						<Button href={event.registrationUrl} size="lg">Registrarme <ArrowUpRight class="size-4" aria-hidden="true" /></Button>
+					</div>
+				)
+			}
+		</div>
+	</div>
+</article>

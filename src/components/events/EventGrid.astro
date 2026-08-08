@@ -1,0 +1,14 @@
+---
+import type { Event } from '../../data/events';
+import EventCard from './EventCard.astro';
+
+interface Props {
+	events: Event[];
+}
+
+const { events } = Astro.props;
+---
+
+<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+	{events.map((event) => <EventCard event={event} />)}
+</div>
