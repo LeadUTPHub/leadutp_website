@@ -1,0 +1,18 @@
+---
+interface Props {
+	tone?: 'primary' | 'secondary' | 'optional';
+	class?: string;
+}
+
+const { tone = 'primary', class: className } = Astro.props;
+
+const tones = {
+	primary: 'bg-white/[0.06] text-foreground ring-1 ring-white/12',
+	secondary: 'bg-secondary/16 text-white ring-1 ring-secondary/30',
+	optional: 'bg-optional-1/18 text-white ring-1 ring-optional-1/35',
+};
+---
+
+<span class:list={['inline-flex w-fit items-center rounded-md px-2.5 py-1 text-[0.6875rem] font-bold tracking-[0.08em] uppercase', tones[tone], className]}>
+	<slot />
+</span>

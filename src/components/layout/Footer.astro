@@ -1,0 +1,194 @@
+---
+import { Image } from 'astro:assets';
+import { MessageCircle } from '@lucide/astro';
+import leadLogoLight from '../../assets/brand/lead-utp-logo-light.png';
+import Container from '../ui/Container.astro';
+
+interface FooterItem {
+	label: string;
+	href?: string;
+}
+
+interface SocialLink {
+	label: string;
+	href: string;
+	icon: 'instagram' | 'linkedin' | 'discord';
+}
+
+const year = new Date().getFullYear();
+
+const informationItems = [
+	{ label: 'Sobre nosotros' },
+	{ label: 'Proyectos' },
+	{ label: 'Pilares', href: '/pilares' },
+	{ label: 'Alianzas' },
+	{ label: 'Vida LEAD' },
+	{ label: 'Eventos', href: '/eventos' },
+	{ label: 'Convocatorias' },
+] satisfies FooterItem[];
+
+const socialLinks = [
+	{
+		label: 'Instagram',
+		href: 'https://www.instagram.com/lead_utp',
+		icon: 'instagram',
+	},
+	{
+		label: 'LinkedIn',
+		href: 'https://www.linkedin.com/company/lead-utp',
+		icon: 'linkedin',
+	},
+	{
+		label: 'Discord',
+		href: 'https://discord.gg/EYXFUfYHbF',
+		icon: 'discord',
+	},
+] satisfies SocialLink[];
+
+const supportItems = [
+	{ label: 'Contacto' },
+	{ label: 'Privacidad' },
+	{ label: 'Términos' },
+] satisfies FooterItem[];
+
+const navLinkClasses =
+	'inline-flex min-h-11 items-center rounded-sm text-sm text-white/72 transition-colors hover:text-white sm:min-h-9 motion-reduce:transition-none';
+const navTextClasses = 'inline-flex min-h-9 items-center text-sm text-white/58';
+---
+
+<footer class="mt-auto border-t border-white/10 bg-canvas-deep text-white">
+	<Container>
+		<div
+			class="grid gap-10 py-10 md:gap-12 md:py-11 lg:grid-cols-[minmax(0,0.6fr)_minmax(0,1fr)] lg:items-start lg:gap-14 xl:gap-20"
+		>
+			<div class="max-w-sm">
+				<a
+					href="/"
+					aria-label="Ir al inicio de LEAD UTP"
+					class="inline-flex min-h-11 items-center rounded-sm transition-opacity hover:opacity-85 motion-reduce:transition-none"
+				>
+					<Image
+						src={leadLogoLight}
+						alt="LEAD UTP"
+						widths={[176, 192, 208]}
+						sizes="(min-width: 1024px) 208px, (min-width: 768px) 192px, 176px"
+						class="h-auto w-44 md:w-48 lg:w-52"
+						loading="lazy"
+						decoding="async"
+					/>
+				</a>
+
+				<p class="mt-4 text-xs font-semibold leading-6 tracking-[0.16em] text-white/72">
+					LEARN. EXPLORE. ASPIRE. DISCOVER.
+				</p>
+
+				<ul class="mt-3 flex items-center gap-1" aria-label="Redes sociales de LEAD UTP">
+					{
+						socialLinks.map((social) => (
+							<li>
+								<a
+									href={social.href}
+									aria-label={`${social.label} de LEAD UTP`}
+									class="inline-flex size-11 items-center justify-center rounded-full text-white/72 transition-colors hover:text-white motion-reduce:transition-none"
+								>
+									{social.icon === 'instagram' && (
+										<svg
+											aria-hidden="true"
+											class="size-[19px]"
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											stroke-width="1.8"
+											stroke-linecap="round"
+											stroke-linejoin="round"
+										>
+											<rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+											<path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37Z" />
+											<path d="M17.5 6.5h.01" />
+										</svg>
+									)}
+									{social.icon === 'linkedin' && (
+										<svg
+											aria-hidden="true"
+											class="size-[19px]"
+											viewBox="0 0 24 24"
+											fill="none"
+											stroke="currentColor"
+											stroke-width="1.8"
+											stroke-linecap="round"
+											stroke-linejoin="round"
+										>
+											<path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6Z" />
+											<path d="M2 9h4v12H2z" />
+											<circle cx="4" cy="4" r="2" />
+										</svg>
+									)}
+									{social.icon === 'discord' && (
+										<MessageCircle aria-hidden="true" size={19} stroke-width={1.8} />
+									)}
+								</a>
+							</li>
+						))
+					}
+				</ul>
+			</div>
+
+			<div class="grid grid-cols-1 gap-x-8 gap-y-9 min-[420px]:grid-cols-2 md:grid-cols-3 md:gap-x-10 lg:gap-x-8 xl:gap-x-12">
+				<nav aria-labelledby="footer-information-heading">
+					<p id="footer-information-heading" class="text-[0.6875rem] font-semibold tracking-[0.14em] text-white/70 uppercase">
+						Más información
+					</p>
+					<ul class="mt-3 space-y-0.5">
+						{
+							informationItems.map((item) => (
+								<li>
+									{item.href ? (
+										<a href={item.href} class={navLinkClasses}>{item.label}</a>
+									) : (
+										<span class={navTextClasses}>{item.label}</span>
+									)}
+								</li>
+							))
+						}
+					</ul>
+				</nav>
+
+				<nav aria-labelledby="footer-social-heading">
+					<p id="footer-social-heading" class="text-[0.6875rem] font-semibold tracking-[0.14em] text-white/70 uppercase">
+						Síguenos
+					</p>
+					<ul class="mt-3 space-y-0.5">
+						{
+							socialLinks.map((social) => (
+								<li>
+									<a href={social.href} class={navLinkClasses}>{social.label}</a>
+								</li>
+							))
+						}
+					</ul>
+				</nav>
+
+				<nav aria-labelledby="footer-support-heading">
+					<p id="footer-support-heading" class="text-[0.6875rem] font-semibold tracking-[0.14em] text-white/70 uppercase">
+						Soporte
+					</p>
+					<ul class="mt-3 space-y-0.5">
+						{
+							supportItems.map((item) => (
+								<li><span class={navTextClasses}>{item.label}</span></li>
+							))
+						}
+					</ul>
+				</nav>
+			</div>
+		</div>
+
+		<div class="flex flex-col gap-3 border-t border-white/14 py-4 text-xs text-white/62 sm:flex-row sm:items-center sm:justify-between">
+			<p>&copy; {year} LEAD UTP. Todos los derechos reservados.</p>
+			<div class="flex gap-x-6" aria-label="Información legal">
+				<span>Privacidad</span>
+				<span>Términos</span>
+			</div>
+		</div>
+	</Container>
+</footer>
