@@ -1,0 +1,57 @@
+---
+import { ArrowRight } from '@lucide/astro';
+import PillarOverviewItem from '../../components/pillars/PillarOverviewItem.astro';
+import Container from '../../components/ui/Container.astro';
+import { pillars } from '../../data/pillars';
+import Layout from '../../layouts/Layout.astro';
+
+---
+
+<Layout
+	title="Nuestros Pilares | LEAD UTP"
+	description="Conoce los seis pilares que orientan las iniciativas, experiencias y el desarrollo de la comunidad LEAD UTP."
+>
+	<section class="border-b border-white/8 bg-canvas-navy/35 py-13 sm:py-16 lg:py-18">
+		<Container>
+			<header class="max-w-3xl">
+				<p class="text-[0.7rem] font-bold uppercase tracking-[0.18em] text-foreground-secondary">Comunidad LEAD</p>
+				<h1 class="mt-4 font-display text-4xl font-bold tracking-[-0.065em] text-foreground sm:text-5xl lg:text-6xl">
+					Nuestros <span class="inline-block pr-2 bg-linear-to-r from-secondary to-optional-1 bg-clip-text text-transparent">Pilares</span>
+				</h1>
+				<p class="mt-5 max-w-2xl text-base leading-7 text-foreground-secondary sm:text-lg sm:leading-8">
+					Son los ejes que orientan nuestras iniciativas, las experiencias que compartimos y la forma en que crecemos como comunidad.
+				</p>
+			</header>
+		</Container>
+	</section>
+
+	<section class="py-14 sm:py-18 lg:py-22" aria-label="Pilares de LEAD UTP">
+		<Container>
+			<ol class="grid border-y border-white/12 md:grid-cols-2 md:gap-x-12 lg:gap-x-20 xl:gap-x-24">
+				{
+					pillars.map((pillar, index) => (
+						<li class:list={[
+							'border-white/12',
+							index > 0 && 'border-t',
+							index === 1 && 'md:border-t-0',
+						]}>
+							<PillarOverviewItem pillar={pillar} index={index} />
+						</li>
+					))
+				}
+			</ol>
+
+			<div class="mt-16 border-t border-white/12 pt-10 sm:mt-20 sm:flex sm:items-end sm:justify-between sm:gap-10 lg:mt-24">
+				<div class="max-w-2xl">
+					<p class="font-display text-2xl font-semibold tracking-[-0.045em] text-foreground sm:text-3xl">
+						Los pilares toman forma cuando aprendemos, colaboramos y construimos experiencias juntos.
+					</p>
+				</div>
+				<a href="/eventos" class="mt-6 inline-flex min-h-11 shrink-0 items-center gap-2 rounded-sm text-sm font-bold text-foreground transition-colors hover:text-white focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-optional-3 sm:mt-0 motion-reduce:transition-none">
+					Conoce nuestras experiencias
+					<ArrowRight class="size-4" aria-hidden="true" />
+				</a>
+			</div>
+		</Container>
+	</section>
+</Layout>

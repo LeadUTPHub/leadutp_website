@@ -1,0 +1,63 @@
+---
+import { ArrowRight } from '@lucide/astro';
+import type { Pillar } from '../../data/pillars';
+import PillarVisual from './PillarVisual.astro';
+
+interface Props {
+	pillar: Pillar;
+	index: number;
+}
+
+const { pillar, index } = Astro.props;
+const hasOverviewImage = Boolean(
+	pillar.image && pillar.imageAlt !== undefined && !pillar.imageIsTemporary,
+);
+
+const toneClasses = {
+	primary: 'bg-white/70',
+	secondary: 'bg-secondary',
+	'optional-1': 'bg-optional-1',
+	'optional-2': 'bg-optional-2',
+	'optional-3': 'bg-optional-3',
+};
+---
+
+<article class="h-full py-9 sm:py-10 md:py-12 lg:py-14">
+	<div class="flex h-full max-w-xl flex-col">
+		<figure
+			class="aspect-[16/9] overflow-hidden rounded-lg border border-white/10 bg-surface sm:aspect-[16/8]"
+			aria-hidden={hasOverviewImage ? undefined : 'true'}
+		>
+			{
+				hasOverviewImage && pillar.image && pillar.imageAlt !== undefined && (
+					<PillarVisual
+						image={pillar.image}
+						alt={pillar.imageAlt}
+						imageIsTemporary={pillar.imageIsTemporary}
+						class="h-full w-full object-cover"
+						sizes="(min-width: 768px) 50vw, 100vw"
+					/>
+				)
+			}
+		</figure>
+		<div class="mt-6 flex items-center gap-3">
+			<span class="font-display text-sm font-semibold tracking-[0.12em] text-foreground-muted" aria-hidden="true">
+				{String(index + 1).padStart(2, '0')}
+			</span>
+			<span class:list={['h-0.5 w-10 rounded-full', toneClasses[pillar.tone]]} aria-hidden="true"></span>
+		</div>
+		<h2 class="mt-5 max-w-[18ch] font-display text-2xl font-semibold leading-[1.08] tracking-[-0.05em] text-foreground sm:text-3xl lg:text-[2.15rem]">
+			{pillar.name}
+		</h2>
+		<p class="mt-4 max-w-md text-sm leading-6 text-foreground-secondary sm:text-base sm:leading-7">
+			{pillar.shortDescription}
+		</p>
+		<a
+			href={`/pilares/${pillar.slug}`}
+			class="group/link mt-auto inline-flex min-h-11 w-fit items-center gap-2 rounded-sm pt-6 text-sm font-bold text-foreground-secondary transition-colors hover:text-white focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-optional-3 motion-reduce:transition-none"
+		>
+			Explorar pilar
+			<ArrowRight class="size-4 transition-transform duration-200 group-hover/link:translate-x-1 motion-reduce:transform-none motion-reduce:transition-none" aria-hidden="true" />
+		</a>
+	</div>
+</article>
