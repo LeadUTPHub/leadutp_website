@@ -1,0 +1,48 @@
+---
+import { ArrowRight } from '@lucide/astro';
+import type { HomeCommunityMoment } from '../../data/home';
+import Container from '../ui/Container.astro';
+import HomeMedia from './HomeMedia.astro';
+
+interface Props {
+	moments: HomeCommunityMoment[];
+}
+
+const { moments } = Astro.props;
+---
+
+<section class="py-16 sm:py-20 lg:py-24" aria-labelledby="life-title">
+	<Container>
+		<div class="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+			<div>
+				<p class="text-[0.7rem] font-bold uppercase tracking-[0.18em] text-secondary">Cómo se vive</p>
+				<h2 id="life-title" class="mt-3 font-display text-3xl font-semibold tracking-[-0.05em] text-foreground sm:text-4xl">Vida LEAD UTP</h2>
+				<p class="mt-3 max-w-xl text-base leading-7 text-foreground-secondary">Así se vive nuestra comunidad: creando, colaborando y celebrando cada experiencia juntos.</p>
+			</div>
+			<a href="/vida-lead" class="group inline-flex min-h-11 w-fit shrink-0 items-center gap-2 rounded-sm text-sm font-bold text-foreground transition-colors hover:text-white focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-optional-3 motion-reduce:transition-none">
+				Descubre Vida LEAD
+				<ArrowRight class="size-4 transition-transform duration-200 group-hover:translate-x-1 motion-reduce:transform-none motion-reduce:transition-none" aria-hidden="true" />
+			</a>
+		</div>
+
+		<div class="mt-10 grid gap-4 sm:grid-cols-2 md:grid-cols-12 md:grid-rows-2 lg:gap-5">
+			{
+				moments.map((moment, index) => (
+					<div class:list={[
+						index === 0
+							? 'sm:col-span-2 md:col-span-7 md:row-span-2'
+							: 'md:col-span-5',
+					]}>
+						<HomeMedia
+							media={moment.media}
+							class:list={[
+								index === 0 ? 'aspect-[16/10] md:h-full md:min-h-[34rem] md:aspect-auto' : 'aspect-[4/3] md:h-full md:min-h-[16.5rem] md:aspect-auto',
+							]}
+							sizes={index === 0 ? '(min-width: 768px) 58vw, 100vw' : '(min-width: 768px) 42vw, 50vw'}
+						/>
+					</div>
+				))
+			}
+		</div>
+	</Container>
+</section>

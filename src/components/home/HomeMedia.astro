@@ -1,0 +1,47 @@
+---
+import { Image } from 'astro:assets';
+import type { HomeMedia } from '../../data/home';
+
+interface Props {
+	media?: HomeMedia;
+	class?: string;
+	sizes?: string;
+	loading?: 'eager' | 'lazy';
+}
+
+const {
+	media,
+	class: className,
+	sizes = '100vw',
+	loading = 'lazy',
+} = Astro.props;
+
+const hasRealImage = Boolean(media?.image && media.alt && !media.imageIsTemporary);
+---
+
+<div
+	class:list={[
+		'relative overflow-hidden rounded-xl border border-white/10 bg-surface',
+		className,
+	]}
+	aria-hidden={hasRealImage ? undefined : 'true'}
+>
+	{
+		hasRealImage && media?.image && media.alt ? (
+			<Image
+				src={media.image}
+				alt={media.alt}
+				widths={[480, 720, 960, 1280]}
+				sizes={sizes}
+				class="absolute inset-0 h-full w-full object-cover"
+				loading={loading}
+				decoding="async"
+			/>
+		) : (
+			<div class="absolute inset-0 bg-[linear-gradient(145deg,rgba(255,255,255,0.025),transparent_58%)]">
+				<span class="absolute inset-x-0 top-0 h-px bg-linear-to-r from-secondary/70 via-optional-1/45 to-transparent"></span>
+				<span class="absolute right-7 bottom-7 size-2 rounded-full bg-optional-3/70"></span>
+			</div>
+		)
+	}
+</div>

@@ -1,0 +1,43 @@
+---
+import { ArrowRight } from '@lucide/astro';
+import type { HomeMedia as HomeMediaData } from '../../data/home';
+import Button from '../ui/Button.astro';
+import Container from '../ui/Container.astro';
+import HomeMedia from './HomeMedia.astro';
+
+interface Props {
+	media: HomeMediaData;
+}
+
+const { media } = Astro.props;
+---
+
+<section class="border-b border-white/8 bg-canvas-navy/35 py-14 sm:py-18 lg:py-22" aria-labelledby="home-title">
+	<Container>
+		<div class="grid items-center gap-10 lg:grid-cols-[minmax(0,1.08fr)_minmax(22rem,0.92fr)] lg:gap-14 xl:gap-20">
+			<header class="max-w-3xl">
+				<p class="text-[0.7rem] font-bold uppercase tracking-[0.18em] text-foreground-secondary">Comunidad UTP</p>
+				<h1 id="home-title" class="mt-5 font-display text-4xl font-bold leading-[0.98] tracking-[-0.065em] text-foreground sm:text-5xl lg:text-6xl xl:text-[4.4rem]">
+					Impulsamos a la próxima <span class="inline-block pr-2 bg-linear-to-r from-secondary to-optional-1 bg-clip-text text-transparent">generación de líderes.</span>
+				</h1>
+				<p class="mt-6 max-w-2xl text-base leading-7 text-foreground-secondary sm:text-lg sm:leading-8">
+					LEAD UTP es una comunidad de estudiantes que conecta tecnología, liderazgo, desarrollo profesional y experiencias capaces de abrir nuevas oportunidades.
+				</p>
+				<div class="mt-8 flex flex-wrap gap-3">
+					<Button href="/nosotros" size="lg">
+						Conoce LEAD UTP
+						<ArrowRight class="size-4" aria-hidden="true" />
+					</Button>
+					<Button href="/convocatorias" variant="outline" size="lg">Ver convocatorias</Button>
+				</div>
+			</header>
+
+			<HomeMedia
+				media={media}
+				class="aspect-[4/3] sm:aspect-[16/10] lg:aspect-[4/5] xl:aspect-[5/4]"
+				sizes="(min-width: 1024px) 42vw, 100vw"
+				loading="eager"
+			/>
+		</div>
+	</Container>
+</section>

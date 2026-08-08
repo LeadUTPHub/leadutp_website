@@ -1,11 +1,38 @@
 ---
-import Welcome from '../components/Welcome.astro';
+import HomeAlliances from '../components/home/HomeAlliances.astro';
+import HomeEvents from '../components/home/HomeEvents.astro';
+import HomeHero from '../components/home/HomeHero.astro';
+import HomeInitiative from '../components/home/HomeInitiative.astro';
+import HomeLife from '../components/home/HomeLife.astro';
+import HomeNetwork from '../components/home/HomeNetwork.astro';
+import HomePillars from '../components/home/HomePillars.astro';
+import HomeRecruitment from '../components/home/HomeRecruitment.astro';
+import HomeWays from '../components/home/HomeWays.astro';
+import { events, getFeaturedEvent, getUpcomingEvents } from '../data/events';
+import { homeAlliances, homeCommunityMoments, homeHeroMedia } from '../data/home';
+import { getPillarBySlug, pillars } from '../data/pillars';
 import Layout from '../layouts/Layout.astro';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const upcomingEvents = getUpcomingEvents(events);
+const featuredEvent = getFeaturedEvent(upcomingEvents)
+	?? upcomingEvents.find((event) => event.status !== 'cancelled');
+const secondaryEvents = featuredEvent
+	? upcomingEvents.filter((event) => event.slug !== featuredEvent.slug).slice(0, 2)
+	: [];
+const leadAcademia = getPillarBySlug(pillars, 'lead-academia');
 ---
 
-<Layout>
-	<Welcome />
+<Layout
+	title="LEAD UTP | Comunidad, liderazgo y tecnología"
+	description="Conoce LEAD UTP, una comunidad de estudiantes que impulsa liderazgo, tecnología, desarrollo profesional y nuevas oportunidades dentro de la Universidad Tecnológica del Perú."
+>
+	<HomeHero media={homeHeroMedia} />
+	<HomeWays />
+	{featuredEvent && <HomeEvents featuredEvent={featuredEvent} secondaryEvents={secondaryEvents} />}
+	<HomePillars pillars={pillars} />
+	{leadAcademia && <HomeInitiative initiative={leadAcademia} />}
+	<HomeLife moments={homeCommunityMoments} />
+	<HomeAlliances alliances={homeAlliances} />
+	<HomeNetwork />
+	<HomeRecruitment />
 </Layout>

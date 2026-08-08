@@ -1,0 +1,66 @@
+---
+import { ArrowRight } from '@lucide/astro';
+import type { Pillar } from '../../data/pillars';
+import Container from '../ui/Container.astro';
+
+interface Props {
+	pillars: Pillar[];
+}
+
+const { pillars } = Astro.props;
+
+const toneClasses = {
+	primary: 'bg-white/70',
+	secondary: 'bg-secondary',
+	'optional-1': 'bg-optional-1',
+	'optional-2': 'bg-optional-2',
+	'optional-3': 'bg-optional-3',
+};
+---
+
+<section class="py-16 sm:py-20 lg:py-24" aria-labelledby="pillars-title">
+	<Container>
+		<div class="grid gap-6 lg:grid-cols-[0.72fr_1fr] lg:items-end lg:gap-16">
+			<div>
+				<p class="text-[0.7rem] font-bold uppercase tracking-[0.18em] text-secondary">Qué nos guía</p>
+				<h2 id="pillars-title" class="mt-3 font-display text-3xl font-semibold tracking-[-0.05em] text-foreground sm:text-4xl">Nuestros pilares</h2>
+			</div>
+			<p class="max-w-2xl text-base leading-7 text-foreground-secondary">
+				Seis ejes orientan la forma en que aprendemos, crecemos y construimos comunidad dentro de LEAD UTP.
+			</p>
+		</div>
+
+		<ol class="mt-10 grid border-y border-white/12 sm:grid-cols-2 lg:grid-cols-3">
+			{
+				pillars.map((pillar, index) => (
+					<li class:list={[
+						'py-7 sm:px-7 lg:px-8 lg:py-8',
+						index > 0 && 'border-t border-white/12',
+						index === 1 && 'sm:border-t-0',
+						index === 2 && 'lg:border-t-0',
+						index % 2 === 0 && 'sm:pl-0 lg:px-8',
+						index % 2 === 1 && 'sm:pr-0 lg:px-8',
+						index % 3 === 0 && 'lg:pl-0',
+						index % 3 === 2 && 'lg:pr-0',
+					]}>
+						<div class="flex items-center gap-3">
+							<span class="text-xs font-bold tracking-[0.16em] text-foreground-muted" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+							<span class:list={['h-0.5 w-8', toneClasses[pillar.tone]]} aria-hidden="true"></span>
+						</div>
+						<h3 class="mt-4 font-display text-xl font-semibold leading-tight tracking-[-0.04em] text-foreground">
+							<a href={`/pilares/${pillar.slug}`} class="inline-flex min-h-11 items-center rounded-sm transition-colors hover:text-white focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-optional-3 motion-reduce:transition-none">
+								{pillar.name}
+							</a>
+						</h3>
+						<p class="mt-2 max-w-sm text-sm leading-6 text-foreground-secondary">{pillar.shortDescription}</p>
+					</li>
+				))
+			}
+		</ol>
+
+		<a href="/pilares" class="group mt-7 inline-flex min-h-11 items-center gap-2 rounded-sm text-sm font-bold text-foreground transition-colors hover:text-white focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-optional-3 motion-reduce:transition-none">
+			Explora nuestros pilares
+			<ArrowRight class="size-4 transition-transform duration-200 group-hover:translate-x-1 motion-reduce:transform-none motion-reduce:transition-none" aria-hidden="true" />
+		</a>
+	</Container>
+</section>
