@@ -1,6 +1,6 @@
 # Contexto del proyecto — LEAD UTP Website
 
-> Última actualización: 2026-08-23
+> Última actualización: 2026-08-24
 
 ## Qué es esto
 
@@ -24,6 +24,12 @@ Páginas implementadas:
 | Home | `/` | ✅ rediseñada, con secciones: hero, pilares, eventos, alianzas, vida del capítulo, red, reclutamiento, medios |
 | Eventos | `/eventos` | ✅ agenda con eventos destacados, próximos y pasados |
 | Pilares | `/pilares` y `/pilares/[slug]` | ✅ vista general + página por pilar |
+| Sobre nosotros | `/nosotros` | 🟡 placeholder "Próximamente" — falta contenido real (misión, equipo, historia) |
+| Proyectos | `/proyectos` | 🟡 placeholder "Próximamente" — falta contenido real |
+| Convocatorias | `/convocatorias` | 🟡 placeholder "Próximamente" — falta contenido real (convocatorias abiertas) |
+| 404 | — | ✅ página de error personalizada |
+
+Los CTAs del home ("Conoce LEAD UTP", "Ver convocatorias", "Explorar proyectos") y el Navbar ya apuntaban a `/nosotros`, `/proyectos` y `/convocatorias`, pero esas rutas no existían (404). Se creó un placeholder honesto por cada una (componente `src/components/ui/ComingSoon.astro`) para no romper esos links mientras se prepara el contenido real.
 
 SEO/infra ya cubierto:
 - Meta tags Open Graph / Twitter Card + imagen social (`og-image.png`)
@@ -58,9 +64,11 @@ npm run preview   # preview del build
 
 ## Pendientes / ideas abiertas
 
+- Reemplazar los placeholders "Próximamente" de `/nosotros`, `/proyectos` y `/convocatorias` con contenido real.
 - Imágenes placeholder en pilares y eventos (`imageIsTemporary: true`) — reemplazar con fotos reales.
 - Evaluar si el contenido pasa a un CMS/marketplace integration en vez de archivos `.data.ts` a medida que crezca.
 - Definir dominio propio (actualmente `leadutp.vercel.app`).
+- Configurar ESLint + Prettier para consistencia entre contribuidores (próximo en la lista).
 
 ## Dónde preguntar
 

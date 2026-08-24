@@ -1,0 +1,33 @@
+---
+import { Sparkles } from '@lucide/astro';
+import Button from './Button.astro';
+import Container from './Container.astro';
+
+interface Props {
+	eyebrow: string;
+	title: string;
+	description: string;
+}
+
+const { eyebrow, title, description } = Astro.props;
+---
+
+<section class="flex flex-1 items-center border-b border-white/8 bg-canvas-navy/35 py-20 sm:py-24 lg:py-28">
+	<Container>
+		<div class="mx-auto max-w-2xl text-center">
+			<span class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-canvas-navy px-4 py-1.5 text-[0.7rem] font-bold uppercase tracking-[0.18em] text-foreground-secondary">
+				<Sparkles class="size-3.5" aria-hidden="true" />
+				{eyebrow}
+			</span>
+			<h1 class="mt-6 font-display text-4xl font-semibold tracking-[-0.065em] text-foreground sm:text-5xl">
+				{title}
+			</h1>
+			<p class="mx-auto mt-4 max-w-xl text-base leading-7 text-foreground-secondary sm:text-lg">
+				{description}
+			</p>
+			<div class="mt-8">
+				<Button href="/" size="lg">Volver al inicio</Button>
+			</div>
+		</div>
+	</Container>
+</section>
