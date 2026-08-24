@@ -1,4 +1,7 @@
 ---
+import { ClientRouter } from 'astro:transitions';
+import Analytics from '@vercel/analytics/astro';
+import SpeedInsights from '@vercel/speed-insights/astro';
 import Footer from '../components/layout/Footer.astro';
 import Navbar from '../components/layout/Navbar.astro';
 import '../styles/global.css';
@@ -6,12 +9,17 @@ import '../styles/global.css';
 interface Props {
 	title?: string;
 	description?: string;
+	image?: string;
 }
 
 const {
 	title = 'LeadUTP',
 	description = 'Liderazgo con propósito.',
+	image = '/og-image.png',
 } = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const socialImageURL = new URL(image, Astro.site);
 ---
 
 <!doctype html>
@@ -21,9 +29,24 @@ const {
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="icon" href="/favicon.ico" />
+		<link rel="canonical" href={canonicalURL} />
 		<meta name="generator" content={Astro.generator} />
 		<meta name="description" content={description} />
 		<title>{title}</title>
+
+		<meta property="og:type" content="website" />
+		<meta property="og:url" content={canonicalURL} />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:image" content={socialImageURL} />
+
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:url" content={canonicalURL} />
+		<meta name="twitter:title" content={title} />
+		<meta name="twitter:description" content={description} />
+		<meta name="twitter:image" content={socialImageURL} />
+
+		<ClientRouter />
 	</head>
 	<body class="flex min-h-svh flex-col font-sans text-foreground antialiased">
 		<a
@@ -37,5 +60,7 @@ const {
 			<slot />
 		</main>
 		<Footer />
+		<Analytics />
+		<SpeedInsights />
 	</body>
 </html>
