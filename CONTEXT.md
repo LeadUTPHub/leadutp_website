@@ -64,11 +64,7 @@ npm run preview   # preview del build
 
 ## Pendientes / ideas abiertas
 
-- Reemplazar los placeholders "Próximamente" de `/nosotros`, `/proyectos` y `/convocatorias` con contenido real.
-- Imágenes placeholder en pilares y eventos (`imageIsTemporary: true`) — reemplazar con fotos reales.
-- Evaluar si el contenido pasa a un CMS/marketplace integration en vez de archivos `.data.ts` a medida que crezca.
-- Definir dominio propio (actualmente `leadutp.vercel.app`).
-- Configurar ESLint + Prettier para consistencia entre contribuidores (próximo en la lista).
+Ver [`PENDIENTES.md`](./PENDIENTES.md) para la lista detallada y priorizada.
 
 ## Dónde preguntar
 
