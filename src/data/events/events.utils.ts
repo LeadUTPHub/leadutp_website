@@ -24,51 +24,52 @@ const shortMonthFormatter = new Intl.DateTimeFormat('es-PE', {
 	timeZone: 'UTC',
 });
 
-const normalizeTime = (time: string) => time.length === 5 ? `${time}:00` : time;
+const normalizeTime = (time: string) =>
+	time.length === 5 ? `${time}:00` : time;
 
-const createLimaInstant = (date: string, time: string) => (
-	new Date(`${date}T${normalizeTime(time)}${EVENT_TIME_OFFSET}`)
-);
+const createLimaInstant = (date: string, time: string) =>
+	new Date(`${date}T${normalizeTime(time)}${EVENT_TIME_OFFSET}`);
 
-const getEventStartInstant = (event: Event) => (
-	createLimaInstant(event.date, event.startTime ?? '00:00:00')
-);
+const getEventStartInstant = (event: Event) =>
+	createLimaInstant(event.date, event.startTime ?? '00:00:00');
 
-export const getEventEndInstant = (event: Event) => (
-	createLimaInstant(event.date, event.endTime ?? END_OF_DAY)
-);
+export const getEventEndInstant = (event: Event) =>
+	createLimaInstant(event.date, event.endTime ?? END_OF_DAY);
 
-export const hasEventEnded = (event: Event, now = new Date()) => (
-	now.getTime() > getEventEndInstant(event).getTime()
-);
+export const hasEventEnded = (event: Event, now = new Date()) =>
+	now.getTime() > getEventEndInstant(event).getTime();
 
-export const getFeaturedEvent = (source: Event[]) => (
-	source.find((event) => event.featured && event.status !== 'cancelled')
-);
+export const getFeaturedEvent = (source: Event[]) =>
+	source.find((event) => event.featured && event.status !== 'cancelled');
 
-export const getUpcomingEvents = (source: Event[], now = new Date()) => (
+export const getUpcomingEvents = (source: Event[], now = new Date()) =>
 	source
 		.filter((event) => !hasEventEnded(event, now))
-		.toSorted((first, second) => getEventStartInstant(first).getTime() - getEventStartInstant(second).getTime())
-);
+		.toSorted(
+			(first, second) =>
+				getEventStartInstant(first).getTime() -
+				getEventStartInstant(second).getTime(),
+		);
 
-export const getPastEvents = (source: Event[], now = new Date()) => (
+export const getPastEvents = (source: Event[], now = new Date()) =>
 	source
 		.filter((event) => hasEventEnded(event, now))
-		.toSorted((first, second) => getEventEndInstant(second).getTime() - getEventEndInstant(first).getTime())
-);
+		.toSorted(
+			(first, second) =>
+				getEventEndInstant(second).getTime() -
+				getEventEndInstant(first).getTime(),
+		);
 
-export const getEventsByPillar = (source: Event[], pillarSlug: PillarSlug) => (
-	source.filter((event) => event.pillarSlugs?.includes(pillarSlug))
-);
+export const getEventsByPillar = (source: Event[], pillarSlug: PillarSlug) =>
+	source.filter((event) => event.pillarSlugs?.includes(pillarSlug));
 
-export const canRegisterForEvent = (event: Event, now = new Date()) => (
-	Boolean(event.registrationUrl)
-	&& event.status !== 'cancelled'
-	&& !hasEventEnded(event, now)
-);
+export const canRegisterForEvent = (event: Event, now = new Date()) =>
+	Boolean(event.registrationUrl) &&
+	event.status !== 'cancelled' &&
+	!hasEventEnded(event, now);
 
-export const formatEventDate = (date: string) => fullDateFormatter.format(createUtcDate(date));
+export const formatEventDate = (date: string) =>
+	fullDateFormatter.format(createUtcDate(date));
 
 export const formatEventTimeRange = (event: Event) => {
 	if (!event.startTime) return null;
@@ -89,15 +90,22 @@ export const getEventDateParts = (date: string) => {
 
 	return {
 		day: String(parsedDate.getUTCDate()).padStart(2, '0'),
-		monthShort: shortMonthFormatter.format(parsedDate).replace('.', '').toUpperCase(),
+		monthShort: shortMonthFormatter
+			.format(parsedDate)
+			.replace('.', '')
+			.toUpperCase(),
 		monthKey: date.slice(0, 7),
 		monthLabel: monthFormatter.format(parsedDate).toUpperCase(),
 	};
 };
 
-export const groupEventsByMonth = (source: Event[]): EventMonthGroup[] => (
+export const groupEventsByMonth = (source: Event[]): EventMonthGroup[] =>
 	source
-		.toSorted((first, second) => getEventStartInstant(first).getTime() - getEventStartInstant(second).getTime())
+		.toSorted(
+			(first, second) =>
+				getEventStartInstant(first).getTime() -
+				getEventStartInstant(second).getTime(),
+		)
 		.reduce<EventMonthGroup[]>((groups, event) => {
 			const { monthKey, monthLabel } = getEventDateParts(event.date);
 			const currentGroup = groups.at(-1);
@@ -109,5 +117,4 @@ export const groupEventsByMonth = (source: Event[]): EventMonthGroup[] => (
 			}
 
 			return groups;
-		}, [])
-);
+		}, []);

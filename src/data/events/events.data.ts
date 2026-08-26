@@ -1,7 +1,8 @@
 import eventPlaceholder from '../../assets/events/event-placeholder.svg';
 import type { Event } from './events.types';
 
-const registrationPlaceholder = (slug: string) => `https://example.com/registro-lead/${slug}`;
+const registrationPlaceholder = (slug: string) =>
+	`https://example.com/registro-lead/${slug}`;
 
 export const events = [
 	{
@@ -10,7 +11,8 @@ export const events = [
 		category: 'Conversatorio',
 		badgeTone: 'secondary',
 		title: 'Diseña tu próximo impacto',
-		description: 'Una conversación práctica para convertir tus ideas en acciones con propósito.',
+		description:
+			'Una conversación práctica para convertir tus ideas en acciones con propósito.',
 		date: '2026-08-22',
 		startTime: '18:30',
 		endTime: '20:00',
@@ -24,7 +26,8 @@ export const events = [
 		category: 'Networking',
 		badgeTone: 'optional',
 		title: 'LEAD Connect: Startups',
-		description: 'Fundadores, estudiantes y nuevas conexiones en una tarde para compartir aprendizajes.',
+		description:
+			'Fundadores, estudiantes y nuevas conexiones en una tarde para compartir aprendizajes.',
 		date: '2026-08-29',
 		startTime: '17:00',
 		endTime: '19:00',
@@ -39,7 +42,8 @@ export const events = [
 		category: 'Taller',
 		badgeTone: 'primary',
 		title: 'De idea a pitch',
-		description: 'Aprende a presentar una propuesta clara, relevante y capaz de movilizar a otros.',
+		description:
+			'Aprende a presentar una propuesta clara, relevante y capaz de movilizar a otros.',
 		date: '2026-09-05',
 		startTime: '15:00',
 		endTime: '17:00',
@@ -54,7 +58,8 @@ export const events = [
 		category: 'Laboratorio',
 		badgeTone: 'optional',
 		title: 'Open Studio: creatividad aplicada',
-		description: 'Un laboratorio abierto para experimentar con herramientas de innovación y diseño.',
+		description:
+			'Un laboratorio abierto para experimentar con herramientas de innovación y diseño.',
 		date: '2026-09-12',
 		startTime: '16:00',
 		endTime: '18:00',
@@ -66,7 +71,8 @@ export const events = [
 		category: 'Liderazgo',
 		badgeTone: 'secondary',
 		title: 'Mujeres que están cambiando la industria',
-		description: 'Historias, decisiones y aprendizajes de profesionales que lideran transformación.',
+		description:
+			'Historias, decisiones y aprendizajes de profesionales que lideran transformación.',
 		date: '2026-09-18',
 		startTime: '18:00',
 		endTime: '20:00',
@@ -75,7 +81,9 @@ export const events = [
 		imageAlt: 'Visual temporal para Mujeres que están cambiando la industria',
 		imageIsTemporary: true,
 		// TODO: Reemplazar por la URL real de registro.
-		registrationUrl: registrationPlaceholder('mujeres-que-cambian-la-industria'),
+		registrationUrl: registrationPlaceholder(
+			'mujeres-que-cambian-la-industria',
+		),
 	},
 	{
 		slug: 'integracion-lead-globant-2026',
@@ -83,7 +91,8 @@ export const events = [
 		category: 'Networking',
 		badgeTone: 'optional',
 		title: 'Integración LEAD × GLOBANT',
-		description: 'Networking, charlas técnicas y oportunidades para conectar con líderes de ingeniería.',
+		description:
+			'Networking, charlas técnicas y oportunidades para conectar con líderes de ingeniería.',
 		date: '2026-09-26',
 		startTime: '17:00',
 		endTime: '20:00',
@@ -101,7 +110,8 @@ export const events = [
 		category: 'Startups',
 		badgeTone: 'secondary',
 		title: 'De MVP a Startup Financiada',
-		description: 'Descubre los pasos críticos para validar un producto mínimo viable y atraer inversión.',
+		description:
+			'Descubre los pasos críticos para validar un producto mínimo viable y atraer inversión.',
 		date: '2026-10-03',
 		startTime: '18:00',
 		endTime: '20:00',
@@ -118,7 +128,8 @@ export const events = [
 		category: 'Conversatorio',
 		badgeTone: 'primary',
 		title: 'Liderazgo que transforma',
-		description: 'Una sesión sobre decisiones, influencia y liderazgo con impacto sostenible.',
+		description:
+			'Una sesión sobre decisiones, influencia y liderazgo con impacto sostenible.',
 		date: '2026-10-10',
 		startTime: '18:00',
 		location: 'Torre Arequipa',
@@ -129,7 +140,8 @@ export const events = [
 		category: 'Laboratorio',
 		badgeTone: 'optional',
 		title: 'Laboratorio de innovación social',
-		description: 'Diseña soluciones centradas en personas para desafíos reales de nuestra comunidad.',
+		description:
+			'Diseña soluciones centradas en personas para desafíos reales de nuestra comunidad.',
 		date: '2026-10-22',
 		startTime: '16:00',
 		endTime: '18:30',
@@ -144,7 +156,8 @@ export const events = [
 		category: 'Evento destacado',
 		badgeTone: 'optional',
 		title: 'First Gen Day Perú 2026',
-		description: 'El encuentro para la primera generación de estudiantes universitarios en tecnología. Conecta con líderes, aprende de sus experiencias y construye tu siguiente oportunidad.',
+		description:
+			'El encuentro para la primera generación de estudiantes universitarios en tecnología. Conecta con líderes, aprende de sus experiencias y construye tu siguiente oportunidad.',
 		date: '2026-11-08',
 		startTime: '15:00',
 		endTime: '19:00',
@@ -162,7 +175,8 @@ export const events = [
 		category: 'Tecnología',
 		badgeTone: 'primary',
 		title: 'LEAD Tech Night',
-		description: 'Proyectos, tendencias y conversaciones breves para explorar el futuro tecnológico.',
+		description:
+			'Proyectos, tendencias y conversaciones breves para explorar el futuro tecnológico.',
 		date: '2026-11-14',
 		startTime: '18:30',
 		endTime: '21:00',
@@ -177,7 +191,8 @@ export const events = [
 		category: 'Mentoría',
 		badgeTone: 'optional',
 		title: 'Mentorías que conectan',
-		description: 'Espacios de conversación uno a uno para orientar decisiones académicas y profesionales.',
+		description:
+			'Espacios de conversación uno a uno para orientar decisiones académicas y profesionales.',
 		date: '2026-11-21',
 		startTime: '10:00',
 		endTime: '13:00',
@@ -189,7 +204,8 @@ export const events = [
 		category: 'Tecnología',
 		badgeTone: 'secondary',
 		title: 'Hackatón de impacto',
-		description: 'Una jornada intensiva para crear soluciones tecnológicas con valor para la comunidad.',
+		description:
+			'Una jornada intensiva para crear soluciones tecnológicas con valor para la comunidad.',
 		date: '2026-11-28',
 		startTime: '09:00',
 		endTime: '18:00',
@@ -207,7 +223,8 @@ export const events = [
 		category: 'Comunidad',
 		badgeTone: 'primary',
 		title: 'Chocotada LEAD',
-		description: 'Cerramos el año compartiendo, celebrando a la comunidad y conectando nuevas ideas.',
+		description:
+			'Cerramos el año compartiendo, celebrando a la comunidad y conectando nuevas ideas.',
 		date: '2026-12-12',
 		startTime: '18:00',
 		endTime: '21:00',
@@ -222,7 +239,8 @@ export const events = [
 		category: 'Comunidad',
 		badgeTone: 'optional',
 		title: 'Cierre de comunidad LEAD',
-		description: 'Un último encuentro para reconocer los aprendizajes y conexiones construidas durante el año.',
+		description:
+			'Un último encuentro para reconocer los aprendizajes y conexiones construidas durante el año.',
 		date: '2026-12-19',
 		startTime: '17:00',
 		location: 'Patio central UTP',

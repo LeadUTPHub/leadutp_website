@@ -10,23 +10,23 @@ import {
 	getEventsByPillar,
 	getUpcomingEvents,
 } from '../../data/events';
-import {
-	getOtherPillars,
-	pillars,
-	type Pillar,
-} from '../../data/pillars';
+import { getOtherPillars, pillars, type Pillar } from '../../data/pillars';
 import Layout from '../../layouts/Layout.astro';
 
-export const getStaticPaths = (() => (
-	pillars.map((pillar) => ({ params: { slug: pillar.slug }, props: { pillar } }))
-)) satisfies GetStaticPaths;
+export const getStaticPaths = (() =>
+	pillars.map((pillar) => ({
+		params: { slug: pillar.slug },
+		props: { pillar },
+	}))) satisfies GetStaticPaths;
 
 interface Props {
 	pillar: Pillar;
 }
 
 const { pillar } = Astro.props;
-const upcomingEvents = getUpcomingEvents(getEventsByPillar(events, pillar.slug)).slice(0, 3);
+const upcomingEvents = getUpcomingEvents(
+	getEventsByPillar(events, pillar.slug),
+).slice(0, 3);
 const otherPillars = getOtherPillars(pillars, pillar.slug, 3);
 const visibleMoments = pillar.moments?.slice(0, 5) ?? [];
 
@@ -43,29 +43,43 @@ const toneClasses = {
 	title={`${pillar.name} | Pilares LEAD UTP`}
 	description={pillar.shortDescription}
 >
-	<section class="border-b border-white/8 bg-canvas-navy/35 pb-12 pt-10 sm:pb-14 sm:pt-12 lg:pb-16 lg:pt-14">
+	<section
+		class="bg-canvas-navy/35 border-b border-white/8 pt-10 pb-12 sm:pt-12 sm:pb-14 lg:pt-14 lg:pb-16"
+	>
 		<Container>
-			<a href="/pilares" class="inline-flex min-h-11 items-center gap-2 rounded-sm text-sm font-semibold text-foreground-secondary transition-colors hover:text-white focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-optional-3 motion-reduce:transition-none">
+			<a
+				href="/pilares"
+				class="text-foreground-secondary focus-visible:outline-optional-3 inline-flex min-h-11 items-center gap-2 rounded-sm text-sm font-semibold transition-colors hover:text-white focus-visible:outline-3 focus-visible:outline-offset-3 motion-reduce:transition-none"
+			>
 				<ArrowLeft class="size-4" aria-hidden="true" />
 				Todos los pilares
 			</a>
 
 			<header class="mt-7 max-w-4xl">
 				<div class="flex items-center gap-3">
-					<span class:list={['h-1 w-8 rounded-full', toneClasses[pillar.tone]]}></span>
-					<p class="text-[0.7rem] font-bold uppercase tracking-[0.18em] text-foreground-secondary">Pilar · LEAD UTP</p>
+					<span class:list={['h-1 w-8 rounded-full', toneClasses[pillar.tone]]}
+					></span>
+					<p
+						class="text-foreground-secondary text-[0.7rem] font-bold tracking-[0.18em] uppercase"
+					>
+						Pilar · LEAD UTP
+					</p>
 				</div>
-				<h1 class="mt-5 max-w-3xl font-display text-4xl font-semibold leading-[1.03] tracking-[-0.065em] text-foreground sm:text-5xl lg:text-6xl">
+				<h1
+					class="font-display text-foreground mt-5 max-w-3xl text-4xl leading-[1.03] font-semibold tracking-[-0.065em] sm:text-5xl lg:text-6xl"
+				>
 					{pillar.name}
 				</h1>
-				<p class="mt-5 max-w-2xl text-base leading-7 text-foreground-secondary sm:text-lg sm:leading-8">
+				<p
+					class="text-foreground-secondary mt-5 max-w-2xl text-base leading-7 sm:text-lg sm:leading-8"
+				>
 					{pillar.intro}
 				</p>
 			</header>
 
 			{
 				pillar.image && pillar.imageAlt !== undefined && (
-					<figure class="mt-9 aspect-[4/3] overflow-hidden rounded-xl border border-white/10 bg-surface sm:mt-10 sm:aspect-[16/8] lg:aspect-[16/7]">
+					<figure class="bg-surface mt-9 aspect-[4/3] overflow-hidden rounded-xl border border-white/10 sm:mt-10 sm:aspect-[16/8] lg:aspect-[16/7]">
 						<PillarVisual
 							image={pillar.image}
 							alt={pillar.imageAlt}
@@ -81,25 +95,46 @@ const toneClasses = {
 
 	<section class="py-16 sm:py-20 lg:py-24" aria-labelledby="meaning-title">
 		<Container>
-			<div class="grid gap-6 lg:grid-cols-[minmax(0,0.38fr)_minmax(0,0.62fr)] lg:gap-16">
+			<div
+				class="grid gap-6 lg:grid-cols-[minmax(0,0.38fr)_minmax(0,0.62fr)] lg:gap-16"
+			>
 				<div>
-					<p class="text-[0.7rem] font-bold uppercase tracking-[0.18em] text-foreground-secondary">Propósito</p>
-					<h2 id="meaning-title" class="mt-3 font-display text-3xl font-semibold tracking-[-0.05em] text-foreground sm:text-4xl">
+					<p
+						class="text-foreground-secondary text-[0.7rem] font-bold tracking-[0.18em] uppercase"
+					>
+						Propósito
+					</p>
+					<h2
+						id="meaning-title"
+						class="font-display text-foreground mt-3 text-3xl font-semibold tracking-[-0.05em] sm:text-4xl"
+					>
 						Qué significa este pilar
 					</h2>
 				</div>
-				<p class="max-w-3xl text-base leading-8 text-foreground-secondary sm:text-lg sm:leading-9">
+				<p
+					class="text-foreground-secondary max-w-3xl text-base leading-8 sm:text-lg sm:leading-9"
+				>
 					{pillar.description}
 				</p>
 			</div>
 		</Container>
 	</section>
 
-	<section class="border-y border-white/8 bg-surface py-16 sm:py-20" aria-labelledby="initiatives-title">
+	<section
+		class="bg-surface border-y border-white/8 py-16 sm:py-20"
+		aria-labelledby="initiatives-title"
+	>
 		<Container>
 			<div class="max-w-2xl">
-				<p class="text-[0.7rem] font-bold uppercase tracking-[0.18em] text-foreground-secondary">En acción</p>
-				<h2 id="initiatives-title" class="mt-3 font-display text-3xl font-semibold tracking-[-0.05em] text-foreground sm:text-4xl">
+				<p
+					class="text-foreground-secondary text-[0.7rem] font-bold tracking-[0.18em] uppercase"
+				>
+					En acción
+				</p>
+				<h2
+					id="initiatives-title"
+					class="font-display text-foreground mt-3 text-3xl font-semibold tracking-[-0.05em] sm:text-4xl"
+				>
 					Cómo lo vivimos
 				</h2>
 			</div>
@@ -108,9 +143,18 @@ const toneClasses = {
 				{
 					pillar.initiatives.map((initiative, index) => (
 						<li class="grid gap-3 border-b border-white/12 py-6 sm:grid-cols-[3.5rem_minmax(0,0.38fr)_minmax(0,0.62fr)] sm:items-start sm:gap-6 sm:py-7">
-							<span class="font-display text-sm font-semibold text-foreground-muted" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
-							<h3 class="font-display text-xl font-semibold tracking-[-0.035em] text-foreground sm:text-2xl">{initiative.title}</h3>
-							<p class="text-sm leading-6 text-foreground-secondary sm:text-base sm:leading-7">{initiative.description}</p>
+							<span
+								class="font-display text-foreground-muted text-sm font-semibold"
+								aria-hidden="true"
+							>
+								{String(index + 1).padStart(2, '0')}
+							</span>
+							<h3 class="font-display text-foreground text-xl font-semibold tracking-[-0.035em] sm:text-2xl">
+								{initiative.title}
+							</h3>
+							<p class="text-foreground-secondary text-sm leading-6 sm:text-base sm:leading-7">
+								{initiative.description}
+							</p>
 						</li>
 					))
 				}
@@ -120,21 +164,39 @@ const toneClasses = {
 
 	{
 		upcomingEvents.length > 0 && (
-			<section class="py-16 sm:py-20 lg:py-24" aria-labelledby="experiences-title">
+			<section
+				class="py-16 sm:py-20 lg:py-24"
+				aria-labelledby="experiences-title"
+			>
 				<Container>
 					<div class="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
 						<div>
-							<p class="text-[0.7rem] font-bold uppercase tracking-[0.18em] text-foreground-secondary">Agenda</p>
-							<h2 id="experiences-title" class="mt-3 font-display text-3xl font-semibold tracking-[-0.05em] text-foreground sm:text-4xl">
+							<p class="text-foreground-secondary text-[0.7rem] font-bold tracking-[0.18em] uppercase">
+								Agenda
+							</p>
+							<h2
+								id="experiences-title"
+								class="font-display text-foreground mt-3 text-3xl font-semibold tracking-[-0.05em] sm:text-4xl"
+							>
 								Próximas experiencias
 							</h2>
 						</div>
-						<a href="/eventos" class="inline-flex min-h-11 items-center gap-2 rounded-sm text-sm font-bold text-foreground transition-colors hover:text-white focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-optional-3 motion-reduce:transition-none">
+						<a
+							href="/eventos"
+							class="text-foreground focus-visible:outline-optional-3 inline-flex min-h-11 items-center gap-2 rounded-sm text-sm font-bold transition-colors hover:text-white focus-visible:outline-3 focus-visible:outline-offset-3 motion-reduce:transition-none"
+						>
 							Ver todos los eventos
 							<ArrowRight class="size-4" aria-hidden="true" />
 						</a>
 					</div>
-					<div class="mt-8"><UpcomingEventList events={upcomingEvents} id={`pillar-events-${pillar.slug}`} initialCount={3} step={3} /></div>
+					<div class="mt-8">
+						<UpcomingEventList
+							events={upcomingEvents}
+							id={`pillar-events-${pillar.slug}`}
+							initialCount={3}
+							step={3}
+						/>
+					</div>
 				</Container>
 			</section>
 		)
@@ -142,13 +204,38 @@ const toneClasses = {
 
 	{
 		visibleMoments.length >= 3 && (
-			<section class="border-t border-white/8 py-16 sm:py-20 lg:py-24" aria-labelledby="moments-title">
+			<section
+				class="border-t border-white/8 py-16 sm:py-20 lg:py-24"
+				aria-labelledby="moments-title"
+			>
 				<Container>
-					<h2 id="moments-title" class="font-display text-3xl font-semibold tracking-[-0.05em] text-foreground sm:text-4xl">Momentos que nos representan</h2>
+					<h2
+						id="moments-title"
+						class="font-display text-foreground text-3xl font-semibold tracking-[-0.05em] sm:text-4xl"
+					>
+						Momentos que nos representan
+					</h2>
 					<div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 						{visibleMoments.map((moment, index) => (
-							<figure class:list={['overflow-hidden rounded-xl border border-white/10 bg-surface', index === 0 ? 'aspect-[4/3] sm:col-span-2 lg:row-span-2 lg:aspect-auto' : 'aspect-[4/3]']}>
-								<Image src={moment.image} alt={moment.imageAlt} class="h-full w-full object-cover" widths={[480, 720, 960, 1280]} sizes={index === 0 ? '(min-width: 1024px) 66vw, 100vw' : '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw'} />
+							<figure
+								class:list={[
+									'bg-surface overflow-hidden rounded-xl border border-white/10',
+									index === 0
+										? 'aspect-[4/3] sm:col-span-2 lg:row-span-2 lg:aspect-auto'
+										: 'aspect-[4/3]',
+								]}
+							>
+								<Image
+									src={moment.image}
+									alt={moment.imageAlt}
+									class="h-full w-full object-cover"
+									widths={[480, 720, 960, 1280]}
+									sizes={
+										index === 0
+											? '(min-width: 1024px) 66vw, 100vw'
+											: '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw'
+									}
+								/>
 							</figure>
 						))}
 					</div>
@@ -159,14 +246,30 @@ const toneClasses = {
 
 	{
 		pillar.testimonials && pillar.testimonials.length > 0 && (
-			<section class="border-t border-white/8 py-16 sm:py-20" aria-labelledby="voices-title">
+			<section
+				class="border-t border-white/8 py-16 sm:py-20"
+				aria-labelledby="voices-title"
+			>
 				<Container>
-					<h2 id="voices-title" class="font-display text-3xl font-semibold tracking-[-0.05em] text-foreground sm:text-4xl">Voces de la comunidad</h2>
+					<h2
+						id="voices-title"
+						class="font-display text-foreground text-3xl font-semibold tracking-[-0.05em] sm:text-4xl"
+					>
+						Voces de la comunidad
+					</h2>
 					<div class="mt-8 grid gap-8 md:grid-cols-2">
 						{pillar.testimonials.map((testimonial) => (
-							<figure class="border-l-2 border-secondary pl-6">
-								<blockquote class="font-display text-xl leading-8 text-foreground sm:text-2xl">“{testimonial.quote}”</blockquote>
-								<figcaption class="mt-5 text-sm text-foreground-secondary"><strong class="font-semibold text-foreground">{testimonial.name}</strong><br />{testimonial.role}</figcaption>
+							<figure class="border-secondary border-l-2 pl-6">
+								<blockquote class="font-display text-foreground text-xl leading-8 sm:text-2xl">
+									“{testimonial.quote}”
+								</blockquote>
+								<figcaption class="text-foreground-secondary mt-5 text-sm">
+									<strong class="text-foreground font-semibold">
+										{testimonial.name}
+									</strong>
+									<br />
+									{testimonial.role}
+								</figcaption>
 							</figure>
 						))}
 					</div>
@@ -177,15 +280,31 @@ const toneClasses = {
 
 	{
 		pillar.metrics && pillar.metrics.length > 0 && (
-			<section class="border-y border-white/8 bg-surface py-16 sm:py-20" aria-labelledby="impact-title">
+			<section
+				class="bg-surface border-y border-white/8 py-16 sm:py-20"
+				aria-labelledby="impact-title"
+			>
 				<Container>
-					<h2 id="impact-title" class="font-display text-3xl font-semibold tracking-[-0.05em] text-foreground sm:text-4xl">Nuestro impacto</h2>
+					<h2
+						id="impact-title"
+						class="font-display text-foreground text-3xl font-semibold tracking-[-0.05em] sm:text-4xl"
+					>
+						Nuestro impacto
+					</h2>
 					<dl class="mt-8 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
 						{pillar.metrics.map((metric) => (
 							<div class="flex flex-col border-t border-white/14 pt-5">
-								<dt class="order-2 mt-2 font-semibold text-foreground">{metric.label}</dt>
-								<dd class="order-1 font-display text-4xl font-semibold tracking-[-0.055em] text-foreground">{metric.value}</dd>
-								{metric.context && <dd class="order-3 mt-1 text-sm leading-6 text-foreground-secondary">{metric.context}</dd>}
+								<dt class="text-foreground order-2 mt-2 font-semibold">
+									{metric.label}
+								</dt>
+								<dd class="font-display text-foreground order-1 text-4xl font-semibold tracking-[-0.055em]">
+									{metric.value}
+								</dd>
+								{metric.context && (
+									<dd class="text-foreground-secondary order-3 mt-1 text-sm leading-6">
+										{metric.context}
+									</dd>
+								)}
 							</div>
 						))}
 					</dl>
@@ -194,21 +313,35 @@ const toneClasses = {
 		)
 	}
 
-	<section class="border-t border-white/8 py-16 sm:py-20 lg:py-24" aria-labelledby="other-pillars-title">
+	<section
+		class="border-t border-white/8 py-16 sm:py-20 lg:py-24"
+		aria-labelledby="other-pillars-title"
+	>
 		<Container>
-			<h2 id="other-pillars-title" class="font-display text-3xl font-semibold tracking-[-0.05em] text-foreground sm:text-4xl">
+			<h2
+				id="other-pillars-title"
+				class="font-display text-foreground text-3xl font-semibold tracking-[-0.05em] sm:text-4xl"
+			>
 				Explora otros pilares
 			</h2>
 			<div class="mt-8 grid gap-x-8 md:grid-cols-3">
 				{
 					otherPillars.map((otherPillar) => (
-						<a href={`/pilares/${otherPillar.slug}`} class="group flex min-h-24 items-center justify-between gap-5 border-t border-white/14 py-5 text-foreground transition-colors hover:text-white focus-visible:rounded-sm focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-optional-3 motion-reduce:transition-none">
-							<span class="font-display text-lg font-semibold leading-tight tracking-[-0.035em] sm:text-xl">{otherPillar.name}</span>
-							<ArrowUpRight class="size-5 shrink-0 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 motion-reduce:transform-none motion-reduce:transition-none" aria-hidden="true" />
+						<a
+							href={`/pilares/${otherPillar.slug}`}
+							class="group text-foreground focus-visible:outline-optional-3 flex min-h-24 items-center justify-between gap-5 border-t border-white/14 py-5 transition-colors hover:text-white focus-visible:rounded-sm focus-visible:outline-3 focus-visible:outline-offset-3 motion-reduce:transition-none"
+						>
+							<span class="font-display text-lg leading-tight font-semibold tracking-[-0.035em] sm:text-xl">
+								{otherPillar.name}
+							</span>
+							<ArrowUpRight
+								class="size-5 shrink-0 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 motion-reduce:transform-none motion-reduce:transition-none"
+								aria-hidden="true"
+							/>
 						</a>
 					))
 				}
 			</div>
-	</Container>
+		</Container>
 	</section>
 </Layout>

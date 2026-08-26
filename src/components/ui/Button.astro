@@ -19,8 +19,10 @@ const {
 
 const variants = {
 	primary: 'border border-white/10 bg-optional-3 text-white hover:bg-[#6849d8]',
-	secondary: 'border border-white/10 bg-secondary text-white hover:bg-[#bb2937]',
-	outline: 'border border-white/20 bg-transparent text-foreground hover:border-white/35 hover:bg-surface',
+	secondary:
+		'border border-white/10 bg-secondary text-white hover:bg-[#bb2937]',
+	outline:
+		'border border-white/20 bg-transparent text-foreground hover:border-white/35 hover:bg-surface',
 	ghost: 'text-foreground hover:bg-surface',
 };
 
@@ -40,7 +42,11 @@ const classes = [
 
 {
 	href ? (
-		<a href={disabled ? undefined : href} aria-disabled={disabled || undefined} class:list={classes}>
+		<a
+			href={disabled ? undefined : href}
+			aria-disabled={disabled || undefined}
+			class:list={classes}
+		>
 			<slot />
 		</a>
 	) : (

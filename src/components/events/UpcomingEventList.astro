@@ -19,19 +19,31 @@ const {
 } = Astro.props;
 
 const monthGroups = groupEventsByMonth(events);
-const eventCount = monthGroups.reduce((total, group) => total + group.events.length, 0);
+const eventCount = monthGroups.reduce(
+	(total, group) => total + group.events.length,
+	0,
+);
 ---
 
 <upcoming-event-list data-initial-count={initialCount} data-step={step}>
 	<div id={id}>
 		{
 			monthGroups.map((group) => (
-				<section data-month-group aria-labelledby={`${id}-${group.key}`} class="mt-9 first:mt-0">
-					<p id={`${id}-${group.key}`} class="mb-1 text-[0.7rem] font-bold uppercase tracking-[0.18em] text-foreground-muted">
+				<section
+					data-month-group
+					aria-labelledby={`${id}-${group.key}`}
+					class="mt-9 first:mt-0"
+				>
+					<p
+						id={`${id}-${group.key}`}
+						class="text-foreground-muted mb-1 text-[0.7rem] font-bold tracking-[0.18em] uppercase"
+					>
 						{group.label}
 					</p>
 					<div>
-						{group.events.map((event) => <UpcomingEventItem event={event} />)}
+						{group.events.map((event) => (
+							<UpcomingEventItem event={event} />
+						))}
 					</div>
 				</section>
 			))
@@ -47,12 +59,20 @@ const eventCount = monthGroups.reduce((total, group) => total + group.events.len
 					data-expand-button
 					aria-controls={id}
 					aria-expanded="false"
-					class="inline-flex min-h-11 items-center justify-center gap-2 rounded-md px-4 text-sm font-bold text-foreground transition-colors duration-200 hover:bg-surface hover:text-white focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-optional-3 motion-reduce:transition-none"
+					class="text-foreground hover:bg-surface focus-visible:outline-optional-3 inline-flex min-h-11 items-center justify-center gap-2 rounded-md px-4 text-sm font-bold transition-colors duration-200 hover:text-white focus-visible:outline-3 focus-visible:outline-offset-3 motion-reduce:transition-none"
 				>
 					<span data-expand-label>Mostrar más</span>
-					<ChevronDown data-expand-icon class="size-4 transition-transform duration-200 motion-reduce:transition-none" aria-hidden="true" />
+					<ChevronDown
+						data-expand-icon
+						class="size-4 transition-transform duration-200 motion-reduce:transition-none"
+						aria-hidden="true"
+					/>
 				</button>
-				<p data-visible-status aria-live="polite" class="text-xs text-foreground-muted">
+				<p
+					data-visible-status
+					aria-live="polite"
+					class="text-foreground-muted text-xs"
+				>
 					{eventCount} eventos disponibles
 				</p>
 			</div>
@@ -66,9 +86,15 @@ const eventCount = monthGroups.reduce((total, group) => total + group.events.len
 			if (this.dataset.ready === 'true') return;
 			this.dataset.ready = 'true';
 
-			const items = Array.from(this.querySelectorAll<HTMLElement>('[data-upcoming-item]'));
-			const groups = Array.from(this.querySelectorAll<HTMLElement>('[data-month-group]'));
-			const button = this.querySelector<HTMLButtonElement>('[data-expand-button]');
+			const items = Array.from(
+				this.querySelectorAll<HTMLElement>('[data-upcoming-item]'),
+			);
+			const groups = Array.from(
+				this.querySelectorAll<HTMLElement>('[data-month-group]'),
+			);
+			const button = this.querySelector<HTMLButtonElement>(
+				'[data-expand-button]',
+			);
 			const label = this.querySelector<HTMLElement>('[data-expand-label]');
 			const icon = this.querySelector<HTMLElement>('[data-expand-icon]');
 			const status = this.querySelector<HTMLElement>('[data-visible-status]');
@@ -86,7 +112,9 @@ const eventCount = monthGroups.reduce((total, group) => total + group.events.len
 				});
 
 				groups.forEach((group) => {
-					const hasVisibleItem = Array.from(group.querySelectorAll<HTMLElement>('[data-upcoming-item]')).some((item) => !item.hidden);
+					const hasVisibleItem = Array.from(
+						group.querySelectorAll<HTMLElement>('[data-upcoming-item]'),
+					).some((item) => !item.hidden);
 					group.hidden = !hasVisibleItem;
 				});
 
@@ -96,7 +124,9 @@ const eventCount = monthGroups.reduce((total, group) => total + group.events.len
 				const nextCount = Math.min(step, remaining);
 
 				button.setAttribute('aria-expanded', String(expanded));
-				label.textContent = allVisible ? 'Mostrar menos' : `Mostrar ${nextCount} más`;
+				label.textContent = allVisible
+					? 'Mostrar menos'
+					: `Mostrar ${nextCount} más`;
 				icon?.classList.toggle('rotate-180', allVisible);
 
 				if (status) {
@@ -105,9 +135,10 @@ const eventCount = monthGroups.reduce((total, group) => total + group.events.len
 			};
 
 			button.addEventListener('click', () => {
-				visibleCount = visibleCount >= items.length
-					? Math.min(initialCount, items.length)
-					: Math.min(visibleCount + step, items.length);
+				visibleCount =
+					visibleCount >= items.length
+						? Math.min(initialCount, items.length)
+						: Math.min(visibleCount + step, items.length);
 				update();
 			});
 
