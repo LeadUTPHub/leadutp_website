@@ -10,15 +10,17 @@ const links = [
 	{ href: '/proyectos', label: 'Proyectos' },
 	{ href: '/eventos', label: 'Eventos' },
 	{ href: '/pilares', label: 'Pilares' },
+	{ href: '/internacional', label: 'Internacional' },
 ];
 
 const pathname = Astro.url.pathname;
-const isActive = (href: string) => (
-	href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`)
-);
+const isActive = (href: string) =>
+	href === '/'
+		? pathname === '/'
+		: pathname === href || pathname.startsWith(`${href}/`);
 ---
 
-<header class="border-b border-white/10 bg-primary text-white">
+<header class="bg-primary border-b border-white/10 text-white">
 	<Container>
 		<div class="relative flex min-h-20 items-center justify-between">
 			<a
@@ -26,7 +28,10 @@ const isActive = (href: string) => (
 				class="inline-flex min-h-11 items-center rounded-sm transition-opacity hover:opacity-90 focus-visible:rounded-sm motion-reduce:transition-none"
 				aria-label="LEAD UTP, inicio"
 			>
-				<span class="relative block h-[46px] w-[120px] overflow-hidden md:h-[54px] md:w-[140px]" aria-hidden="true">
+				<span
+					class="relative block h-[46px] w-[120px] overflow-hidden md:h-[54px] md:w-[140px]"
+					aria-hidden="true"
+				>
 					<Image
 						src={leadLogo}
 						alt=""
@@ -39,16 +44,19 @@ const isActive = (href: string) => (
 				</span>
 			</a>
 
-			<nav class="absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 lg:flex" aria-label="Navegación principal">
+			<nav
+				class="absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 lg:flex"
+				aria-label="Navegación principal"
+			>
 				{
 					links.map((link) => (
 						<a
 							href={link.href}
 							aria-current={isActive(link.href) ? 'page' : undefined}
 							class:list={[
-								'relative px-3 py-2 text-sm transition-colors focus-visible:rounded-md focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-optional-3',
+								'focus-visible:outline-optional-3 relative px-3 py-2 text-sm transition-colors focus-visible:rounded-md focus-visible:outline-3 focus-visible:outline-offset-3',
 								isActive(link.href)
-									? 'font-semibold text-white after:absolute after:bottom-0.5 after:left-3 after:right-3 after:h-0.5 after:bg-secondary'
+									? 'after:bg-secondary font-semibold text-white after:absolute after:right-3 after:bottom-0.5 after:left-3 after:h-0.5'
 									: 'font-medium text-white/72 hover:text-white',
 							]}
 						>
@@ -58,32 +66,45 @@ const isActive = (href: string) => (
 				}
 			</nav>
 
-			<a href="/convocatorias" class="hidden min-h-9 items-center rounded-md border border-white/20 bg-optional-3/80 px-3.5 text-sm font-semibold transition hover:bg-optional-3 focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-optional-3 lg:inline-flex">
+			<a
+				href="/convocatorias"
+				class="bg-optional-3/80 hover:bg-optional-3 focus-visible:outline-optional-3 hidden min-h-9 items-center rounded-md border border-white/20 px-3.5 text-sm font-semibold transition focus-visible:outline-3 focus-visible:outline-offset-3 lg:inline-flex"
+			>
 				Convocatorias
 			</a>
 
 			<details class="group relative lg:hidden">
-				<summary class="flex min-h-11 min-w-11 cursor-pointer list-none items-center justify-center rounded-md text-white transition hover:bg-white/10 focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-optional-3">
+				<summary
+					class="focus-visible:outline-optional-3 flex min-h-11 min-w-11 cursor-pointer list-none items-center justify-center rounded-md text-white transition hover:bg-white/10 focus-visible:outline-3 focus-visible:outline-offset-3"
+				>
 					<Menu class="size-5 group-open:hidden" aria-hidden="true" />
 					<X class="hidden size-5 group-open:block" aria-hidden="true" />
 					<span class="sr-only">Abrir menú de navegación</span>
 				</summary>
-				<nav class="absolute right-0 top-[calc(100%+0.75rem)] z-30 w-72 rounded-lg border border-white/12 bg-canvas-deep p-2" aria-label="Navegación móvil">
+				<nav
+					class="bg-canvas-deep absolute top-[calc(100%+0.75rem)] right-0 z-30 w-72 rounded-lg border border-white/12 p-2"
+					aria-label="Navegación móvil"
+				>
 					{
 						links.map((link) => (
 							<a
 								href={link.href}
 								aria-current={isActive(link.href) ? 'page' : undefined}
 								class:list={[
-									'flex min-h-11 items-center rounded-md px-3 text-sm font-semibold transition-colors focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-optional-3',
-									isActive(link.href) ? 'bg-white/10 text-white' : 'text-white/72 hover:bg-white/[0.06] hover:text-white',
+									'focus-visible:outline-optional-3 flex min-h-11 items-center rounded-md px-3 text-sm font-semibold transition-colors focus-visible:outline-3 focus-visible:outline-offset-2',
+									isActive(link.href)
+										? 'bg-white/10 text-white'
+										: 'text-white/72 hover:bg-white/[0.06] hover:text-white',
 								]}
 							>
 								{link.label}
 							</a>
 						))
 					}
-					<a href="/convocatorias" class="mt-2 flex min-h-11 items-center justify-center rounded-md bg-optional-3 px-3 text-sm font-semibold text-white transition hover:bg-[#6849d8] focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-optional-3">
+					<a
+						href="/convocatorias"
+						class="bg-optional-3 focus-visible:outline-optional-3 mt-2 flex min-h-11 items-center justify-center rounded-md px-3 text-sm font-semibold text-white transition hover:bg-[#6849d8] focus-visible:outline-3 focus-visible:outline-offset-2"
+					>
 						Convocatorias
 					</a>
 				</nav>

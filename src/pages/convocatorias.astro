@@ -1,15 +1,102 @@
 ---
-import ComingSoon from '../components/ui/ComingSoon.astro';
+import Button from '../components/ui/Button.astro';
+import Container from '../components/ui/Container.astro';
+import { openings } from '../data/openings';
 import Layout from '../layouts/Layout.astro';
+
+const hasOpenings = openings.length > 0;
 ---
 
 <Layout
 	title="Convocatorias | LEAD UTP"
 	description="Encuentra las convocatorias abiertas para formar parte de LEAD UTP."
 >
-	<ComingSoon
-		eyebrow="Convocatorias"
-		title="Aún no hay convocatorias abiertas"
-		description="Estamos preparando esta sección. Síguenos en nuestras redes para enterarte apenas se abra una nueva convocatoria."
-	/>
+	<section
+		class="bg-canvas-navy/35 border-b border-white/8 py-13 sm:py-16 lg:py-18"
+	>
+		<Container>
+			<header class="max-w-3xl">
+				<p
+					class="text-foreground-secondary text-[0.7rem] font-bold tracking-[0.18em] uppercase"
+				>
+					Comunidad LEAD
+				</p>
+				<h1
+					class="font-display text-foreground mt-4 text-4xl font-bold tracking-[-0.065em] sm:text-5xl lg:text-6xl"
+				>
+					Convocatorias
+				</h1>
+				<p
+					class="text-foreground-secondary mt-5 max-w-2xl text-base leading-7 sm:text-lg sm:leading-8"
+				>
+					{
+						hasOpenings
+							? 'Roles abiertos para formar parte de la comunidad LEAD UTP.'
+							: 'Ahora mismo no hay convocatorias abiertas. Síguenos en nuestras redes para enterarte apenas se abra una nueva.'
+					}
+				</p>
+			</header>
+		</Container>
+	</section>
+
+	{
+		hasOpenings ? (
+			<section
+				class="py-16 sm:py-20 lg:py-24"
+				aria-label="Convocatorias abiertas"
+			>
+				<Container>
+					<ol class="border-t border-white/12">
+						{openings.map((opening) => (
+							<li class="grid gap-5 border-b border-white/12 py-8 sm:grid-cols-[minmax(0,0.4fr)_minmax(0,0.6fr)] sm:gap-10 sm:py-10">
+								<div>
+									<h2 class="font-display text-foreground text-2xl font-semibold tracking-[-0.045em] sm:text-3xl">
+										{opening.role}
+									</h2>
+									<p class="text-foreground-secondary mt-3 text-sm leading-6">
+										Fecha límite: {opening.deadline}
+									</p>
+									<div class="mt-6">
+										<Button href={opening.applyUrl}>Postular</Button>
+									</div>
+								</div>
+								<div>
+									<p class="text-foreground-secondary text-[0.7rem] font-bold tracking-[0.18em] uppercase">
+										Requisitos
+									</p>
+									<ul class="text-foreground-secondary mt-3 space-y-2 text-sm leading-6">
+										{opening.requirements.map((requirement) => (
+											<li class="flex gap-2">
+												<span aria-hidden="true">•</span>
+												{requirement}
+											</li>
+										))}
+									</ul>
+								</div>
+							</li>
+						))}
+					</ol>
+				</Container>
+			</section>
+		) : (
+			<section
+				class="py-20 sm:py-24 lg:py-28"
+				aria-label="Sin convocatorias abiertas"
+			>
+				<Container>
+					<div class="mx-auto max-w-xl text-center">
+						<p class="text-foreground-secondary text-base leading-7 sm:text-lg">
+							No te pierdas la próxima convocatoria: seguinos en redes para
+							enterarte primero.
+						</p>
+						<div class="mt-8">
+							<Button href="/" size="lg">
+								Volver al inicio
+							</Button>
+						</div>
+					</div>
+				</Container>
+			</section>
+		)
+	}
 </Layout>
