@@ -47,13 +47,17 @@ Hoy todo el sitio comparte una sola `public/og-image.png` (definida en `Layout.a
 
 `homeHeroMedia` en `src/data/home/home.data.ts` sigue vacío (`{}`); solo se completaron los 3 "momentos" de la sección Vida LEAD con fotos de `public/imagestest/2025/`.
 
+### 8. Página `/alianzas` (link quitado por un 404)
+
+La Home tenía un link "Conoce nuestras alianzas" apuntando a `/alianzas`, ruta que nunca existió. Se quitó el link (`HomeAlliances.astro`) para no dejar un 404 en producción; solo hay un aliado cargado (`Globant`, sin logo) en `homeAlliances` dentro de `src/data/home/home.data.ts`. Si se junta la lista real de alianzas (nombre, logo, descripción), se puede crear la página siguiendo el mismo patrón que `/nosotros`/`/proyectos` y volver a agregar el link.
+
 ## Baja prioridad / decisiones a futuro
 
-### 8. ¿CMS o seguir con archivos `.data.ts`?
+### 9. ¿CMS o seguir con archivos `.data.ts`?
 
 Todo el contenido (pilares, eventos, home, nosotros, proyectos, convocatorias, internacional, vida LEAD) vive como datos tipados en `src/data/`, no en un CMS. Funciona bien mientras el equipo sea técnico y los cambios sean poco frecuentes. Si alguien no-dev va a cargar contenido seguido (sobre todo convocatorias, que cambian por temporada), evaluar migrar a un CMS headless.
 
-### 9. Dominio propio
+### 10. Dominio propio
 
 El sitio sigue en `leadutp.vercel.app`. Definir y conectar un dominio propio cuando esté disponible.
 
