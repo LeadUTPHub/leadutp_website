@@ -35,21 +35,17 @@ Hoy todo el sitio comparte una sola `public/og-image.png` (definida en `Layout.a
 
 `src/data/events/events.utils.ts` tiene funciones como `getUpcomingEvents`, `getPastEvents`, `getFeaturedEvent` que dependen de comparar fechas. No hay ningún test runner en el proyecto — si esta lógica falla silenciosamente, un evento puede aparecer en la sección equivocada sin que nadie lo note. Vale la pena agregar Vitest + un par de casos de prueba ahí.
 
-### 5. Gestor de paquetes duplicado
-
-El repo tiene `package-lock.json` (npm) y también `pnpm-lock.yaml` + `pnpm-workspace.yaml`, pero `node_modules` está instalado con npm (no hay carpeta `.pnpm`). Los archivos de pnpm están huérfanos — conviene eliminarlos para evitar que alguien instale con el gestor equivocado y genere un lockfile desincronizado.
-
-### 6. Carpeta internacional sin país confirmado
+### 5. Carpeta internacional sin país confirmado
 
 `public/imagestest/internacional_leadutp/16_aI_hackaton_lizbeth/` (AI Hackathon) quedó fuera de `/internacional` porque no se confirmó el país. Cuando se sepa, agregar una entrada en `src/data/international/international.data.ts`.
 
 ## Baja prioridad / decisiones a futuro
 
-### 7. ¿CMS o seguir con archivos `.data.ts`?
+### 6. ¿CMS o seguir con archivos `.data.ts`?
 
 Todo el contenido (pilares, eventos, home, nosotros, proyectos, convocatorias, internacional) vive como datos tipados en `src/data/`, no en un CMS. Funciona bien mientras el equipo sea técnico y los cambios sean poco frecuentes. Si alguien no-dev va a cargar contenido seguido (sobre todo convocatorias, que cambian por temporada), evaluar migrar a un CMS headless.
 
-### 8. Dominio propio
+### 7. Dominio propio
 
 El sitio sigue en `leadutp.vercel.app`. Definir y conectar un dominio propio cuando esté disponible.
 
