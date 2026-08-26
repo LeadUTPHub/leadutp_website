@@ -1,0 +1,50 @@
+---
+import LifeEventCard from '../components/life/LifeEventCard.astro';
+import Container from '../components/ui/Container.astro';
+import { lifeEvents } from '../data/life';
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+	title="Vida LEAD UTP | LEAD UTP"
+	description="Así se vive la comunidad LEAD UTP: los eventos, dinámicas y momentos que compartimos."
+>
+	<section
+		class="bg-canvas-navy/35 border-b border-white/8 py-13 sm:py-16 lg:py-18"
+	>
+		<Container>
+			<header class="max-w-3xl">
+				<p
+					class="text-foreground-secondary text-[0.7rem] font-bold tracking-[0.18em] uppercase"
+				>
+					Comunidad LEAD
+				</p>
+				<h1
+					class="font-display text-foreground mt-4 text-4xl font-bold tracking-[-0.065em] sm:text-5xl lg:text-6xl"
+				>
+					Vida <span
+						class="from-secondary to-optional-1 inline-block bg-linear-to-r bg-clip-text pr-2 text-transparent"
+						>LEAD UTP</span
+					>
+				</h1>
+				<p
+					class="text-foreground-secondary mt-5 max-w-2xl text-base leading-7 sm:text-lg sm:leading-8"
+				>
+					Así se vive nuestra comunidad: creando, colaborando y celebrando cada
+					experiencia juntos.
+				</p>
+			</header>
+		</Container>
+	</section>
+
+	<section
+		class="py-16 sm:py-20 lg:py-24"
+		aria-label="Eventos de la comunidad LEAD UTP"
+	>
+		<Container>
+			<div class="flex flex-col gap-16 sm:gap-20">
+				{lifeEvents.map((event) => <LifeEventCard event={event} />)}
+			</div>
+		</Container>
+	</section>
+</Layout>
