@@ -9,15 +9,22 @@ import HomePillars from '../components/home/HomePillars.astro';
 import HomeRecruitment from '../components/home/HomeRecruitment.astro';
 import HomeWays from '../components/home/HomeWays.astro';
 import { events, getFeaturedEvent, getUpcomingEvents } from '../data/events';
-import { homeAlliances, homeCommunityMoments, homeHeroMedia } from '../data/home';
+import {
+	homeAlliances,
+	homeCommunityMoments,
+	homeHeroMedia,
+} from '../data/home';
 import { getPillarBySlug, pillars } from '../data/pillars';
 import Layout from '../layouts/Layout.astro';
 
 const upcomingEvents = getUpcomingEvents(events);
-const featuredEvent = getFeaturedEvent(upcomingEvents)
-	?? upcomingEvents.find((event) => event.status !== 'cancelled');
+const featuredEvent =
+	getFeaturedEvent(upcomingEvents) ??
+	upcomingEvents.find((event) => event.status !== 'cancelled');
 const secondaryEvents = featuredEvent
-	? upcomingEvents.filter((event) => event.slug !== featuredEvent.slug).slice(0, 2)
+	? upcomingEvents
+			.filter((event) => event.slug !== featuredEvent.slug)
+			.slice(0, 2)
 	: [];
 const leadAcademia = getPillarBySlug(pillars, 'lead-academia');
 ---
@@ -28,7 +35,14 @@ const leadAcademia = getPillarBySlug(pillars, 'lead-academia');
 >
 	<HomeHero media={homeHeroMedia} />
 	<HomeWays />
-	{featuredEvent && <HomeEvents featuredEvent={featuredEvent} secondaryEvents={secondaryEvents} />}
+	{
+		featuredEvent && (
+			<HomeEvents
+				featuredEvent={featuredEvent}
+				secondaryEvents={secondaryEvents}
+			/>
+		)
+	}
 	<HomePillars pillars={pillars} />
 	{leadAcademia && <HomeInitiative initiative={leadAcademia} />}
 	<HomeLife moments={homeCommunityMoments} />

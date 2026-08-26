@@ -4,18 +4,39 @@ import Button from '../ui/Button.astro';
 import Container from '../ui/Container.astro';
 ---
 
-<section class="pb-16 pt-6 sm:pb-20 sm:pt-8 lg:pb-24" aria-labelledby="recruitment-title">
+<section
+	class="pt-6 pb-16 sm:pt-8 sm:pb-20 lg:pb-24"
+	aria-labelledby="recruitment-title"
+>
 	<Container>
-		<div class="relative overflow-hidden rounded-xl border border-white/12 bg-canvas-navy px-6 py-10 sm:px-10 sm:py-12 lg:px-14 lg:py-14">
-			<div class="absolute inset-x-0 top-0 h-px bg-linear-to-r from-secondary via-optional-1 to-optional-3" aria-hidden="true"></div>
-			<div class="relative grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end lg:gap-12">
+		<div
+			class="bg-canvas-navy relative overflow-hidden rounded-xl border border-white/12 px-6 py-10 sm:px-10 sm:py-12 lg:px-14 lg:py-14"
+		>
+			<div
+				class="from-secondary via-optional-1 to-optional-3 absolute inset-x-0 top-0 h-px bg-linear-to-r"
+				aria-hidden="true"
+			>
+			</div>
+			<div
+				class="relative grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end lg:gap-12"
+			>
 				<div class="max-w-3xl">
-					<p class="text-[0.7rem] font-bold uppercase tracking-[0.18em] text-foreground-secondary">Tu próximo paso</p>
-					<h2 id="recruitment-title" class="mt-3 font-display text-3xl font-semibold leading-tight tracking-[-0.05em] text-foreground sm:text-4xl lg:text-5xl">
+					<p
+						class="text-foreground-secondary text-[0.7rem] font-bold tracking-[0.18em] uppercase"
+					>
+						Tu próximo paso
+					</p>
+					<h2
+						id="recruitment-title"
+						class="font-display text-foreground mt-3 text-3xl leading-tight font-semibold tracking-[-0.05em] sm:text-4xl lg:text-5xl"
+					>
 						¿Quieres formar parte de LEAD UTP?
 					</h2>
-					<p class="mt-4 max-w-2xl text-base leading-7 text-foreground-secondary">
-						Conoce nuestras convocatorias y encuentra una oportunidad para aprender, aportar y crecer junto a nuestra comunidad.
+					<p
+						class="text-foreground-secondary mt-4 max-w-2xl text-base leading-7"
+					>
+						Conoce nuestras convocatorias y encuentra una oportunidad para
+						aprender, aportar y crecer junto a nuestra comunidad.
 					</p>
 				</div>
 				<Button href="/convocatorias" size="lg">

@@ -1,15 +1,87 @@
 ---
-import ComingSoon from '../components/ui/ComingSoon.astro';
+import Badge from '../components/ui/Badge.astro';
+import Container from '../components/ui/Container.astro';
+import { projects } from '../data/projects';
 import Layout from '../layouts/Layout.astro';
+
+const statusLabels = {
+	activo: 'Activo',
+	finalizado: 'Finalizado',
+	planificado: 'Planificado',
+};
+
+const statusTones = {
+	activo: 'secondary',
+	finalizado: 'primary',
+	planificado: 'optional',
+} as const;
 ---
 
 <Layout
 	title="Proyectos | LEAD UTP"
 	description="Descubre los proyectos e iniciativas impulsados por la comunidad LEAD UTP."
 >
-	<ComingSoon
-		eyebrow="Proyectos"
-		title="Estamos preparando esta sección"
-		description="Pronto podrás explorar los proyectos e iniciativas que nuestra comunidad está construyendo. Vuelve pronto para conocerlos."
-	/>
+	<section
+		class="bg-canvas-navy/35 border-b border-white/8 py-13 sm:py-16 lg:py-18"
+	>
+		<Container>
+			<header class="max-w-3xl">
+				<p
+					class="text-foreground-secondary text-[0.7rem] font-bold tracking-[0.18em] uppercase"
+				>
+					Comunidad LEAD
+				</p>
+				<h1
+					class="font-display text-foreground mt-4 text-4xl font-bold tracking-[-0.065em] sm:text-5xl lg:text-6xl"
+				>
+					Nuestros <span
+						class="from-secondary to-optional-1 inline-block bg-linear-to-r bg-clip-text pr-2 text-transparent"
+						>proyectos</span
+					>
+				</h1>
+				<p
+					class="text-foreground-secondary mt-5 max-w-2xl text-base leading-7 sm:text-lg sm:leading-8"
+				>
+					Iniciativas que nuestra comunidad está construyendo, de la mano de sus
+					miembros.
+				</p>
+			</header>
+		</Container>
+	</section>
+
+	<section class="py-14 sm:py-18 lg:py-22" aria-label="Lista de proyectos">
+		<Container>
+			<ol class="grid gap-x-8 border-y border-white/12 md:grid-cols-2">
+				{
+					projects.map((project, index) => (
+						<li
+							class:list={[
+								'border-white/12 py-8 sm:py-9',
+								index > 0 && 'border-t',
+								index === 1 && 'md:border-t-0',
+							]}
+						>
+							<Badge tone={statusTones[project.status]}>
+								{statusLabels[project.status]}
+							</Badge>
+							<h2 class="font-display text-foreground mt-4 max-w-md text-2xl leading-tight font-semibold tracking-[-0.05em] sm:text-3xl">
+								{project.name}
+							</h2>
+							<p class="text-foreground-secondary mt-3 max-w-md text-sm leading-6 sm:text-base sm:leading-7">
+								{project.description}
+							</p>
+							{project.link && (
+								<a
+									href={project.link}
+									class="text-foreground-secondary focus-visible:outline-optional-3 mt-5 inline-flex min-h-11 items-center gap-2 rounded-sm text-sm font-bold transition-colors hover:text-white focus-visible:outline-3 focus-visible:outline-offset-3 motion-reduce:transition-none"
+								>
+									Ver más
+								</a>
+							)}
+						</li>
+					))
+				}
+			</ol>
+		</Container>
+	</section>
 </Layout>

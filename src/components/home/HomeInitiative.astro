@@ -10,35 +10,65 @@ interface Props {
 }
 
 const { initiative } = Astro.props;
-const initiativeMedia: HomeMediaData = initiative.image && initiative.imageAlt
-	? {
-		image: initiative.image,
-		alt: initiative.imageAlt,
-		imageIsTemporary: initiative.imageIsTemporary,
-	}
-	: {};
+const initiativeMedia: HomeMediaData =
+	initiative.image && initiative.imageAlt
+		? {
+				image: initiative.image,
+				alt: initiative.imageAlt,
+				imageIsTemporary: initiative.imageIsTemporary,
+			}
+		: {};
 ---
 
-<section class="border-y border-white/8 bg-canvas-navy/25 py-16 sm:py-20 lg:py-24" aria-labelledby="initiative-title">
+<section
+	class="bg-canvas-navy/25 border-y border-white/8 py-16 sm:py-20 lg:py-24"
+	aria-labelledby="initiative-title"
+>
 	<Container>
-		<div class="grid items-center gap-10 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)] lg:gap-16 xl:gap-20">
-			<HomeMedia media={initiativeMedia} class="aspect-[16/10] lg:min-h-[30rem] lg:aspect-auto" sizes="(min-width: 1024px) 52vw, 100vw" />
+		<div
+			class="grid items-center gap-10 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)] lg:gap-16 xl:gap-20"
+		>
+			<HomeMedia
+				media={initiativeMedia}
+				class="aspect-[16/10] lg:aspect-auto lg:min-h-[30rem]"
+				sizes="(min-width: 1024px) 52vw, 100vw"
+			/>
 
 			<div class="max-w-xl">
-				<p class="text-[0.7rem] font-bold uppercase tracking-[0.18em] text-secondary">Lo que construimos</p>
-				<h2 id="initiative-title" class="mt-3 font-display text-3xl font-semibold tracking-[-0.05em] text-foreground sm:text-4xl">
+				<p
+					class="text-secondary text-[0.7rem] font-bold tracking-[0.18em] uppercase"
+				>
+					Lo que construimos
+				</p>
+				<h2
+					id="initiative-title"
+					class="font-display text-foreground mt-3 text-3xl font-semibold tracking-[-0.05em] sm:text-4xl"
+				>
 					Ideas que llevamos a la acción
 				</h2>
-				<div class="mt-8 border-l-2 border-optional-3 pl-5 sm:pl-6">
-					<h3 class="font-display text-2xl font-semibold tracking-[-0.04em] text-foreground">{initiative.name}</h3>
-					<p class="mt-3 text-base leading-7 text-foreground-secondary">{initiative.intro}</p>
-					<p class="mt-4 text-sm leading-6 text-foreground-muted">
-						Una iniciativa impulsada por voluntarios que extiende el aprendizaje y la curiosidad tecnológica hacia nuevas generaciones.
+				<div class="border-optional-3 mt-8 border-l-2 pl-5 sm:pl-6">
+					<h3
+						class="font-display text-foreground text-2xl font-semibold tracking-[-0.04em]"
+					>
+						{initiative.name}
+					</h3>
+					<p class="text-foreground-secondary mt-3 text-base leading-7">
+						{initiative.intro}
+					</p>
+					<p class="text-foreground-muted mt-4 text-sm leading-6">
+						Una iniciativa impulsada por voluntarios que extiende el aprendizaje
+						y la curiosidad tecnológica hacia nuevas generaciones.
 					</p>
 				</div>
-				<a href="/proyectos" class="group mt-8 inline-flex min-h-11 items-center gap-2 rounded-sm text-sm font-bold text-foreground transition-colors hover:text-white focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-optional-3 motion-reduce:transition-none">
+				<a
+					href="/proyectos"
+					class="group text-foreground focus-visible:outline-optional-3 mt-8 inline-flex min-h-11 items-center gap-2 rounded-sm text-sm font-bold transition-colors hover:text-white focus-visible:outline-3 focus-visible:outline-offset-3 motion-reduce:transition-none"
+				>
 					Explorar proyectos
-					<ArrowRight class="size-4 transition-transform duration-200 group-hover:translate-x-1 motion-reduce:transform-none motion-reduce:transition-none" aria-hidden="true" />
+					<ArrowRight
+						class="size-4 transition-transform duration-200 group-hover:translate-x-1 motion-reduce:transform-none motion-reduce:transition-none"
+						aria-hidden="true"
+					/>
 				</a>
 			</div>
 		</div>

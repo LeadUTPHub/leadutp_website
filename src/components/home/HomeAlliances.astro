@@ -1,5 +1,4 @@
 ---
-import { ArrowRight } from '@lucide/astro';
 import { Image } from 'astro:assets';
 import type { HomeAlliance } from '../../data/home';
 import Container from '../ui/Container.astro';
@@ -11,29 +10,53 @@ interface Props {
 const { alliances } = Astro.props;
 ---
 
-<section class="border-y border-white/8 bg-canvas-navy/25 py-14 sm:py-16 lg:py-18" aria-labelledby="alliances-title">
+<section
+	class="bg-canvas-navy/25 border-y border-white/8 py-14 sm:py-16 lg:py-18"
+	aria-labelledby="alliances-title"
+>
 	<Container>
-		<div class="grid gap-8 lg:grid-cols-[0.72fr_1.28fr] lg:items-center lg:gap-16">
+		<div
+			class="grid gap-8 lg:grid-cols-[0.72fr_1.28fr] lg:items-center lg:gap-16"
+		>
 			<div>
-				<p class="text-[0.7rem] font-bold uppercase tracking-[0.18em] text-secondary">Con quiénes colaboramos</p>
-				<h2 id="alliances-title" class="mt-3 font-display text-3xl font-semibold tracking-[-0.05em] text-foreground sm:text-4xl">Nuestras alianzas</h2>
-				<p class="mt-3 max-w-xl text-sm leading-6 text-foreground-secondary">
-					Crecemos junto a organizaciones que conectan a nuestra comunidad con nuevas experiencias y oportunidades.
+				<p
+					class="text-secondary text-[0.7rem] font-bold tracking-[0.18em] uppercase"
+				>
+					Con quiénes colaboramos
 				</p>
-				<a href="/alianzas" class="group mt-6 inline-flex min-h-11 items-center gap-2 rounded-sm text-sm font-bold text-foreground transition-colors hover:text-white focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-optional-3 motion-reduce:transition-none">
-					Conoce nuestras alianzas
-					<ArrowRight class="size-4 transition-transform duration-200 group-hover:translate-x-1 motion-reduce:transform-none motion-reduce:transition-none" aria-hidden="true" />
-				</a>
+				<h2
+					id="alliances-title"
+					class="font-display text-foreground mt-3 text-3xl font-semibold tracking-[-0.05em] sm:text-4xl"
+				>
+					Nuestras alianzas
+				</h2>
+				<p class="text-foreground-secondary mt-3 max-w-xl text-sm leading-6">
+					Crecemos junto a organizaciones que conectan a nuestra comunidad con
+					nuevas experiencias y oportunidades.
+				</p>
 			</div>
 
-			<ul class="grid grid-cols-2 gap-3 sm:grid-cols-3" aria-label="Organizaciones aliadas de LEAD UTP">
+			<ul
+				class="grid grid-cols-2 gap-3 sm:grid-cols-3"
+				aria-label="Organizaciones aliadas de LEAD UTP"
+			>
 				{
 					alliances.map((alliance) => (
-						<li class="flex min-h-24 items-center justify-center rounded-lg border border-white/10 bg-surface px-5 py-4 text-center">
-							{alliance.logo && alliance.logoAlt && !alliance.logoIsTemporary ? (
-								<Image src={alliance.logo} alt={alliance.logoAlt} class="max-h-12 w-auto max-w-full object-contain" widths={[160, 240, 320]} sizes="240px" />
+						<li class="bg-surface flex min-h-24 items-center justify-center rounded-lg border border-white/10 px-5 py-4 text-center">
+							{alliance.logo &&
+							alliance.logoAlt &&
+							!alliance.logoIsTemporary ? (
+								<Image
+									src={alliance.logo}
+									alt={alliance.logoAlt}
+									class="max-h-12 w-auto max-w-full object-contain"
+									widths={[160, 240, 320]}
+									sizes="240px"
+								/>
 							) : (
-								<span class="font-display text-lg font-semibold tracking-[0.08em] text-white/82 uppercase">{alliance.name}</span>
+								<span class="font-display text-lg font-semibold tracking-[0.08em] text-white/82 uppercase">
+									{alliance.name}
+								</span>
 							)}
 						</li>
 					))

@@ -1,15 +1,121 @@
 ---
-import ComingSoon from '../components/ui/ComingSoon.astro';
+import { about } from '../data/about';
+import Container from '../components/ui/Container.astro';
 import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout
 	title="Sobre nosotros | LEAD UTP"
-	description="Conoce la misión, el equipo y la historia de LEAD UTP."
+	description="Conoce la misión, la visión, la historia y el equipo de LEAD UTP."
 >
-	<ComingSoon
-		eyebrow="Sobre nosotros"
-		title="Estamos preparando esta sección"
-		description="Muy pronto podrás conocer la misión, el equipo y la historia de LEAD UTP. Mientras tanto, síguenos en nuestras redes para no perderte nada."
-	/>
+	<section
+		class="bg-canvas-navy/35 border-b border-white/8 py-13 sm:py-16 lg:py-18"
+	>
+		<Container>
+			<header class="max-w-3xl">
+				<p
+					class="text-foreground-secondary text-[0.7rem] font-bold tracking-[0.18em] uppercase"
+				>
+					Comunidad LEAD
+				</p>
+				<h1
+					class="font-display text-foreground mt-4 text-4xl font-bold tracking-[-0.065em] sm:text-5xl lg:text-6xl"
+				>
+					Sobre <span
+						class="from-secondary to-optional-1 inline-block bg-linear-to-r bg-clip-text pr-2 text-transparent"
+						>nosotros</span
+					>
+				</h1>
+			</header>
+		</Container>
+	</section>
+
+	<section class="py-16 sm:py-20 lg:py-24" aria-labelledby="mission-title">
+		<Container>
+			<div class="grid gap-10 sm:grid-cols-2 lg:gap-16">
+				<div>
+					<p
+						class="text-foreground-secondary text-[0.7rem] font-bold tracking-[0.18em] uppercase"
+					>
+						Misión
+					</p>
+					<p
+						id="mission-title"
+						class="text-foreground mt-3 max-w-lg text-lg leading-8 sm:text-xl sm:leading-9"
+					>
+						{about.mission}
+					</p>
+				</div>
+				<div>
+					<p
+						class="text-foreground-secondary text-[0.7rem] font-bold tracking-[0.18em] uppercase"
+					>
+						Visión
+					</p>
+					<p
+						class="text-foreground mt-3 max-w-lg text-lg leading-8 sm:text-xl sm:leading-9"
+					>
+						{about.vision}
+					</p>
+				</div>
+			</div>
+		</Container>
+	</section>
+
+	<section
+		class="bg-surface border-y border-white/8 py-16 sm:py-20"
+		aria-labelledby="history-title"
+	>
+		<Container>
+			<div
+				class="grid gap-6 lg:grid-cols-[minmax(0,0.38fr)_minmax(0,0.62fr)] lg:gap-16"
+			>
+				<div>
+					<p
+						class="text-foreground-secondary text-[0.7rem] font-bold tracking-[0.18em] uppercase"
+					>
+						Historia
+					</p>
+					<h2
+						id="history-title"
+						class="font-display text-foreground mt-3 text-3xl font-semibold tracking-[-0.05em] sm:text-4xl"
+					>
+						Cómo empezamos
+					</h2>
+				</div>
+				<p
+					class="text-foreground-secondary max-w-3xl text-base leading-8 sm:text-lg sm:leading-9"
+				>
+					{about.history}
+				</p>
+			</div>
+		</Container>
+	</section>
+
+	<section class="py-16 sm:py-20 lg:py-24" aria-labelledby="team-title">
+		<Container>
+			<h2
+				id="team-title"
+				class="font-display text-foreground text-3xl font-semibold tracking-[-0.05em] sm:text-4xl"
+			>
+				Junta directiva
+			</h2>
+			<ul
+				class="mt-9 grid gap-x-8 gap-y-0 border-t border-white/12 sm:grid-cols-2 lg:grid-cols-3"
+			>
+				{
+					about.team.map((member) => (
+						<li class="border-b border-white/12 py-6 sm:py-7">
+							<p class="font-display text-foreground text-xl font-semibold tracking-[-0.035em]">
+								{member.name}
+							</p>
+							<p class="text-foreground-secondary mt-1 text-sm leading-6">
+								{member.role}
+							</p>
+						</li>
+					))
+				}
+			</ul>
+		</Container>
+	</section>
 </Layout>

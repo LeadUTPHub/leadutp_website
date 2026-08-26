@@ -23,59 +23,140 @@ const { featuredEvent, secondaryEvents } = Astro.props;
 const featuredTime = formatEventTimeRange(featuredEvent);
 const featuredStatus = getEventStatusLabel(featuredEvent);
 const featuredCanRegister = canRegisterForEvent(featuredEvent);
-const featuredMedia: HomeMediaData = featuredEvent.image && featuredEvent.imageAlt
-	? {
-		image: featuredEvent.image,
-		alt: featuredEvent.imageAlt,
-		imageIsTemporary: featuredEvent.imageIsTemporary,
-	}
-	: {};
+const featuredMedia: HomeMediaData =
+	featuredEvent.image && featuredEvent.imageAlt
+		? {
+				image: featuredEvent.image,
+				alt: featuredEvent.imageAlt,
+				imageIsTemporary: featuredEvent.imageIsTemporary,
+			}
+		: {};
 ---
 
-<section class="border-y border-white/8 bg-canvas-navy/30 py-16 sm:py-20 lg:py-24" aria-labelledby="current-title">
+<section
+	class="bg-canvas-navy/30 border-y border-white/8 py-16 sm:py-20 lg:py-24"
+	aria-labelledby="current-title"
+>
 	<Container>
-		<div class="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+		<div
+			class="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between"
+		>
 			<div>
-				<p class="text-[0.7rem] font-bold uppercase tracking-[0.18em] text-secondary">Experiencias actuales</p>
-				<h2 id="current-title" class="mt-3 font-display text-3xl font-semibold tracking-[-0.05em] text-foreground sm:text-4xl">
+				<p
+					class="text-secondary text-[0.7rem] font-bold tracking-[0.18em] uppercase"
+				>
+					Experiencias actuales
+				</p>
+				<h2
+					id="current-title"
+					class="font-display text-foreground mt-3 text-3xl font-semibold tracking-[-0.05em] sm:text-4xl"
+				>
 					Ahora en LEAD UTP
 				</h2>
-				<p class="mt-3 max-w-2xl text-sm leading-6 text-foreground-secondary sm:text-base sm:leading-7">
-					Encuentros para aprender, compartir ideas y conectar con nuevas oportunidades dentro de nuestra comunidad.
+				<p
+					class="text-foreground-secondary mt-3 max-w-2xl text-sm leading-6 sm:text-base sm:leading-7"
+				>
+					Encuentros para aprender, compartir ideas y conectar con nuevas
+					oportunidades dentro de nuestra comunidad.
 				</p>
 			</div>
-			<a href="/eventos" class="group inline-flex min-h-11 w-fit shrink-0 items-center gap-2 rounded-sm text-sm font-bold text-foreground transition-colors hover:text-white focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-optional-3 motion-reduce:transition-none">
+			<a
+				href="/eventos"
+				class="group text-foreground focus-visible:outline-optional-3 inline-flex min-h-11 w-fit shrink-0 items-center gap-2 rounded-sm text-sm font-bold transition-colors hover:text-white focus-visible:outline-3 focus-visible:outline-offset-3 motion-reduce:transition-none"
+			>
 				Ver todos los eventos
-				<ArrowRight class="size-4 transition-transform duration-200 group-hover:translate-x-1 motion-reduce:transform-none motion-reduce:transition-none" aria-hidden="true" />
+				<ArrowRight
+					class="size-4 transition-transform duration-200 group-hover:translate-x-1 motion-reduce:transform-none motion-reduce:transition-none"
+					aria-hidden="true"
+				/>
 			</a>
 		</div>
 
-		<article class="mt-10 grid overflow-hidden rounded-xl border border-white/10 bg-surface lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
-			<HomeMedia media={featuredMedia} class="min-h-64 rounded-none border-0 border-b border-white/10 sm:min-h-80 lg:min-h-full lg:border-r lg:border-b-0" sizes="(min-width: 1024px) 42vw, 100vw" />
+		<article
+			class="bg-surface mt-10 grid overflow-hidden rounded-xl border border-white/10 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]"
+		>
+			<HomeMedia
+				media={featuredMedia}
+				class="min-h-64 rounded-none border-0 border-b border-white/10 sm:min-h-80 lg:min-h-full lg:border-r lg:border-b-0"
+				sizes="(min-width: 1024px) 42vw, 100vw"
+			/>
 			<div class="flex flex-col p-6 sm:p-8 lg:p-10">
 				<div class="flex flex-wrap items-center gap-3">
 					<Badge tone={featuredEvent.badgeTone}>{featuredEvent.category}</Badge>
 					{
 						featuredStatus && (
-							<span class="inline-flex items-center gap-2 text-[0.68rem] font-bold uppercase tracking-[0.12em] text-white/85">
-								<span class:list={['size-1.5 rounded-full', featuredEvent.status === 'cancelled' ? 'bg-secondary' : 'bg-optional-3']} aria-hidden="true"></span>
+							<span class="inline-flex items-center gap-2 text-[0.68rem] font-bold tracking-[0.12em] text-white/85 uppercase">
+								<span
+									class:list={[
+										'size-1.5 rounded-full',
+										featuredEvent.status === 'cancelled'
+											? 'bg-secondary'
+											: 'bg-optional-3',
+									]}
+									aria-hidden="true"
+								/>
 								{featuredStatus}
 							</span>
 						)
 					}
 				</div>
-				<h3 class="mt-5 font-display text-2xl font-semibold leading-tight tracking-[-0.045em] text-foreground sm:text-3xl">
+				<h3
+					class="font-display text-foreground mt-5 text-2xl leading-tight font-semibold tracking-[-0.045em] sm:text-3xl"
+				>
 					{featuredEvent.title}
 				</h3>
-				{featuredEvent.description && <p class="mt-4 max-w-xl text-sm leading-6 text-foreground-secondary sm:text-base sm:leading-7">{featuredEvent.description}</p>}
-				<div class="mt-6 grid gap-3 text-sm text-foreground-secondary sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-					<div class="flex items-center gap-3"><Calendar class="size-4 shrink-0 text-secondary" aria-hidden="true" /><time datetime={featuredEvent.date}>{formatEventDate(featuredEvent.date)}</time></div>
-					{featuredTime && <div class="flex items-center gap-3"><Clock class="size-4 shrink-0 text-secondary" aria-hidden="true" /><span>{featuredTime}</span></div>}
-					{featuredEvent.location && <div class="flex items-center gap-3 sm:col-span-2 lg:col-span-1 xl:col-span-2"><MapPin class="size-4 shrink-0 text-secondary" aria-hidden="true" /><span>{featuredEvent.location}</span></div>}
+				{
+					featuredEvent.description && (
+						<p class="text-foreground-secondary mt-4 max-w-xl text-sm leading-6 sm:text-base sm:leading-7">
+							{featuredEvent.description}
+						</p>
+					)
+				}
+				<div
+					class="text-foreground-secondary mt-6 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2"
+				>
+					<div class="flex items-center gap-3">
+						<Calendar
+							class="text-secondary size-4 shrink-0"
+							aria-hidden="true"
+						/><time datetime={featuredEvent.date}
+							>{formatEventDate(featuredEvent.date)}</time
+						>
+					</div>
+					{
+						featuredTime && (
+							<div class="flex items-center gap-3">
+								<>
+									<Clock
+										class="text-secondary size-4 shrink-0"
+										aria-hidden="true"
+									/>
+									<span>{featuredTime}</span>
+								</>
+							</div>
+						)
+					}
+					{
+						featuredEvent.location && (
+							<div class="flex items-center gap-3 sm:col-span-2 lg:col-span-1 xl:col-span-2">
+								<>
+									<MapPin
+										class="text-secondary size-4 shrink-0"
+										aria-hidden="true"
+									/>
+									<span>{featuredEvent.location}</span>
+								</>
+							</div>
+						)
+					}
 				</div>
 				{
 					featuredCanRegister && featuredEvent.registrationUrl && (
-						<div class="mt-8"><Button href={featuredEvent.registrationUrl}>Registrarme <ArrowRight class="size-4" aria-hidden="true" /></Button></div>
+						<div class="mt-8">
+							<Button href={featuredEvent.registrationUrl}>
+								Registrarme <ArrowRight class="size-4" aria-hidden="true" />
+							</Button>
+						</div>
 					)
 				}
 			</div>
@@ -91,26 +172,47 @@ const featuredMedia: HomeMediaData = featuredEvent.image && featuredEvent.imageA
 						const showRegistration = canRegisterForEvent(event);
 
 						return (
-							<article class:list={['grid gap-4 py-5 sm:grid-cols-[5rem_minmax(0,1fr)_auto] sm:items-center sm:gap-6 sm:py-6', index > 0 && 'border-t border-white/12']}>
-								<time datetime={event.date} class="flex items-baseline gap-2 sm:block">
-									<span class="font-display text-2xl font-semibold tracking-[-0.04em] text-foreground sm:block">{dateParts.day}</span>
-									<span class="text-[0.65rem] font-bold tracking-[0.16em] text-secondary sm:mt-1 sm:block">{dateParts.monthShort}</span>
+							<article
+								class:list={[
+									'grid gap-4 py-5 sm:grid-cols-[5rem_minmax(0,1fr)_auto] sm:items-center sm:gap-6 sm:py-6',
+									index > 0 && 'border-t border-white/12',
+								]}
+							>
+								<time
+									datetime={event.date}
+									class="flex items-baseline gap-2 sm:block"
+								>
+									<span class="font-display text-foreground text-2xl font-semibold tracking-[-0.04em] sm:block">
+										{dateParts.day}
+									</span>
+									<span class="text-secondary text-[0.65rem] font-bold tracking-[0.16em] sm:mt-1 sm:block">
+										{dateParts.monthShort}
+									</span>
 								</time>
 								<div class="min-w-0">
-									<div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-semibold text-foreground-muted">
+									<div class="text-foreground-muted flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-semibold">
 										<span>{event.category}</span>
-										{statusLabel && <span class="text-white/80">{statusLabel}</span>}
+										{statusLabel && (
+											<span class="text-white/80">{statusLabel}</span>
+										)}
 									</div>
-									<h3 class="mt-1 font-display text-lg font-semibold tracking-[-0.035em] text-foreground">{event.title}</h3>
-									{(timeLabel || event.location) && <p class="mt-2 text-sm leading-6 text-foreground-secondary">{[timeLabel, event.location].filter(Boolean).join(' · ')}</p>}
+									<h3 class="font-display text-foreground mt-1 text-lg font-semibold tracking-[-0.035em]">
+										{event.title}
+									</h3>
+									{(timeLabel || event.location) && (
+										<p class="text-foreground-secondary mt-2 text-sm leading-6">
+											{[timeLabel, event.location].filter(Boolean).join(' · ')}
+										</p>
+									)}
 								</div>
-								{
-									showRegistration && event.registrationUrl && (
-										<a href={event.registrationUrl} class="inline-flex min-h-11 w-fit items-center gap-2 rounded-sm text-sm font-bold text-foreground transition-colors hover:text-white focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-optional-3 motion-reduce:transition-none">
-											Registrarme <ArrowRight class="size-4" aria-hidden="true" />
-										</a>
-									)
-								}
+								{showRegistration && event.registrationUrl && (
+									<a
+										href={event.registrationUrl}
+										class="text-foreground focus-visible:outline-optional-3 inline-flex min-h-11 w-fit items-center gap-2 rounded-sm text-sm font-bold transition-colors hover:text-white focus-visible:outline-3 focus-visible:outline-offset-3 motion-reduce:transition-none"
+									>
+										Registrarme <ArrowRight class="size-4" aria-hidden="true" />
+									</a>
+								)}
 							</article>
 						);
 					})}

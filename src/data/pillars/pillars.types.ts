@@ -8,7 +8,8 @@ export type PillarSlug =
 	| 'excelencia-academica'
 	| 'lead-academia';
 
-export type PillarTone = 'primary' | 'secondary' | 'optional-1' | 'optional-2' | 'optional-3';
+export type PillarTone =
+	'primary' | 'secondary' | 'optional-1' | 'optional-2' | 'optional-3';
 
 export interface PillarInitiative {
 	title: string;

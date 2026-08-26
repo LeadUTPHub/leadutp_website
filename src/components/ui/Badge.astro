@@ -13,6 +13,12 @@ const tones = {
 };
 ---
 
-<span class:list={['inline-flex w-fit items-center rounded-md px-2.5 py-1 text-[0.6875rem] font-bold tracking-[0.08em] uppercase', tones[tone], className]}>
+<span
+	class:list={[
+		'inline-flex w-fit items-center rounded-md px-2.5 py-1 text-[0.6875rem] font-bold tracking-[0.08em] uppercase',
+		tones[tone],
+		className,
+	]}
+>
 	<slot />
 </span>

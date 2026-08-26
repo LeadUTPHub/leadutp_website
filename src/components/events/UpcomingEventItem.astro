@@ -26,46 +26,82 @@ const hasAside = hasImage || showRegistration;
 <article
 	data-upcoming-item
 	class:list={[
-		'group grid grid-cols-[3.5rem_minmax(0,1fr)] gap-x-4 gap-y-4 border-b border-white/10 px-1 py-5 transition-colors duration-200 hover:bg-surface sm:grid-cols-[4rem_minmax(0,1fr)] sm:gap-x-5 sm:px-3 sm:py-6 motion-reduce:transition-none',
+		'group hover:bg-surface grid grid-cols-[3.5rem_minmax(0,1fr)] gap-x-4 gap-y-4 border-b border-white/10 px-1 py-5 transition-colors duration-200 motion-reduce:transition-none sm:grid-cols-[4rem_minmax(0,1fr)] sm:gap-x-5 sm:px-3 sm:py-6',
 		hasAside
 			? 'md:grid-cols-[4rem_minmax(0,1fr)_9rem] lg:grid-cols-[4.5rem_minmax(0,1fr)_10rem] xl:grid-cols-[4.75rem_minmax(0,1fr)_11rem]'
 			: 'md:grid-cols-[4rem_minmax(0,1fr)] lg:grid-cols-[4.5rem_minmax(0,1fr)]',
 	]}
 >
-	<time datetime={event.date} aria-label={formatEventDate(event.date)} class="flex h-fit flex-col items-center border-r border-white/12 pr-4 text-center sm:pr-5">
-		<span aria-hidden="true" class="font-display text-2xl font-semibold leading-none tracking-[-0.05em] text-foreground sm:text-3xl">{dateParts.day}</span>
-		<span aria-hidden="true" class="mt-1 text-[0.68rem] font-bold tracking-[0.16em] text-foreground-secondary">{dateParts.monthShort}</span>
+	<time
+		datetime={event.date}
+		aria-label={formatEventDate(event.date)}
+		class="flex h-fit flex-col items-center border-r border-white/12 pr-4 text-center sm:pr-5"
+	>
+		<span
+			aria-hidden="true"
+			class="font-display text-foreground text-2xl leading-none font-semibold tracking-[-0.05em] sm:text-3xl"
+			>{dateParts.day}</span
+		>
+		<span
+			aria-hidden="true"
+			class="text-foreground-secondary mt-1 text-[0.68rem] font-bold tracking-[0.16em]"
+			>{dateParts.monthShort}</span
+		>
 	</time>
 
 	<div class="min-w-0">
 		<div class="flex flex-wrap items-center gap-x-3 gap-y-1">
-			<p class="text-[0.68rem] font-bold uppercase tracking-[0.15em] text-foreground-muted">{event.category}</p>
+			<p
+				class="text-foreground-muted text-[0.68rem] font-bold tracking-[0.15em] uppercase"
+			>
+				{event.category}
+			</p>
 			{
 				statusLabel && (
-					<span class="inline-flex items-center gap-2 text-[0.68rem] font-bold uppercase tracking-[0.12em] text-white/85">
-						<span class:list={['size-1.5 rounded-full', event.status === 'cancelled' ? 'bg-secondary' : 'bg-optional-3']} aria-hidden="true"></span>
+					<span class="inline-flex items-center gap-2 text-[0.68rem] font-bold tracking-[0.12em] text-white/85 uppercase">
+						<span
+							class:list={[
+								'size-1.5 rounded-full',
+								event.status === 'cancelled' ? 'bg-secondary' : 'bg-optional-3',
+							]}
+							aria-hidden="true"
+						/>
 						{statusLabel}
 					</span>
 				)
 			}
 		</div>
-		<h3 class="mt-2 font-display text-xl font-semibold leading-tight tracking-[-0.04em] text-foreground sm:text-2xl">
+		<h3
+			class="font-display text-foreground mt-2 text-xl leading-tight font-semibold tracking-[-0.04em] sm:text-2xl"
+		>
 			{event.title}
 		</h3>
-		{event.description && <p class="mt-2 max-w-2xl text-sm leading-6 text-foreground-secondary">{event.description}</p>}
+		{
+			event.description && (
+				<p class="text-foreground-secondary mt-2 max-w-2xl text-sm leading-6">
+					{event.description}
+				</p>
+			)
+		}
 
 		{
 			(timeLabel || event.location) && (
-				<div class="mt-4 flex flex-col gap-2 text-sm font-medium text-foreground-secondary sm:flex-row sm:flex-wrap sm:gap-x-5">
+				<div class="text-foreground-secondary mt-4 flex flex-col gap-2 text-sm font-medium sm:flex-row sm:flex-wrap sm:gap-x-5">
 					{timeLabel && (
 						<span class="inline-flex items-center gap-2">
-							<Clock class="size-4 shrink-0 text-secondary" aria-hidden="true" />
+							<Clock
+								class="text-secondary size-4 shrink-0"
+								aria-hidden="true"
+							/>
 							{timeLabel}
 						</span>
 					)}
 					{event.location && (
 						<span class="inline-flex items-center gap-2">
-							<MapPin class="size-4 shrink-0 text-secondary" aria-hidden="true" />
+							<MapPin
+								class="text-secondary size-4 shrink-0"
+								aria-hidden="true"
+							/>
 							{event.location}
 						</span>
 					)}
@@ -78,7 +114,7 @@ const hasAside = hasImage || showRegistration;
 		hasAside && (
 			<div class="col-span-2 flex min-w-0 flex-col gap-3 pl-[4.5rem] sm:pl-[5.25rem] md:col-span-1 md:col-start-3 md:row-start-1 md:pl-0">
 				{hasImage && event.image && event.imageAlt && (
-					<figure class="aspect-[16/10] overflow-hidden rounded-lg border border-white/10 bg-surface">
+					<figure class="bg-surface aspect-[16/10] overflow-hidden rounded-lg border border-white/10">
 						{event.imageIsTemporary ? (
 							<img
 								src={event.image.src}
@@ -103,10 +139,13 @@ const hasAside = hasImage || showRegistration;
 				{showRegistration && event.registrationUrl && (
 					<a
 						href={event.registrationUrl}
-						class="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-md text-sm font-bold text-foreground transition-colors duration-200 hover:text-white focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-optional-3 motion-reduce:transition-none md:justify-end"
+						class="text-foreground focus-visible:outline-optional-3 inline-flex min-h-11 items-center justify-center gap-1.5 rounded-md text-sm font-bold transition-colors duration-200 hover:text-white focus-visible:outline-3 focus-visible:outline-offset-3 motion-reduce:transition-none md:justify-end"
 					>
 						Registrarme
-						<ArrowRight class="size-4 transition-transform duration-200 group-hover:translate-x-1 motion-reduce:transform-none motion-reduce:transition-none" aria-hidden="true" />
+						<ArrowRight
+							class="size-4 transition-transform duration-200 group-hover:translate-x-1 motion-reduce:transform-none motion-reduce:transition-none"
+							aria-hidden="true"
+						/>
 					</a>
 				)}
 			</div>

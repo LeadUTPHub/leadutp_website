@@ -1,0 +1,47 @@
+---
+import type { InternationalExperience } from '../../data/international';
+
+interface Props {
+	experience: InternationalExperience;
+}
+
+const { experience } = Astro.props;
+---
+
+<article>
+	<div class="flex items-baseline gap-3">
+		<p
+			class="text-foreground-secondary text-[0.7rem] font-bold tracking-[0.18em] uppercase"
+		>
+			{experience.country}
+		</p>
+	</div>
+	<h2
+		class="font-display text-foreground mt-2 text-2xl font-semibold tracking-[-0.045em] sm:text-3xl"
+	>
+		{experience.eventName}
+	</h2>
+
+	<div class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+		{
+			experience.photos.map((photo, index) => (
+				<figure
+					class:list={[
+						'bg-surface overflow-hidden rounded-xl border border-white/10',
+						index === 0
+							? 'aspect-[4/3] sm:col-span-2 lg:row-span-2 lg:aspect-auto'
+							: 'aspect-[4/3]',
+					]}
+				>
+					<img
+						src={photo.src}
+						alt={photo.alt}
+						class="h-full w-full object-cover"
+						loading="lazy"
+						decoding="async"
+					/>
+				</figure>
+			))
+		}
+	</div>
+</article>

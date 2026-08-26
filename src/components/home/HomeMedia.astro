@@ -16,12 +16,14 @@ const {
 	loading = 'lazy',
 } = Astro.props;
 
-const hasRealImage = Boolean(media?.image && media.alt && !media.imageIsTemporary);
+const hasRealImage = Boolean(
+	media?.image && media.alt && !media.imageIsTemporary,
+);
 ---
 
 <div
 	class:list={[
-		'relative overflow-hidden rounded-xl border border-white/10 bg-surface',
+		'bg-surface relative overflow-hidden rounded-xl border border-white/10',
 		className,
 	]}
 	aria-hidden={hasRealImage ? undefined : 'true'}
@@ -39,8 +41,8 @@ const hasRealImage = Boolean(media?.image && media.alt && !media.imageIsTemporar
 			/>
 		) : (
 			<div class="absolute inset-0 bg-[linear-gradient(145deg,rgba(255,255,255,0.025),transparent_58%)]">
-				<span class="absolute inset-x-0 top-0 h-px bg-linear-to-r from-secondary/70 via-optional-1/45 to-transparent"></span>
-				<span class="absolute right-7 bottom-7 size-2 rounded-full bg-optional-3/70"></span>
+				<span class="from-secondary/70 via-optional-1/45 absolute inset-x-0 top-0 h-px bg-linear-to-r to-transparent" />
+				<span class="bg-optional-3/70 absolute right-7 bottom-7 size-2 rounded-full" />
 			</div>
 		)
 	}

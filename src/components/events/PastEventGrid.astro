@@ -9,16 +9,18 @@ interface Props {
 	initialCount?: number;
 }
 
-const {
-	events,
-	id = 'past-event-list',
-	initialCount = 3,
-} = Astro.props;
+const { events, id = 'past-event-list', initialCount = 3 } = Astro.props;
 ---
 
 <past-event-grid data-initial-count={initialCount}>
 	<div id={id} class="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
-		{events.map((event) => <div data-past-event-item><PastEventCard event={event} /></div>)}
+		{
+			events.map((event) => (
+				<div data-past-event-item>
+					<PastEventCard event={event} />
+				</div>
+			))
+		}
 	</div>
 
 	{
@@ -30,12 +32,20 @@ const {
 					data-expand-button
 					aria-controls={id}
 					aria-expanded="false"
-					class="inline-flex min-h-11 items-center justify-center gap-2 rounded-md px-4 text-sm font-bold text-foreground transition-colors duration-200 hover:bg-surface hover:text-white focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-optional-3 motion-reduce:transition-none"
+					class="text-foreground hover:bg-surface focus-visible:outline-optional-3 inline-flex min-h-11 items-center justify-center gap-2 rounded-md px-4 text-sm font-bold transition-colors duration-200 hover:text-white focus-visible:outline-3 focus-visible:outline-offset-3 motion-reduce:transition-none"
 				>
 					<span data-expand-label>Ver más eventos</span>
-					<ChevronDown data-expand-icon class="size-4 transition-transform duration-200 motion-reduce:transition-none" aria-hidden="true" />
+					<ChevronDown
+						data-expand-icon
+						class="size-4 transition-transform duration-200 motion-reduce:transition-none"
+						aria-hidden="true"
+					/>
 				</button>
-				<p data-visible-status aria-live="polite" class="text-xs text-foreground-muted">
+				<p
+					data-visible-status
+					aria-live="polite"
+					class="text-foreground-muted text-xs"
+				>
 					{events.length} eventos disponibles
 				</p>
 			</div>
@@ -49,8 +59,12 @@ const {
 			if (this.dataset.ready === 'true') return;
 			this.dataset.ready = 'true';
 
-			const items = Array.from(this.querySelectorAll<HTMLElement>('[data-past-event-item]'));
-			const button = this.querySelector<HTMLButtonElement>('[data-expand-button]');
+			const items = Array.from(
+				this.querySelectorAll<HTMLElement>('[data-past-event-item]'),
+			);
+			const button = this.querySelector<HTMLButtonElement>(
+				'[data-expand-button]',
+			);
 			const label = this.querySelector<HTMLElement>('[data-expand-label]');
 			const icon = this.querySelector<HTMLElement>('[data-expand-icon]');
 			const status = this.querySelector<HTMLElement>('[data-visible-status]');
@@ -62,7 +76,9 @@ const {
 			button.hidden = false;
 
 			const update = () => {
-				const visibleCount = expanded ? items.length : Math.min(initialCount, items.length);
+				const visibleCount = expanded
+					? items.length
+					: Math.min(initialCount, items.length);
 
 				items.forEach((item, index) => {
 					item.hidden = index >= visibleCount;

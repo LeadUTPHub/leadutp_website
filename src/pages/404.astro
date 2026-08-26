@@ -8,19 +8,32 @@ import Layout from '../layouts/Layout.astro';
 	title="Página no encontrada | LEAD UTP"
 	description="La página que buscas no existe o fue movida."
 >
-	<section class="flex flex-1 items-center border-b border-white/8 bg-canvas-navy/35 py-20 sm:py-24 lg:py-28">
+	<section
+		class="bg-canvas-navy/35 flex flex-1 items-center border-b border-white/8 py-20 sm:py-24 lg:py-28"
+	>
 		<Container>
 			<div class="mx-auto max-w-2xl text-center">
-				<p class="font-display text-6xl font-bold tracking-[-0.065em] text-optional-3 sm:text-7xl">404</p>
-				<h1 class="mt-4 font-display text-3xl font-semibold tracking-[-0.05em] text-foreground sm:text-4xl">
+				<p
+					class="font-display text-optional-3 text-6xl font-bold tracking-[-0.065em] sm:text-7xl"
+				>
+					404
+				</p>
+				<h1
+					class="font-display text-foreground mt-4 text-3xl font-semibold tracking-[-0.05em] sm:text-4xl"
+				>
 					No encontramos esta página
 				</h1>
-				<p class="mx-auto mt-4 max-w-xl text-base leading-7 text-foreground-secondary sm:text-lg">
-					Puede que el enlace esté roto o que la página se haya movido. Vuelve al inicio o explora nuestros eventos y pilares.
+				<p
+					class="text-foreground-secondary mx-auto mt-4 max-w-xl text-base leading-7 sm:text-lg"
+				>
+					Puede que el enlace esté roto o que la página se haya movido. Vuelve
+					al inicio o explora nuestros eventos y pilares.
 				</p>
 				<div class="mt-8 flex flex-wrap justify-center gap-3">
 					<Button href="/" size="lg">Volver al inicio</Button>
-					<Button href="/eventos" variant="outline" size="lg">Ver eventos</Button>
+					<Button href="/eventos" variant="outline" size="lg"
+						>Ver eventos</Button
+					>
 				</div>
 			</div>
 		</Container>
