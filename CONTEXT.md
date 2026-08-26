@@ -13,6 +13,8 @@ Sitio web oficial de **LEAD UTP**, construido con [Astro](https://astro.build) +
 - **@lucide/astro** para iconos
 - **@vercel/analytics** y **@vercel/speed-insights** — métricas de uso y performance
 - **@astrojs/sitemap** — sitemap.xml automático
+- **ESLint + Prettier** — `npm run lint`, `npm run format`, `npm run format:check`
+- **Vitest** — `npm test` (o `npm run test:watch`); por ahora solo cubre `src/data/events/events.utils.ts`
 - Deploy en **Vercel** (`https://leadutp.vercel.app`)
 
 ## Estado actual

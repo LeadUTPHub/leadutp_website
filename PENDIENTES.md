@@ -31,21 +31,17 @@ Reemplazar por fotos reales y quitar el flag (se usa para mostrar un aviso visua
 
 Hoy todo el sitio comparte una sola `public/og-image.png` (definida en `Layout.astro`). Las páginas de pilares y eventos individuales podrían tener su propia imagen al compartirse en redes.
 
-### 4. Tests para la lógica de fechas de eventos
-
-`src/data/events/events.utils.ts` tiene funciones como `getUpcomingEvents`, `getPastEvents`, `getFeaturedEvent` que dependen de comparar fechas. No hay ningún test runner en el proyecto — si esta lógica falla silenciosamente, un evento puede aparecer en la sección equivocada sin que nadie lo note. Vale la pena agregar Vitest + un par de casos de prueba ahí.
-
-### 5. Carpeta internacional sin país confirmado
+### 4. Carpeta internacional sin país confirmado
 
 `public/imagestest/internacional_leadutp/16_aI_hackaton_lizbeth/` (AI Hackathon) quedó fuera de `/internacional` porque no se confirmó el país. Cuando se sepa, agregar una entrada en `src/data/international/international.data.ts`.
 
 ## Baja prioridad / decisiones a futuro
 
-### 6. ¿CMS o seguir con archivos `.data.ts`?
+### 5. ¿CMS o seguir con archivos `.data.ts`?
 
 Todo el contenido (pilares, eventos, home, nosotros, proyectos, convocatorias, internacional) vive como datos tipados en `src/data/`, no en un CMS. Funciona bien mientras el equipo sea técnico y los cambios sean poco frecuentes. Si alguien no-dev va a cargar contenido seguido (sobre todo convocatorias, que cambian por temporada), evaluar migrar a un CMS headless.
 
-### 7. Dominio propio
+### 6. Dominio propio
 
 El sitio sigue en `leadutp.vercel.app`. Definir y conectar un dominio propio cuando esté disponible.
 
