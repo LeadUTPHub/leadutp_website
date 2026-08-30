@@ -43,10 +43,13 @@ import Layout from '../layouts/Layout.astro';
 		aria-label="Experiencias internacionales de LEAD UTP"
 	>
 		<Container>
-			<div class="flex flex-col gap-16 sm:gap-20">
+			<div class="flex flex-col gap-16 sm:gap-24 lg:gap-28">
 				{
-					internationalExperiences.map((experience) => (
-						<InternationalExperienceCard experience={experience} />
+					internationalExperiences.map((experience, index) => (
+						<InternationalExperienceCard
+							experience={experience}
+							index={index}
+						/>
 					))
 				}
 			</div>
