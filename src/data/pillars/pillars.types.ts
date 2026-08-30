@@ -40,6 +40,8 @@ export interface Pillar {
 	intro: string;
 	description: string;
 	tone: PillarTone;
+	/** Ícono monocromo del pilar (línea blanca sobre fondo transparente). */
+	icon?: ImageMetadata;
 	image?: ImageMetadata;
 	imageAlt?: string;
 	imageIsTemporary?: boolean;

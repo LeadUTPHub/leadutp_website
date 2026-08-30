@@ -29,6 +29,7 @@ const restColsClass =
 				class="from-secondary to-optional-1 inline-block bg-linear-to-r bg-clip-text text-transparent"
 				>N.º {plate}</span
 			>
+			<span class="text-foreground-muted">· {experience.continent}</span>
 		</p>
 		<p
 			class="text-foreground-secondary text-[0.72rem] font-semibold tracking-[0.16em] uppercase"
@@ -37,39 +38,44 @@ const restColsClass =
 			<span class="text-foreground-muted">· {photoLabel}</span>
 		</p>
 		<h2
-			class="font-display text-foreground mt-3 w-full text-4xl leading-[0.95] font-bold tracking-[-0.055em] sm:text-5xl lg:text-6xl"
+			class="font-display text-foreground mt-3 flex w-full items-center gap-3 text-4xl leading-[0.95] font-bold tracking-[-0.055em] sm:text-5xl lg:text-6xl"
 		>
+			<span aria-hidden="true" class="text-3xl sm:text-4xl lg:text-5xl"
+				>{experience.flag}</span
+			>
 			{experience.country}
 		</h2>
 	</header>
 
-	<figure
-		class="group bg-surface-raised mt-6 aspect-[16/10] overflow-hidden rounded-lg ring-1 ring-white/8 ring-inset sm:mt-8 lg:aspect-[64/27]"
-	>
-		<img
-			src={lead.src}
-			alt={lead.alt}
-			class="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03] motion-reduce:transition-none"
-			loading="lazy"
-			decoding="async"
-		/>
-	</figure>
+	<div class="mt-6 max-w-5xl sm:mt-8">
+		<figure
+			class="group bg-surface-raised aspect-[16/10] overflow-hidden rounded-lg ring-1 ring-white/8 ring-inset lg:aspect-[5/2]"
+		>
+			<img
+				src={lead.src}
+				alt={lead.alt}
+				class="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03] motion-reduce:transition-none"
+				loading="lazy"
+				decoding="async"
+			/>
+		</figure>
 
-	{
-		rest.length > 0 && (
-			<div class:list={['mt-2 grid grid-cols-2 gap-2', restColsClass]}>
-				{rest.map((photo) => (
-					<figure class="group bg-surface-raised aspect-[4/3] overflow-hidden rounded-lg ring-1 ring-white/8 ring-inset">
-						<img
-							src={photo.src}
-							alt={photo.alt}
-							class="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03] motion-reduce:transition-none"
-							loading="lazy"
-							decoding="async"
-						/>
-					</figure>
-				))}
-			</div>
-		)
-	}
+		{
+			rest.length > 0 && (
+				<div class:list={['mt-2 grid grid-cols-2 gap-2', restColsClass]}>
+					{rest.map((photo) => (
+						<figure class="group bg-surface-raised aspect-[4/3] overflow-hidden rounded-lg ring-1 ring-white/8 ring-inset">
+							<img
+								src={photo.src}
+								alt={photo.alt}
+								class="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03] motion-reduce:transition-none"
+								loading="lazy"
+								decoding="async"
+							/>
+						</figure>
+					))}
+				</div>
+			)
+		}
+	</div>
 </article>

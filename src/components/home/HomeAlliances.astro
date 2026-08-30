@@ -42,14 +42,14 @@ const { alliances } = Astro.props;
 			>
 				{
 					alliances.map((alliance) => (
-						<li class="bg-surface flex min-h-24 items-center justify-center rounded-lg border border-white/10 px-5 py-4 text-center">
+						<li class="bg-surface hover:bg-surface-raised flex min-h-28 items-center justify-center rounded-lg border border-white/10 p-6 text-center transition-colors">
 							{alliance.logo &&
 							alliance.logoAlt &&
 							!alliance.logoIsTemporary ? (
 								<Image
 									src={alliance.logo}
 									alt={alliance.logoAlt}
-									class="max-h-12 w-auto max-w-full object-contain"
+									class="max-h-16 w-auto max-w-full object-contain opacity-90"
 									widths={[160, 240, 320]}
 									sizes="240px"
 								/>
