@@ -17,6 +17,12 @@ export interface HomeCommunityMoment {
 	media: HomeMedia;
 }
 
+export interface HomeHeroSlide {
+	/** Ruta pública de la imagen (carpeta /public). */
+	src: string;
+	alt: string;
+}
+
 interface HomeAllianceBase {
 	name: string;
 	href?: string;

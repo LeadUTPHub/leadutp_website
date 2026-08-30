@@ -11,11 +11,40 @@ import presentacionGrupal from '../../assets/home/presentacion-grupal.webp';
 import type {
 	HomeAlliance,
 	HomeCommunityMoment,
+	HomeHeroSlide,
 	HomeMedia,
 } from './home.types';
 
 // TODO: Reemplazar este marco por una fotografía real del hero.
 export const homeHeroMedia = {} satisfies HomeMedia;
+
+// Fotos grupales para el carrusel de portada (se pueden reemplazar por un set curado).
+export const homeHeroSlides = [
+	{
+		src: '/imagestest/2026/8_lead_talent_showcase/grupal-1.webp',
+		alt: 'Comunidad LEAD UTP reunida en LEAD Talent Showcase',
+	},
+	{
+		src: '/imagestest/2026/9_talent_room_01/grupal-1.webp',
+		alt: 'Comunidad LEAD UTP en Talent Room',
+	},
+	{
+		src: '/imagestest/2026/10_integracion_hugotech/grupal-1.webp',
+		alt: 'Comunidad LEAD UTP en la integración con HugoTech',
+	},
+	{
+		src: '/imagestest/2025/6_lead_gala/grupal-1.webp',
+		alt: 'Comunidad LEAD UTP en LEAD Gala',
+	},
+	{
+		src: '/imagestest/2025/2_discovery-day-2025/grupal-1.webp',
+		alt: 'Comunidad LEAD UTP en Discovery Day 2025',
+	},
+	{
+		src: '/imagestest/2025/1_evento-presentacion-leadutp/grupal-1.webp',
+		alt: 'Comunidad LEAD UTP en su evento de presentación',
+	},
+] satisfies HomeHeroSlide[];
 
 export const homeCommunityMoments = [
 	{

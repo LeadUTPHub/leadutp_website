@@ -13,6 +13,7 @@ import {
 	homeAlliances,
 	homeCommunityMoments,
 	homeHeroMedia,
+	homeHeroSlides,
 } from '../data/home';
 import { getPillarBySlug, pillars } from '../data/pillars';
 import Layout from '../layouts/Layout.astro';
@@ -33,7 +34,7 @@ const leadAcademia = getPillarBySlug(pillars, 'lead-academia');
 	title="LEAD UTP | Comunidad, liderazgo y tecnología"
 	description="Conoce LEAD UTP, una comunidad de estudiantes que impulsa liderazgo, tecnología, desarrollo profesional y nuevas oportunidades dentro de la Universidad Tecnológica del Perú."
 >
-	<HomeHero media={homeHeroMedia} />
+	<HomeHero media={homeHeroMedia} slides={homeHeroSlides} />
 	<HomeWays />
 	{
 		featuredEvent && (

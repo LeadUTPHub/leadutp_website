@@ -1,15 +1,21 @@
 ---
 import { ArrowRight } from '@lucide/astro';
-import type { HomeMedia as HomeMediaData } from '../../data/home';
+import type {
+	HomeHeroSlide,
+	HomeMedia as HomeMediaData,
+} from '../../data/home';
 import Button from '../ui/Button.astro';
 import Container from '../ui/Container.astro';
+import HomeHeroCarousel from './HomeHeroCarousel.astro';
 import HomeMedia from './HomeMedia.astro';
 
 interface Props {
 	media: HomeMediaData;
+	slides?: HomeHeroSlide[];
 }
 
-const { media } = Astro.props;
+const { media, slides = [] } = Astro.props;
+const mediaClass = 'aspect-[4/3] sm:aspect-[16/10] lg:aspect-[4/5] xl:aspect-[5/4]';
 ---
 
 <section
@@ -53,12 +59,18 @@ const { media } = Astro.props;
 				</div>
 			</header>
 
-			<HomeMedia
-				media={media}
-				class="aspect-[4/3] sm:aspect-[16/10] lg:aspect-[4/5] xl:aspect-[5/4]"
-				sizes="(min-width: 1024px) 42vw, 100vw"
-				loading="eager"
-			/>
+			{
+				slides.length > 0 ? (
+					<HomeHeroCarousel slides={slides} class={mediaClass} />
+				) : (
+					<HomeMedia
+						media={media}
+						class={mediaClass}
+						sizes="(min-width: 1024px) 42vw, 100vw"
+						loading="eager"
+					/>
+				)
+			}
 		</div>
 	</Container>
 </section>
