@@ -8,60 +8,139 @@ interface Props {
 }
 
 const { alliances } = Astro.props;
+
+// Se duplica la lista para lograr un bucle continuo sin cortes.
+const marqueeItems = [...alliances, ...alliances];
 ---
 
 <section
-	class="bg-canvas-navy/25 border-y border-white/8 py-14 sm:py-16 lg:py-18"
+	class="bg-canvas-navy/25 hairline-y py-14 sm:py-16 lg:py-18"
 	aria-labelledby="alliances-title"
 >
 	<Container>
-		<div
-			class="grid gap-8 lg:grid-cols-[0.72fr_1.28fr] lg:items-center lg:gap-16"
-		>
-			<div>
-				<p
-					class="text-secondary text-[0.7rem] font-bold tracking-[0.18em] uppercase"
-				>
-					Con quiénes colaboramos
-				</p>
-				<h2
-					id="alliances-title"
-					class="font-display text-foreground mt-3 text-3xl font-semibold tracking-[-0.05em] sm:text-4xl"
-				>
-					Nuestras alianzas
-				</h2>
-				<p class="text-foreground-secondary mt-3 max-w-xl text-sm leading-6">
-					Crecemos junto a organizaciones que conectan a nuestra comunidad con
-					nuevas experiencias y oportunidades.
-				</p>
-			</div>
-
-			<ul
-				class="grid grid-cols-2 gap-3 sm:grid-cols-3"
-				aria-label="Organizaciones aliadas de LEAD UTP"
+		<div class="max-w-xl">
+			<p
+				class="text-secondary text-[0.7rem] font-bold tracking-[0.18em] uppercase"
 			>
-				{
-					alliances.map((alliance) => (
-						<li class="bg-surface hover:bg-surface-raised flex min-h-28 items-center justify-center rounded-lg border border-white/10 p-6 text-center transition-colors">
-							{alliance.logo &&
-							alliance.logoAlt &&
-							!alliance.logoIsTemporary ? (
-								<Image
-									src={alliance.logo}
-									alt={alliance.logoAlt}
-									class="max-h-16 w-auto max-w-full object-contain opacity-90"
-									widths={[160, 240, 320]}
-									sizes="240px"
-								/>
-							) : (
-								<span class="font-display text-lg font-semibold tracking-[0.08em] text-white/82 uppercase">
-									{alliance.name}
-								</span>
-							)}
-						</li>
-					))
-				}
-			</ul>
+				Con quiénes colaboramos
+			</p>
+			<h2
+				id="alliances-title"
+				class="font-display text-foreground mt-3 text-3xl font-semibold tracking-[-0.05em] sm:text-4xl"
+			>
+				Nuestras alianzas
+			</h2>
+			<p class="text-foreground-secondary mt-3 text-sm leading-6">
+				Crecemos junto a organizaciones que conectan a nuestra comunidad con
+				nuevas experiencias y oportunidades.
+			</p>
 		</div>
 	</Container>
+
+	<div
+		class="alliance-marquee mt-10 sm:mt-12"
+		role="region"
+		aria-label="Organizaciones aliadas de LEAD UTP"
+	>
+		<ul class="alliance-marquee__track">
+			{
+				marqueeItems.map((alliance, index) => (
+					<li
+						class="alliance-marquee__item"
+						aria-hidden={index >= alliances.length ? 'true' : undefined}
+					>
+						{alliance.logo &&
+						alliance.logoAlt &&
+						!alliance.logoIsTemporary ? (
+							<Image
+								src={alliance.logo}
+								alt={index >= alliances.length ? '' : alliance.logoAlt}
+								class="max-h-12 w-auto max-w-[150px] object-contain opacity-80 transition-opacity hover:opacity-100"
+								widths={[150, 240, 320]}
+								sizes="240px"
+							/>
+						) : (
+							<span class="font-display text-lg font-semibold tracking-[0.08em] text-white/82 uppercase">
+								{alliance.name}
+							</span>
+						)}
+					</li>
+				))
+			}
+		</ul>
+	</div>
 </section>
+
+<style>
+	.alliance-marquee {
+		overflow: hidden;
+		-webkit-mask-image: linear-gradient(
+			to right,
+			transparent,
+			#000 7%,
+			#000 93%,
+			transparent
+		);
+		mask-image: linear-gradient(
+			to right,
+			transparent,
+			#000 7%,
+			#000 93%,
+			transparent
+		);
+	}
+
+	.alliance-marquee__track {
+		display: flex;
+		width: max-content;
+		align-items: center;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		animation: alliance-scroll 34s linear infinite;
+	}
+
+	.alliance-marquee:hover .alliance-marquee__track,
+	.alliance-marquee:focus-within .alliance-marquee__track {
+		animation-play-state: paused;
+	}
+
+	.alliance-marquee__item {
+		display: flex;
+		flex: none;
+		align-items: center;
+		justify-content: center;
+		min-height: 3.5rem;
+		padding-inline: 1.75rem;
+	}
+
+	@keyframes alliance-scroll {
+		from {
+			transform: translateX(0);
+		}
+		to {
+			transform: translateX(-50%);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.alliance-marquee {
+			-webkit-mask-image: none;
+			mask-image: none;
+		}
+
+		.alliance-marquee__track {
+			width: auto;
+			max-width: 72rem;
+			margin-inline: auto;
+			flex-wrap: wrap;
+			justify-content: center;
+			row-gap: 1.5rem;
+			animation: none;
+		}
+
+		.alliance-marquee__item[aria-hidden='true'] {
+			display: none;
+		}
+	}
+</style>

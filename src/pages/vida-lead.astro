@@ -3,6 +3,16 @@ import LifeEventCard from '../components/life/LifeEventCard.astro';
 import Container from '../components/ui/Container.astro';
 import { lifeEvents } from '../data/life';
 import Layout from '../layouts/Layout.astro';
+
+// Solo los eventos más recientes, con un máximo de 5 fotos cada uno
+// (una grande + 3 o 4 pequeñas debajo).
+const MAX_EVENTS = 4;
+const MAX_PHOTOS = 5;
+
+const recentEvents = lifeEvents.slice(0, MAX_EVENTS).map((event) => ({
+	...event,
+	photos: event.photos.slice(0, MAX_PHOTOS),
+}));
 ---
 
 <Layout
@@ -10,12 +20,12 @@ import Layout from '../layouts/Layout.astro';
 	description="Así se vive la comunidad LEAD UTP: los eventos, dinámicas y momentos que compartimos."
 >
 	<section
-		class="bg-canvas-navy/35 border-b border-white/8 py-13 sm:py-16 lg:py-18"
+		class="bg-canvas-navy/35 hairline-b py-13 sm:py-16 lg:py-18"
 	>
 		<Container>
 			<header class="max-w-3xl">
 				<p
-					class="text-foreground-secondary text-[0.7rem] font-bold tracking-[0.18em] uppercase"
+					class="text-secondary text-[0.7rem] font-bold tracking-[0.18em] uppercase"
 				>
 					Comunidad LEAD
 				</p>
@@ -23,7 +33,7 @@ import Layout from '../layouts/Layout.astro';
 					class="font-display text-foreground mt-4 text-4xl font-bold tracking-[-0.065em] sm:text-5xl lg:text-6xl"
 				>
 					Vida <span
-						class="from-secondary to-optional-1 inline-block bg-linear-to-r bg-clip-text pr-2 text-transparent"
+						class="text-secondary"
 						>LEAD UTP</span
 					>
 				</h1>
@@ -44,9 +54,9 @@ import Layout from '../layouts/Layout.astro';
 		<Container>
 			<div class="flex flex-col gap-16 sm:gap-24 lg:gap-28">
 				{
-					lifeEvents.map((event, index) => {
+					recentEvents.map((event, index) => {
 						const showYear =
-							index === 0 || lifeEvents[index - 1].year !== event.year;
+							index === 0 || recentEvents[index - 1].year !== event.year;
 						return (
 							<>
 								{showYear && (

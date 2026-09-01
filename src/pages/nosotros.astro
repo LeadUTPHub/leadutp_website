@@ -1,69 +1,149 @@
 ---
-import { about } from '../data/about';
+import { Lightbulb, Star, Target, Users } from '@lucide/astro';
 import Container from '../components/ui/Container.astro';
+import { about } from '../data/about';
 import Layout from '../layouts/Layout.astro';
+
+const valueIcons = {
+	target: Target,
+	lightbulb: Lightbulb,
+	users: Users,
+	star: Star,
+};
 ---
 
 <Layout
 	title="Sobre nosotros | LEAD UTP"
-	description="Conoce la misión, la visión, la historia y el equipo de LEAD UTP."
+	description="Conoce la misión, la visión y los valores de la comunidad LEAD UTP."
 >
-	<section
-		class="bg-canvas-navy/35 border-b border-white/8 py-13 sm:py-16 lg:py-18"
-	>
+	<section class="glow-heading hairline-b py-16 sm:py-20 lg:py-24">
 		<Container>
-			<header class="max-w-3xl">
-				<p
-					class="text-foreground-secondary text-[0.7rem] font-bold tracking-[0.18em] uppercase"
-				>
-					Comunidad LEAD
-				</p>
+			<div class="mx-auto max-w-2xl text-center">
 				<h1
-					class="font-display text-foreground mt-4 text-4xl font-bold tracking-[-0.065em] sm:text-5xl lg:text-6xl"
+					class="font-display text-foreground text-4xl font-bold tracking-[-0.065em] sm:text-5xl lg:text-6xl"
 				>
-					Sobre <span
-						class="from-secondary to-optional-1 inline-block bg-linear-to-r bg-clip-text pr-2 text-transparent"
-						>nosotros</span
-					>
+					Sobre <span class="text-secondary">Nosotros</span>
 				</h1>
-			</header>
-		</Container>
-	</section>
-
-	<section class="py-16 sm:py-20 lg:py-24" aria-labelledby="mission-title">
-		<Container>
-			<div class="grid gap-10 sm:grid-cols-2 lg:gap-16">
-				<div>
-					<p
-						class="text-foreground-secondary text-[0.7rem] font-bold tracking-[0.18em] uppercase"
-					>
-						Misión
-					</p>
-					<p
-						id="mission-title"
-						class="text-foreground mt-3 max-w-lg text-lg leading-8 sm:text-xl sm:leading-9"
-					>
-						{about.mission}
-					</p>
-				</div>
-				<div>
-					<p
-						class="text-foreground-secondary text-[0.7rem] font-bold tracking-[0.18em] uppercase"
-					>
-						Visión
-					</p>
-					<p
-						class="text-foreground mt-3 max-w-lg text-lg leading-8 sm:text-xl sm:leading-9"
-					>
-						{about.vision}
-					</p>
-				</div>
+				<p
+					class="text-foreground-secondary mx-auto mt-5 max-w-xl text-base leading-7 sm:text-lg sm:leading-8"
+				>
+					{about.intro}
+				</p>
 			</div>
 		</Container>
 	</section>
 
 	<section
-		class="bg-surface border-y border-white/8 py-16 sm:py-20"
+		class="glow-heading py-16 sm:py-20 lg:py-24"
+		aria-labelledby="acronym-title"
+	>
+		<Container>
+			<h2
+				id="acronym-title"
+				class="font-display text-foreground text-center text-3xl font-semibold tracking-[-0.05em] sm:text-4xl"
+			>
+				¿Qué significa LEAD?
+			</h2>
+			<ul
+				class="mx-auto mt-10 grid max-w-3xl grid-cols-4 gap-x-3 gap-y-8 sm:mt-14 sm:gap-x-8"
+			>
+				{
+					about.acronym.map((entry) => (
+						<li class="text-center">
+							<p class="font-display text-optional-3 text-5xl leading-none font-bold sm:text-7xl lg:text-8xl">
+								{entry.letter}
+							</p>
+							<p class="text-foreground mt-4 text-sm font-bold tracking-[0.04em] sm:text-base">
+								{entry.word}
+							</p>
+							<p class="text-foreground-muted mt-1 text-xs sm:text-sm">
+								{entry.translation}
+							</p>
+						</li>
+					))
+				}
+			</ul>
+		</Container>
+	</section>
+
+	<section class="pb-16 sm:pb-20 lg:pb-24" aria-labelledby="mv-title">
+		<Container>
+			<h2 id="mv-title" class="sr-only">Misión y visión</h2>
+			<div class="mx-auto grid max-w-4xl gap-6 sm:grid-cols-2">
+				<article
+					class="card-lift from-canvas-navy/70 rounded-2xl border border-white/10 bg-linear-to-b to-white/[0.02] p-8 text-center sm:p-9"
+				>
+					<h3
+						class="font-display text-foreground text-2xl font-bold tracking-[-0.04em]"
+					>
+						Nuestra Misión
+					</h3>
+					<p class="text-foreground-secondary mt-4 text-sm leading-7">
+						{about.mission}
+					</p>
+				</article>
+				<article
+					class="card-lift from-optional-1/18 rounded-2xl border border-white/10 bg-linear-to-b to-white/[0.02] p-8 text-center sm:p-9"
+				>
+					<h3
+						class="font-display text-foreground text-2xl font-bold tracking-[-0.04em]"
+					>
+						Nuestra Visión
+					</h3>
+					<p class="text-foreground-secondary mt-4 text-sm leading-7">
+						{about.vision}
+					</p>
+				</article>
+			</div>
+		</Container>
+	</section>
+
+	<section
+		class="hairline-t py-16 sm:py-20 lg:py-24"
+		aria-labelledby="values-title"
+	>
+		<Container>
+			<div class="text-center">
+				<h2
+					id="values-title"
+					class="font-display text-foreground text-3xl font-semibold tracking-[-0.05em] sm:text-4xl"
+				>
+					Nuestros Valores
+				</h2>
+				<p class="text-foreground-muted mt-3 text-sm sm:text-base">
+					Los principios que guían nuestras acciones
+				</p>
+			</div>
+			<ul
+				class="mx-auto mt-10 grid max-w-5xl gap-4 sm:mt-14 sm:grid-cols-2 lg:grid-cols-4"
+			>
+				{
+					about.values.map((value) => {
+						const Icon = valueIcons[value.icon];
+						return (
+							<li class="card-lift border-white/10 bg-surface-raised/40 rounded-2xl border p-6 text-center">
+								<span
+									class="bg-optional-3/15 text-optional-3 mx-auto inline-flex size-12 items-center justify-center rounded-xl"
+									aria-hidden="true"
+								>
+									<Icon class="size-6" />
+								</span>
+								<h3 class="font-display text-foreground mt-4 text-base font-bold tracking-[-0.03em]">
+									{value.title}
+								</h3>
+								<p class="text-foreground-secondary mt-2 text-xs leading-6">
+									{value.description}
+								</p>
+							</li>
+						);
+					})
+				}
+			</ul>
+		</Container>
+	</section>
+
+	<section
+		class="bg-surface hairline-t py-16 sm:py-20"
 		aria-labelledby="history-title"
 	>
 		<Container>
@@ -72,7 +152,7 @@ import Layout from '../layouts/Layout.astro';
 			>
 				<div>
 					<p
-						class="text-foreground-secondary text-[0.7rem] font-bold tracking-[0.18em] uppercase"
+						class="text-secondary text-[0.7rem] font-bold tracking-[0.18em] uppercase"
 					>
 						Historia
 					</p>

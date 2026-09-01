@@ -35,6 +35,7 @@ const leadAcademia = getPillarBySlug(pillars, 'lead-academia');
 	description="Conoce LEAD UTP, una comunidad de estudiantes que impulsa liderazgo, tecnología, desarrollo profesional y nuevas oportunidades dentro de la Universidad Tecnológica del Perú."
 >
 	<HomeHero media={homeHeroMedia} slides={homeHeroSlides} />
+	<HomeAlliances alliances={homeAlliances} />
 	<HomeWays />
 	{
 		featuredEvent && (
@@ -47,7 +48,6 @@ const leadAcademia = getPillarBySlug(pillars, 'lead-academia');
 	<HomePillars pillars={pillars} />
 	{leadAcademia && <HomeInitiative initiative={leadAcademia} />}
 	<HomeLife moments={homeCommunityMoments} />
-	<HomeAlliances alliances={homeAlliances} />
 	<HomeNetwork />
 	<HomeRecruitment />
 </Layout>

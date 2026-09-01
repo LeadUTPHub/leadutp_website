@@ -21,8 +21,76 @@
 	--color-surface-raised: rgb(255 255 255 / 0.075);
 	--color-border-subtle: rgb(255 255 255 / 0.1);
 	--color-foreground: #ffffff;
-	--color-foreground-secondary: rgb(255 255 255 / 0.72);
-	--color-foreground-muted: rgb(255 255 255 / 0.5);
+	--color-foreground-secondary: rgb(255 255 255 / 0.8);
+	--color-foreground-muted: rgb(255 255 255 / 0.52);
+}
+
+/* Línea divisoria de 1px que se desvanece en los extremos, para separar
+   secciones sin el efecto de "cajas apiladas" de un borde plano. */
+@utility hairline-b {
+	border-bottom: 1px solid transparent;
+	border-image: linear-gradient(
+			to right,
+			transparent,
+			rgb(255 255 255 / 0.14),
+			transparent
+		)
+		1;
+}
+
+@utility hairline-t {
+	border-top: 1px solid transparent;
+	border-image: linear-gradient(
+			to right,
+			transparent,
+			rgb(255 255 255 / 0.14),
+			transparent
+		)
+		1;
+}
+
+@utility hairline-y {
+	border-top: 1px solid transparent;
+	border-bottom: 1px solid transparent;
+	border-image: linear-gradient(
+			to right,
+			transparent,
+			rgb(255 255 255 / 0.14),
+			transparent
+		)
+		1;
+}
+
+/* Resplandor sutil detrás del encabezado de una sección. */
+@utility glow-heading {
+	background-image: radial-gradient(
+		44rem 24rem at 50% -3rem,
+		rgb(120 86 238 / 0.1),
+		transparent 72%
+	);
+}
+
+/* Hover unificado para superficies tipo tarjeta. */
+.card-lift {
+	transition:
+		border-color 0.2s ease,
+		background-color 0.2s ease,
+		transform 0.2s ease;
+}
+
+.card-lift:hover {
+	border-color: rgb(255 255 255 / 0.25);
+	transform: translateY(-2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.card-lift {
+		transition: none;
+	}
+
+	.card-lift:hover {
+		transform: none;
+	}
 }
 
 :root {
