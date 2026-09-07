@@ -6,6 +6,8 @@ export const internationalExperiences: InternationalExperience[] = [
 	{
 		slug: 'uruguay-waveuy',
 		country: 'Uruguay',
+		flag: '🇺🇾',
+		continent: 'Sudamérica',
 		eventName: 'WaveUY',
 		photos: [
 			{
@@ -29,6 +31,8 @@ export const internationalExperiences: InternationalExperience[] = [
 	{
 		slug: 'china-sias',
 		country: 'China',
+		flag: '🇨🇳',
+		continent: 'Asia',
 		eventName: 'SIAS',
 		photos: [
 			{
@@ -52,6 +56,8 @@ export const internationalExperiences: InternationalExperience[] = [
 	{
 		slug: 'suiza-start-hack',
 		country: 'Suiza',
+		flag: '🇨🇭',
+		continent: 'Europa',
 		eventName: 'Start Hack',
 		photos: [
 			{
@@ -79,6 +85,8 @@ export const internationalExperiences: InternationalExperience[] = [
 	{
 		slug: 'francia-raise-summit',
 		country: 'Francia',
+		flag: '🇫🇷',
+		continent: 'Europa',
 		eventName: 'Raise Summit Hackathon',
 		photos: [
 			{

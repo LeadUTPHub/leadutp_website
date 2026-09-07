@@ -1,3 +1,9 @@
+import iconDesarrolloCapitulo from '../../assets/pillars/icon-desarrollo-del-capitulo.png';
+import iconDesarrolloProfesional from '../../assets/pillars/icon-desarrollo-profesional.png';
+import iconExcelenciaAcademica from '../../assets/pillars/icon-excelencia-academica.png';
+import iconExcelenciaFemenina from '../../assets/pillars/icon-excelencia-femenina.png';
+import iconLeadAcademia from '../../assets/pillars/icon-lead-academia.png';
+import iconLiderazgo from '../../assets/pillars/icon-liderazgo.png';
 import pillarPlaceholder from '../../assets/pillars/pillar-placeholder.svg';
 import type { Pillar } from './pillars.types';
 
@@ -12,6 +18,7 @@ export const pillars = [
 		description:
 			'Este pilar complementa la formación técnica con competencias humanas que ayudan a convertir el conocimiento en impacto. Buscamos que cada miembro reconozca sus fortalezas, tome mejores decisiones y construya una trayectoria profesional con propósito.',
 		tone: 'secondary',
+		icon: iconDesarrolloProfesional,
 		image: pillarPlaceholder,
 		imageAlt: '',
 		imageIsTemporary: true,
@@ -43,6 +50,7 @@ export const pillars = [
 		description:
 			'Liderar dentro de LEAD significa movilizar personas e ideas hacia un propósito común. Este pilar busca desarrollar la capacidad de escuchar, tomar decisiones, asumir responsabilidades y generar confianza dentro y fuera de la comunidad.',
 		tone: 'optional-3',
+		icon: iconLiderazgo,
 		image: pillarPlaceholder,
 		imageAlt: '',
 		imageIsTemporary: true,
@@ -74,6 +82,7 @@ export const pillars = [
 		description:
 			'Este pilar reconoce las barreras que todavía limitan la participación femenina en ciencia y tecnología. Desde LEAD promovemos referentes, redes de apoyo y oportunidades que fortalezcan una comunidad más equitativa y representativa.',
 		tone: 'optional-1',
+		icon: iconExcelenciaFemenina,
 		image: pillarPlaceholder,
 		imageAlt: '',
 		imageIsTemporary: true,
@@ -105,6 +114,7 @@ export const pillars = [
 		description:
 			'El impacto externo de LEAD depende de una comunidad interna organizada, cercana y capaz de aprender de su propio trabajo. Este pilar cuida la integración, la coordinación y la evolución continua de quienes hacen posible cada iniciativa.',
 		tone: 'optional-2',
+		icon: iconDesarrolloCapitulo,
 		image: pillarPlaceholder,
 		imageAlt: '',
 		imageIsTemporary: true,
@@ -136,6 +146,7 @@ export const pillars = [
 		description:
 			'La excelencia académica combina curiosidad, disciplina y colaboración. Este pilar busca que los estudiantes conecten los fundamentos STEM con la práctica, compartan lo que aprenden y encuentren nuevas rutas para seguir creciendo.',
 		tone: 'secondary',
+		icon: iconExcelenciaAcademica,
 		image: pillarPlaceholder,
 		imageAlt: '',
 		imageIsTemporary: true,
@@ -167,6 +178,7 @@ export const pillars = [
 		description:
 			'LEAD Academia extiende el propósito de la comunidad más allá de la universidad. Este pilar busca despertar curiosidad por STEM, acercar referentes y mostrar que la tecnología puede convertirse en una herramienta para aprender, crear y transformar el entorno.',
 		tone: 'optional-3',
+		icon: iconLeadAcademia,
 		image: pillarPlaceholder,
 		imageAlt: '',
 		imageIsTemporary: true,

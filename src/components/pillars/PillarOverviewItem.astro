@@ -1,4 +1,5 @@
 ---
+import { Image } from 'astro:assets';
 import { ArrowRight } from '@lucide/astro';
 import type { Pillar } from '../../data/pillars';
 import PillarVisual from './PillarVisual.astro';
@@ -25,7 +26,7 @@ const toneClasses = {
 <article class="h-full py-9 sm:py-10 md:py-12 lg:py-14">
 	<div class="flex h-full max-w-xl flex-col">
 		<figure
-			class="bg-surface aspect-[16/9] overflow-hidden rounded-lg border border-white/10 sm:aspect-[16/8]"
+			class="bg-surface relative aspect-[16/9] overflow-hidden rounded-lg border border-white/10 sm:aspect-[16/8]"
 			aria-hidden={hasOverviewImage ? undefined : 'true'}
 		>
 			{
@@ -38,6 +39,28 @@ const toneClasses = {
 						sizes="(min-width: 768px) 50vw, 100vw"
 					/>
 				)
+			}
+			{
+				pillar.icon &&
+					(hasOverviewImage ? (
+						<span class="absolute bottom-3 left-3 inline-flex size-11 items-center justify-center rounded-lg border border-white/15 bg-black/45 backdrop-blur-sm">
+							<Image
+								src={pillar.icon}
+								alt=""
+								class="size-6 w-auto opacity-95"
+								widths={[48, 96]}
+								sizes="24px"
+							/>
+						</span>
+					) : (
+						<Image
+							src={pillar.icon}
+							alt=""
+							class="absolute top-1/2 left-1/2 size-16 w-auto -translate-x-1/2 -translate-y-1/2 opacity-25"
+							widths={[64, 128]}
+							sizes="64px"
+						/>
+					))
 			}
 		</figure>
 		<div class="mt-6 flex items-center gap-3">

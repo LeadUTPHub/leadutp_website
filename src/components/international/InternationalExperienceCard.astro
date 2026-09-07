@@ -3,45 +3,55 @@ import type { InternationalExperience } from '../../data/international';
 
 interface Props {
 	experience: InternationalExperience;
+	index: number;
+	total: number;
 }
 
-const { experience } = Astro.props;
+const { experience, index, total } = Astro.props;
+
+const frame = String(index + 1).padStart(2, '0');
+const totalLabel = String(total).padStart(2, '0');
+const count = experience.photos.length;
+const photoLabel = `${count} ${count === 1 ? 'foto' : 'fotos'}`;
+
+const [cover] = experience.photos;
 ---
 
-<article>
-	<div class="flex items-baseline gap-3">
-		<p
-			class="text-foreground-secondary text-[0.7rem] font-bold tracking-[0.18em] uppercase"
-		>
-			{experience.country}
-		</p>
-	</div>
-	<h2
-		class="font-display text-foreground mt-2 text-2xl font-semibold tracking-[-0.045em] sm:text-3xl"
+<figure class="group">
+	<div
+		class="bg-surface-raised relative aspect-[16/10] overflow-hidden rounded-lg ring-1 ring-white/8 ring-inset lg:aspect-[5/2]"
 	>
-		{experience.eventName}
-	</h2>
-
-	<div class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-		{
-			experience.photos.map((photo, index) => (
-				<figure
-					class:list={[
-						'bg-surface overflow-hidden rounded-xl border border-white/10',
-						index === 0
-							? 'aspect-[4/3] sm:col-span-2 lg:row-span-2 lg:aspect-auto'
-							: 'aspect-[4/3]',
-					]}
-				>
-					<img
-						src={photo.src}
-						alt={photo.alt}
-						class="h-full w-full object-cover"
-						loading="lazy"
-						decoding="async"
-					/>
-				</figure>
-			))
-		}
+		<img
+			src={cover.src}
+			alt={cover.alt}
+			class="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03] motion-reduce:transition-none"
+			loading="lazy"
+			decoding="async"
+		/>
+		<span
+			class="font-display absolute top-4 left-4 text-xs font-bold tracking-[0.2em] text-white mix-blend-difference sm:text-sm"
+			>{frame} / {totalLabel}</span
+		>
 	</div>
-</article>
+
+	<figcaption class="mt-4 border-t border-white/15 pt-4">
+		<div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+			<p
+				class="font-display text-foreground flex items-center gap-3 text-3xl font-bold tracking-[-0.03em] sm:text-4xl lg:text-5xl"
+			>
+				<span aria-hidden="true" class="text-2xl sm:text-3xl"
+					>{experience.flag}</span
+				>
+				{experience.country}
+			</p>
+			<p
+				class="text-foreground-muted text-[0.7rem] font-semibold tracking-[0.16em] uppercase"
+			>
+				{experience.continent}
+			</p>
+		</div>
+		<p class="text-foreground-secondary mt-2 text-sm sm:text-base">
+			{experience.eventName} · {photoLabel}
+		</p>
+	</figcaption>
+</figure>

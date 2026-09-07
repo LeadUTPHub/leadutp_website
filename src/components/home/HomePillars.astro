@@ -1,4 +1,5 @@
 ---
+import { Image } from 'astro:assets';
 import { ArrowRight } from '@lucide/astro';
 import type { Pillar } from '../../data/pillars';
 import Container from '../ui/Container.astro';
@@ -58,6 +59,20 @@ const toneClasses = {
 						]}
 					>
 						<div class="flex items-center gap-3">
+							{pillar.icon && (
+								<span
+									class="inline-flex size-12 items-center justify-center rounded-xl border border-white/10 bg-white/[0.06]"
+									aria-hidden="true"
+								>
+									<Image
+										src={pillar.icon}
+										alt=""
+										class="size-7 w-auto opacity-90"
+										widths={[56, 112]}
+										sizes="28px"
+									/>
+								</span>
+							)}
 							<span
 								class="text-foreground-muted text-xs font-bold tracking-[0.16em]"
 								aria-hidden="true"
