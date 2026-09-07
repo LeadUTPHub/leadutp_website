@@ -52,20 +52,30 @@ const isActive = (href: string) =>
 				aria-label="Navegación principal"
 			>
 				{
-					links.map((link) => (
-						<a
-							href={link.href}
-							aria-current={isActive(link.href) ? 'page' : undefined}
-							class:list={[
-								'focus-visible:outline-optional-3 relative px-3 py-2 text-sm transition-colors focus-visible:rounded-md focus-visible:outline-3 focus-visible:outline-offset-3',
-								isActive(link.href)
-									? 'after:bg-secondary font-semibold text-white after:absolute after:right-3 after:bottom-0.5 after:left-3 after:h-0.5'
-									: 'font-medium text-white/72 hover:text-white',
-							]}
-						>
-							{link.label}
-						</a>
-					))
+					links.map((link) => {
+						const words = link.label.split(' ');
+						return (
+							<a
+								href={link.href}
+								aria-current={isActive(link.href) ? 'page' : undefined}
+								class:list={[
+									'focus-visible:outline-optional-3 relative flex flex-col items-center px-3 py-2 text-center text-sm leading-tight transition-colors focus-visible:rounded-md focus-visible:outline-3 focus-visible:outline-offset-3',
+									isActive(link.href)
+										? 'after:bg-secondary font-bold text-white after:absolute after:right-3 after:bottom-0.5 after:left-3 after:h-0.5'
+										: 'font-semibold text-white/72 hover:text-white',
+								]}
+							>
+								{words.length > 1
+									? words.map((word, index) => (
+											<>
+												{word}
+												{index < words.length - 1 && <br />}
+											</>
+										))
+									: link.label}
+							</a>
+						);
+					})
 				}
 			</nav>
 
