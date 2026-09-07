@@ -21,107 +21,153 @@ const isActive = (href: string) =>
 		: pathname === href || pathname.startsWith(`${href}/`);
 ---
 
-<header
-	class="bg-primary sticky top-0 z-50 border-b border-white/10 text-white"
->
-	<Container>
-		<div class="relative flex min-h-20 items-center justify-between">
-			<a
-				href="/"
-				class="inline-flex min-h-11 items-center rounded-sm transition-opacity hover:opacity-90 focus-visible:rounded-sm motion-reduce:transition-none"
-				aria-label="LEAD UTP, inicio"
-			>
-				<span
-					class="relative block h-[46px] w-[120px] overflow-hidden md:h-[54px] md:w-[140px]"
-					aria-hidden="true"
+<header class="navbar pointer-events-none sticky top-0 z-50" data-navbar>
+	<div
+		class="navbar-bar bg-primary pointer-events-auto border-b border-white/10 text-white"
+	>
+		<Container class="h-full">
+			<div class="relative flex h-full items-center justify-between">
+				<a
+					href="/"
+					class="inline-flex min-h-11 items-center rounded-sm transition-opacity hover:opacity-90 focus-visible:rounded-sm motion-reduce:transition-none"
+					aria-label="LEAD UTP, inicio"
 				>
-					<Image
-						src={leadLogo}
-						alt=""
-						widths={[128, 149, 256, 298]}
-						sizes="(min-width: 768px) 149px, 128px"
-						class="absolute -top-[13px] -left-1 h-auto w-[128px] max-w-none md:-top-4 md:w-[149px]"
-						loading="eager"
-						decoding="async"
-					/>
-				</span>
-			</a>
+					<span
+						class="navbar-logo relative block h-[46px] w-[120px] overflow-hidden md:h-[54px] md:w-[140px]"
+						aria-hidden="true"
+					>
+						<Image
+							src={leadLogo}
+							alt=""
+							widths={[128, 149, 256, 298]}
+							sizes="(min-width: 768px) 149px, 128px"
+							class="absolute -top-[13px] -left-1 h-auto w-[128px] max-w-none md:-top-4 md:w-[149px]"
+							loading="eager"
+							decoding="async"
+						/>
+					</span>
+				</a>
 
-			<nav
-				class="absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 lg:flex"
-				aria-label="Navegación principal"
-			>
-				{
-					links.map((link) => {
-						const words = link.label.split(' ');
-						return (
-							<a
-								href={link.href}
-								aria-current={isActive(link.href) ? 'page' : undefined}
-								class:list={[
-									'focus-visible:outline-optional-3 relative flex flex-col items-center px-3 py-2 text-center text-sm leading-tight transition-colors focus-visible:rounded-md focus-visible:outline-3 focus-visible:outline-offset-3',
-									isActive(link.href)
-										? 'after:bg-secondary font-bold text-white after:absolute after:right-3 after:bottom-0.5 after:left-3 after:h-0.5'
-										: 'font-semibold text-white/72 hover:text-white',
-								]}
-							>
-								{words.length > 1
-									? words.map((word, index) => (
-											<>
-												{word}
-												{index < words.length - 1 && <br />}
-											</>
-										))
-									: link.label}
-							</a>
-						);
-					})
-				}
-			</nav>
-
-			<a
-				href="/convocatorias"
-				class="bg-optional-3/80 hover:bg-optional-3 focus-visible:outline-optional-3 hidden min-h-9 items-center rounded-md border border-white/20 px-3.5 text-sm font-semibold transition focus-visible:outline-3 focus-visible:outline-offset-3 lg:inline-flex"
-			>
-				Convocatorias
-			</a>
-
-			<details class="group relative lg:hidden">
-				<summary
-					class="focus-visible:outline-optional-3 flex min-h-11 min-w-11 cursor-pointer list-none items-center justify-center rounded-md text-white transition hover:bg-white/10 focus-visible:outline-3 focus-visible:outline-offset-3"
-				>
-					<Menu class="size-5 group-open:hidden" aria-hidden="true" />
-					<X class="hidden size-5 group-open:block" aria-hidden="true" />
-					<span class="sr-only">Abrir menú de navegación</span>
-				</summary>
 				<nav
-					class="bg-canvas-deep absolute top-[calc(100%+0.75rem)] right-0 z-30 w-72 rounded-lg border border-white/12 p-2"
-					aria-label="Navegación móvil"
+					class="absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 lg:flex"
+					aria-label="Navegación principal"
 				>
 					{
-						links.map((link) => (
-							<a
-								href={link.href}
-								aria-current={isActive(link.href) ? 'page' : undefined}
-								class:list={[
-									'focus-visible:outline-optional-3 flex min-h-11 items-center rounded-md px-3 text-sm font-semibold transition-colors focus-visible:outline-3 focus-visible:outline-offset-2',
-									isActive(link.href)
-										? 'bg-white/10 text-white'
-										: 'text-white/72 hover:bg-white/[0.06] hover:text-white',
-								]}
-							>
-								{link.label}
-							</a>
-						))
+						links.map((link) => {
+							const words = link.label.split(' ');
+							return (
+								<a
+									href={link.href}
+									aria-current={isActive(link.href) ? 'page' : undefined}
+									class:list={[
+										'focus-visible:outline-optional-3 relative flex flex-col items-center px-3 py-2 text-center text-sm leading-tight transition-colors focus-visible:rounded-md focus-visible:outline-3 focus-visible:outline-offset-3',
+										isActive(link.href)
+											? 'after:bg-secondary font-bold text-white after:absolute after:right-3 after:bottom-0.5 after:left-3 after:h-0.5'
+											: 'font-semibold text-white/72 hover:text-white',
+									]}
+								>
+									{words.length > 1
+										? words.map((word, index) => (
+												<>
+													{word}
+													{index < words.length - 1 && <br />}
+												</>
+											))
+										: link.label}
+								</a>
+							);
+						})
 					}
-					<a
-						href="/convocatorias"
-						class="bg-optional-3 focus-visible:outline-optional-3 mt-2 flex min-h-11 items-center justify-center rounded-md px-3 text-sm font-semibold text-white transition hover:bg-[#6849d8] focus-visible:outline-3 focus-visible:outline-offset-2"
-					>
-						Convocatorias
-					</a>
 				</nav>
-			</details>
-		</div>
-	</Container>
+
+				<a
+					href="/convocatorias"
+					class="bg-optional-3/80 hover:bg-optional-3 focus-visible:outline-optional-3 hidden min-h-9 items-center rounded-md border border-white/20 px-3.5 text-sm font-semibold transition focus-visible:outline-3 focus-visible:outline-offset-3 lg:inline-flex"
+				>
+					Convocatorias
+				</a>
+
+				<details class="group relative lg:hidden">
+					<summary
+						class="focus-visible:outline-optional-3 flex min-h-11 min-w-11 cursor-pointer list-none items-center justify-center rounded-md text-white transition hover:bg-white/10 focus-visible:outline-3 focus-visible:outline-offset-3"
+					>
+						<Menu class="size-5 group-open:hidden" aria-hidden="true" />
+						<X class="hidden size-5 group-open:block" aria-hidden="true" />
+						<span class="sr-only">Abrir menú de navegación</span>
+					</summary>
+					<nav
+						class="bg-canvas-deep absolute top-[calc(100%+0.75rem)] right-0 z-30 w-72 rounded-lg border border-white/12 p-2"
+						aria-label="Navegación móvil"
+					>
+						{
+							links.map((link) => (
+								<a
+									href={link.href}
+									aria-current={isActive(link.href) ? 'page' : undefined}
+									class:list={[
+										'focus-visible:outline-optional-3 flex min-h-11 items-center rounded-md px-3 text-sm font-semibold transition-colors focus-visible:outline-3 focus-visible:outline-offset-2',
+										isActive(link.href)
+											? 'bg-white/10 text-white'
+											: 'text-white/72 hover:bg-white/[0.06] hover:text-white',
+									]}
+								>
+									{link.label}
+								</a>
+							))
+						}
+						<a
+							href="/convocatorias"
+							class="bg-optional-3 focus-visible:outline-optional-3 mt-2 flex min-h-11 items-center justify-center rounded-md px-3 text-sm font-semibold text-white transition hover:bg-[#6849d8] focus-visible:outline-3 focus-visible:outline-offset-2"
+						>
+							Convocatorias
+						</a>
+					</nav>
+				</details>
+			</div>
+		</Container>
+	</div>
 </header>
+
+<style>
+	.navbar {
+		height: 5rem;
+	}
+
+	.navbar-bar {
+		height: var(--nav-h, 5rem);
+		transition: height 0.2s ease;
+	}
+
+	.navbar-logo {
+		transform: scale(var(--nav-logo-scale, 1));
+		transform-origin: left center;
+		transition: transform 0.2s ease;
+	}
+
+	.navbar.is-compact {
+		--nav-h: 4rem;
+		--nav-logo-scale: 0.8;
+	}
+</style>
+
+<script>
+	const THRESHOLD = 80;
+	let ticking = false;
+
+	function syncNavbar() {
+		ticking = false;
+		const header = document.querySelector<HTMLElement>('[data-navbar]');
+		header?.classList.toggle('is-compact', window.scrollY > THRESHOLD);
+	}
+
+	function onScroll() {
+		if (ticking) return;
+		ticking = true;
+		requestAnimationFrame(syncNavbar);
+	}
+
+	window.addEventListener('scroll', onScroll, { passive: true });
+	document.addEventListener('astro:after-swap', syncNavbar);
+	document.addEventListener('astro:page-load', syncNavbar);
+	syncNavbar();
+</script>
