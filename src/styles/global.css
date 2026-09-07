@@ -132,6 +132,13 @@ body {
 	outline-offset: 3px;
 }
 
+/* Transición de cambio de página más ágil (crossfade del ClientRouter). */
+::view-transition-old(root),
+::view-transition-new(root) {
+	animation-duration: 0.12s;
+	animation-timing-function: ease-out;
+}
+
 @media (prefers-reduced-motion: reduce) {
 	html {
 		scroll-behavior: auto;
