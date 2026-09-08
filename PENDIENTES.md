@@ -10,15 +10,16 @@ Lista de tareas abiertas para seguir avanzando en el sitio. Para contexto genera
 
 **Sigue sin resolverse a propósito**: la directiva todavía no confirmó los eventos reales (fecha, hora, ubicación, link de registro), así que por ahora se decidió no tocar este archivo — ni vaciarlo ni reemplazarlo — para no perder la estructura de referencia mientras se espera esa información. Ninguno de los eventos en `src/data/events/events.data.ts` es real: fechas inventadas, `registrationUrl` apuntando a `https://example.com/registro-lead/...`, y varios marcados `imageIsTemporary: true`. Sirvió para construir la UI de `/eventos`, pero **no se puede desplegar tal cual a producción**: le mostraría a un visitante una agenda y links de registro ficticios. En cuanto la directiva confirme los eventos reales, reemplazar cada entrada (o vaciar el array y dejar que `/eventos` muestre su estado vacío, igual que ya hacen `/proyectos` y `/convocatorias` — ver punto 2).
 
-### 2. Contenido real para `/nosotros`, `/proyectos` y `/convocatorias`
+### 2. Contenido real para `/nosotros` y `/proyectos`
 
 La directiva todavía no confirmó este contenido. A diferencia del punto 1, acá **ya no hay marcadores `[Contenido pendiente]` ni nombres falsos visibles en producción** — se optó por dejar los datos vacíos y que cada página muestre un estado vacío cuidado hasta tener la información real:
 
 - `src/data/about/about.data.ts` — misión, visión y valores ya son reales. `history` quedó sin definir (opcional) y `team: []`; `/nosotros` oculta las secciones "Historia" y "Junta directiva" mientras estén vacías.
 - `src/data/projects/projects.data.ts` — `projects: []`; `/proyectos` muestra un mensaje de "todavía no publicamos proyectos" en vez de una lista vacía.
-- `src/data/openings/openings.data.ts` — `openings: []`; `/convocatorias` ya mostraba un estado "no hay convocatorias abiertas" para este caso, no requirió cambios.
 
-Apenas la directiva confirme la información real, solo hace falta completar esos 3 archivos `.data.ts` (historia + junta directiva, lista de proyectos, convocatoria abierta) — no hace falta tocar los `.astro` de `src/pages/` ni los componentes visuales.
+Apenas la directiva confirme la información real, solo hace falta completar esos 2 archivos `.data.ts` (historia + junta directiva, lista de proyectos) — no hace falta tocar los `.astro` de `src/pages/` ni los componentes visuales.
+
+`/convocatorias` **ya no está en esta lista**: tiene una convocatoria real ("Voluntariado 2026 - 2") con su Google Form embebido — ver `src/data/openings/openings.data.ts` y el punto 13.
 
 ## Media prioridad
 
@@ -63,11 +64,19 @@ El sitio sigue en `leadutp.vercel.app`. Definir y conectar un dominio propio cua
 
 ### 11. Formato desactualizado en algunos archivos
 
-`pnpm format:check` marca 8 archivos que no coinciden con el Prettier instalado hoy (`HomeHero.astro`, `HomeHeroCarousel.astro`, `404.astro`, `convocatorias.astro`, `eventos.astro`, `internacional.astro`, `pilares/index.astro`, `vida-lead.astro`) — parece un desfase de versión de Prettier/plugins desde la última vez que se formatearon, no algo introducido ahora. Correr `pnpm format` cuando se vaya a tocar alguno de esos archivos igual, para no mezclar un reformateo grande con un cambio de contenido puntual (así se hizo con `HomeAlliances.astro`, que ya salió de esta lista).
+`pnpm format:check` marca 7 archivos que no coinciden con el Prettier instalado hoy (`HomeHero.astro`, `HomeHeroCarousel.astro`, `404.astro`, `eventos.astro`, `internacional.astro`, `pilares/index.astro`, `vida-lead.astro`) — parece un desfase de versión de Prettier/plugins desde la última vez que se formatearon, no algo introducido ahora. Correr `pnpm format` cuando se vaya a tocar alguno de esos archivos igual, para no mezclar un reformateo grande con un cambio de contenido puntual (así se hizo con `HomeAlliances.astro` y `convocatorias.astro`, que ya salieron de esta lista).
 
 ### 12. Logos de alianzas: ¿monocromo blanco como en la página anterior?
 
 La página anterior de LEAD UTP le aplica a cada logo del marquee un filtro `brightness(0) invert(1)` (los vuelve blancos, sin color) para que la franja se vea uniforme en vez de competir con los colores de cada marca. Acá se agrandaron los logos y se igualó el ritmo del marquee (ver `src/components/home/HomeAlliances.astro`), pero se dejaron con su color original a propósito, por no ser parte de lo pedido. Si se quiere ese mismo tratamiento monocromo, es un filtro CSS en el `<Image>` del marquee.
+
+### 13. Google Form embebido en `/convocatorias`
+
+`openings.data.ts` soporta `embedForm: true` para embeber el `applyUrl` (debe ser un Google Form) como iframe directamente en la página, en vez de solo linkear afuera — ver `getEmbeddedFormUrl()` en `openings.utils.ts`. Cosas a tener en cuenta:
+
+- El iframe de Google Forms siempre se ve con fondo blanco — no hay forma de que herede los colores oscuros del sitio (es contenido de otro origen). Se le puso un marco (`rounded-xl border`) para que no se vea como un rectángulo suelto, pero el blanco en sí no se puede evitar.
+- La altura del iframe está fija (1400-1500px) para cubrir el formulario completo hoy; si crece o se acorta, ajustar esos valores en `convocatorias.astro`.
+- Cuando se cierre esta convocatoria o cambie el link, actualizar `applyUrl` (y `role`/`summary`/`requirements` si corresponde) en `openings.data.ts`, o volver a dejar el array vacío si no hay ninguna abierta.
 
 ## Dónde preguntar
 

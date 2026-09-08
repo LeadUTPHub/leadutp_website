@@ -23,7 +23,7 @@ const isActive = (href: string) =>
 
 <header class="navbar pointer-events-none sticky top-0 z-50" data-navbar>
 	<div
-		class="navbar-bar bg-primary pointer-events-auto border-b border-white/10 text-white"
+		class="navbar-bar pointer-events-auto border-b border-white/10 text-white"
 	>
 		<Container class="h-full">
 			<div class="relative flex h-full items-center justify-between">
@@ -135,7 +135,13 @@ const isActive = (href: string) =>
 
 	.navbar-bar {
 		height: var(--nav-h, 5rem);
-		transition: height 0.2s ease;
+		background-color: var(--nav-bg, var(--color-primary));
+		backdrop-filter: var(--nav-blur, none);
+		-webkit-backdrop-filter: var(--nav-blur, none);
+		transition:
+			height 0.2s ease,
+			background-color 0.3s ease,
+			backdrop-filter 0.3s ease;
 	}
 
 	.navbar-logo {
@@ -144,9 +150,24 @@ const isActive = (href: string) =>
 		transition: transform 0.2s ease;
 	}
 
+	/* Al hacer scroll, el navbar deja de ser un navy sólido y pasa a un
+	   cristal translúcido: así el color de la sección que queda justo
+	   debajo se mezcla con él en vez de cortar en seco contra un color
+	   fijo — se adapta a cualquier tono (canvas, canvas-navy, surface...)
+	   sin tener que mapear sección por sección. */
 	.navbar.is-compact {
 		--nav-h: 4rem;
 		--nav-logo-scale: 0.8;
+		--nav-bg: rgb(2 12 62 / 0.62);
+		--nav-blur: blur(16px) saturate(150%);
+	}
+
+	@supports not (
+		(backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))
+	) {
+		.navbar.is-compact {
+			--nav-bg: rgb(2 12 62 / 0.92);
+		}
 	}
 </style>
 

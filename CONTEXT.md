@@ -29,7 +29,7 @@ Páginas implementadas:
 | Pilares        | `/pilares` y `/pilares/[slug]` | ✅ vista general + página por pilar; imágenes de los 6 pilares aún son placeholder (`imageIsTemporary: true`)                                 |
 | Sobre nosotros | `/nosotros`                    | 🟡 misión, visión y valores reales; historia y junta directiva pendientes de la directiva — esas secciones se ocultan mientras tanto          |
 | Proyectos      | `/proyectos`                   | 🟡 estructura y estado vacío listos; sin proyectos cargados aún (pendiente de la directiva)                                                   |
-| Convocatorias  | `/convocatorias`               | 🟡 estructura y estado vacío listos; sin convocatoria abierta cargada aún (pendiente de la directiva)                                         |
+| Convocatorias  | `/convocatorias`               | ✅ convocatoria real abierta ("Voluntarios 2026 - 2"), con su Google Form embebido como iframe en la página                                   |
 | Internacional  | `/internacional`               | ✅ galería por país (Uruguay, China, Suiza, Francia) con fotos reales de `public/images/internacional_leadutp/`                               |
 | Vida LEAD      | `/vida-lead`                   | ✅ galería de 9 eventos locales (2025-2026) con fotos reales de `public/images/{2025,2026}/`                                                  |
 | 404            | —                              | ✅ página de error personalizada                                                                                                              |
@@ -52,7 +52,7 @@ El contenido vive como datos tipados en `src/data/`, **no en un CMS todavía**:
 - `src/data/home/home.data.ts` — contenido específico de la home; `homeCommunityMoments` y `homeHeroSlides` ya usan fotos reales (`src/assets/home/` y `public/images/`), y `homeAlliances` tiene las 7 alianzas reales con logo. `HomeAlliances.astro` las anima en un marquee infinito (lista duplicada + `translateX(-50%)`), con tamaño de logo y ritmo (25s) ajustados para sentirse igual de fluido que en la página anterior de LEAD UTP. `homeHeroMedia` (el marco de foto fija del hero) sigue vacío.
 - `src/data/about/about.data.ts` — misión, visión y valores reales; `history` queda sin definir y `team` vacío hasta que la directiva confirme esos datos (la página oculta esas secciones en ese caso).
 - `src/data/projects/projects.data.ts` — lista de proyectos de `/proyectos`; vacío hasta que la directiva confirme los proyectos reales (la página ya maneja ese estado vacío).
-- `src/data/openings/openings.data.ts` — convocatorias abiertas de `/convocatorias`; array vacío = "no hay convocatorias abiertas" (estado real hoy).
+- `src/data/openings/openings.data.ts` — convocatorias abiertas de `/convocatorias`; array vacío = "no hay convocatorias abiertas". Hoy tiene una convocatoria real ("Voluntariado 2026 - 2") con `embedForm: true`: cuando ese flag está activo, `/convocatorias` embebe el Google Form de `applyUrl` como iframe en la página (`getEmbeddedFormUrl()` en `openings.utils.ts` le agrega `embedded=true`), además del link para abrirlo en una pestaña nueva. Solo funciona con Google Forms — para otro tipo de link, dejar `embedForm` sin definir y se muestra el botón "Postular" de siempre.
 - `src/data/international/international.data.ts` — experiencias internacionales de `/internacional` (país, evento, fotos). Las fotos apuntan a `public/images/internacional_leadutp/`, no a `src/assets` (por eso se renderizan con `<img>` plano en `InternationalExperienceCard.astro`, no con `astro:assets`). Falta agregar la carpeta `16_aI_hackaton_lizbeth` (país sin confirmar).
 - `src/data/life/life.data.ts` — los 9 eventos locales de `/vida-lead` (año, nombre, fotos), mismo patrón de `<img>` plano apuntando a `public/images/2025/` y `public/images/2026/`. Las fechas exactas de cada evento no están confirmadas, por eso solo se muestra el año.
 
@@ -61,7 +61,7 @@ Para **editar contenido** (textos, eventos, pilares), se trabaja directamente en
 ## Componentes reutilizables
 
 - `src/components/ui/` — primitivas (Button, Badge, Container, SectionHeader)
-- `src/components/layout/` — Navbar, Footer
+- `src/components/layout/` — Navbar (sticky; al hacer scroll se encoge y además pasa de navy sólido a un cristal traslúcido con blur, para que el color de la sección que queda debajo se mezcle con él en vez de cortar en seco), Footer
 - `src/components/home/`, `events/`, `pillars/`, `international/`, `life/` — bloques específicos de cada sección
 
 ## Cómo correr el proyecto localmente
