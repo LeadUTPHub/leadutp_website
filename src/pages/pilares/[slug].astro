@@ -29,6 +29,10 @@ const upcomingEvents = getUpcomingEvents(
 ).slice(0, 3);
 const otherPillars = getOtherPillars(pillars, pillar.slug, 3);
 const visibleMoments = pillar.moments?.slice(0, 5) ?? [];
+// Solo usamos la imagen del pilar como og:image cuando ya es una foto real
+// (mientras `imageIsTemporary` sea true, seguimos con el og-image.png global).
+const socialImage =
+	pillar.image && !pillar.imageIsTemporary ? pillar.image.src : undefined;
 
 const toneClasses = {
 	primary: 'bg-white/70',
@@ -42,6 +46,7 @@ const toneClasses = {
 <Layout
 	title={`${pillar.name} | Pilares LEAD UTP`}
 	description={pillar.shortDescription}
+	image={socialImage}
 >
 	<section
 		class="bg-canvas-navy/35 hairline-b pt-10 pb-12 sm:pt-12 sm:pb-14 lg:pt-14 lg:pb-16"
@@ -246,10 +251,7 @@ const toneClasses = {
 
 	{
 		pillar.testimonials && pillar.testimonials.length > 0 && (
-			<section
-				class="hairline-t py-16 sm:py-20"
-				aria-labelledby="voices-title"
-			>
+			<section class="hairline-t py-16 sm:py-20" aria-labelledby="voices-title">
 				<Container>
 					<h2
 						id="voices-title"

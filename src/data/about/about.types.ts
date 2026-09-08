@@ -30,6 +30,8 @@ export interface AboutContent {
 	vision: string;
 	/** Valores que guían a la comunidad. */
 	values: AboutValue[];
-	history: string;
+	/** Opcional: se omite mientras no haya una historia real que mostrar. */
+	history?: string;
+	/** Opcional: la sección de junta directiva se oculta si está vacío. */
 	team: TeamMember[];
 }

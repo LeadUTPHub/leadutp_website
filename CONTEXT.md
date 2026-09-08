@@ -1,6 +1,6 @@
 # Contexto del proyecto — LEAD UTP Website
 
-> Última actualización: 2026-08-25
+> Última actualización: 2026-09-08
 
 ## Qué es esto
 
@@ -13,47 +13,48 @@ Sitio web oficial de **LEAD UTP**, construido con [Astro](https://astro.build) +
 - **@lucide/astro** para iconos
 - **@vercel/analytics** y **@vercel/speed-insights** — métricas de uso y performance
 - **@astrojs/sitemap** — sitemap.xml automático
-- **ESLint + Prettier** — `npm run lint`, `npm run format`, `npm run format:check`
-- **Vitest** — `npm test` (o `npm run test:watch`); por ahora solo cubre `src/data/events/events.utils.ts`
+- **ESLint + Prettier** — `pnpm lint`, `pnpm format`, `pnpm format:check`
+- **Vitest** — `pnpm test` (o `pnpm test:watch`); por ahora solo cubre `src/data/events/events.utils.ts`
+- Gestor de paquetes: **pnpm** (ver `pnpm-lock.yaml`)
 - Deploy en **Vercel** (`https://leadutp.vercel.app`)
 
 ## Estado actual
 
 Páginas implementadas:
 
-| Página         | Ruta                           | Estado                                                                                                              |
-| -------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
-| Home           | `/`                            | ✅ rediseñada, con secciones: hero, pilares, eventos, alianzas, vida del capítulo, red, reclutamiento, medios       |
-| Eventos        | `/eventos`                     | ✅ agenda con eventos destacados, próximos y pasados                                                                |
-| Pilares        | `/pilares` y `/pilares/[slug]` | ✅ vista general + página por pilar                                                                                 |
-| Sobre nosotros | `/nosotros`                    | 🟡 estructura real lista, textos y equipo con marcadores `[Contenido pendiente]` (ver `src/data/about/`)            |
-| Proyectos      | `/proyectos`                   | 🟡 estructura real lista, lista de proyectos con marcadores `[Contenido pendiente]` (ver `src/data/projects/`)      |
-| Convocatorias  | `/convocatorias`               | 🟡 estructura real lista, convocatoria con marcadores `[Contenido pendiente]` (ver `src/data/openings/`)            |
-| Internacional  | `/internacional`               | ✅ galería por país (Uruguay, China, Suiza, Francia) con fotos reales de `public/imagestest/internacional_leadutp/` |
-| Vida LEAD      | `/vida-lead`                   | ✅ galería de 9 eventos locales (2025-2026) con fotos reales de `public/imagestest/{2025,2026}/`                    |
-| 404            | —                              | ✅ página de error personalizada                                                                                    |
+| Página         | Ruta                           | Estado                                                                                                                                        |
+| -------------- | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Home           | `/`                            | ✅ rediseñada, con secciones: hero, pilares, eventos, alianzas, vida del capítulo, red, reclutamiento, medios                                 |
+| Eventos        | `/eventos`                     | 🟡 UI completa, pero `events.data.ts` sigue con 22 eventos de ejemplo (fechas y `registrationUrl` ficticios) — no reemplazar sin datos reales |
+| Pilares        | `/pilares` y `/pilares/[slug]` | ✅ vista general + página por pilar; imágenes de los 6 pilares aún son placeholder (`imageIsTemporary: true`)                                 |
+| Sobre nosotros | `/nosotros`                    | 🟡 misión, visión y valores reales; historia y junta directiva pendientes de la directiva — esas secciones se ocultan mientras tanto          |
+| Proyectos      | `/proyectos`                   | 🟡 estructura y estado vacío listos; sin proyectos cargados aún (pendiente de la directiva)                                                   |
+| Convocatorias  | `/convocatorias`               | 🟡 estructura y estado vacío listos; sin convocatoria abierta cargada aún (pendiente de la directiva)                                         |
+| Internacional  | `/internacional`               | ✅ galería por país (Uruguay, China, Suiza, Francia) con fotos reales de `public/images/internacional_leadutp/`                               |
+| Vida LEAD      | `/vida-lead`                   | ✅ galería de 9 eventos locales (2025-2026) con fotos reales de `public/images/{2025,2026}/`                                                  |
+| 404            | —                              | ✅ página de error personalizada                                                                                                              |
 
-Los CTAs del home ("Conoce LEAD UTP", "Ver convocatorias", "Explorar proyectos") y el Navbar apuntan a `/nosotros`, `/proyectos` y `/convocatorias`. Las tres páginas ya tienen su diseño y estructura de datos definitivos (mismo patrón `.data.ts` que pilares/eventos); solo falta que alguien del equipo reemplace los textos marcados `[Contenido pendiente]` por la información real. `src/components/ui/ComingSoon.astro` sigue disponible para futuras secciones en construcción, pero ya no se usa en estas tres rutas.
+Los CTAs del home ("Conoce LEAD UTP", "Ver convocatorias", "Explorar proyectos") y el Navbar apuntan a `/nosotros`, `/proyectos` y `/convocatorias`. Las tres páginas ya tienen su diseño y estructura de datos definitivos (mismo patrón `.data.ts` que pilares/eventos). Mientras la directiva de LEAD UTP no confirme el contenido real (historia, junta directiva, proyectos, convocatoria), los `.data.ts` correspondientes quedan vacíos a propósito y cada página muestra un estado vacío cuidado en vez de marcadores `[Contenido pendiente]` — no hay que inventar contenido para "rellenar" mientras se espera.
 
 SEO/infra ya cubierto:
 
-- Meta tags Open Graph / Twitter Card + imagen social (`og-image.png`)
+- Meta tags Open Graph / Twitter Card + imagen social; `og-image.png` como fallback global, con override por página en `/pilares/[slug]` cuando el pilar ya tiene foto real (no placeholder)
 - URL canónica por página
 - `robots.txt` + sitemap
-- Transiciones de página (`astro:transitions`)
+- Transiciones de página (`astro:transitions`); el crossfade está afinado a 300ms con `cubic-bezier(0.4, 0, 0.2, 1)` (la misma curva que usa Tailwind en el resto del sitio) en vez del corte seco que tenía antes
 
 ## Estructura de datos (contenido)
 
 El contenido vive como datos tipados en `src/data/`, **no en un CMS todavía**:
 
 - `src/data/pillars/pillars.data.ts` — los 6 pilares de LEAD UTP (`desarrollo-profesional`, `liderazgo`, `excelencia-femenina`, `desarrollo-del-capitulo`, `excelencia-academica`, `lead-academia`), cada uno con descripción, iniciativas, testimonios y métricas.
-- `src/data/events/events.data.ts` — eventos (fecha, hora, ubicación, categoría, imagen, link de registro, pilares relacionados).
-- `src/data/home/home.data.ts` — contenido específico de la home; `homeCommunityMoments` ya usa 3 fotos reales (`src/assets/home/`), pero `homeHeroMedia` sigue vacío.
-- `src/data/about/about.data.ts` — misión, visión, historia y junta directiva de `/nosotros` (marcadores `[Contenido pendiente]`).
-- `src/data/projects/projects.data.ts` — lista de proyectos de `/proyectos` (marcadores `[Contenido pendiente]`).
-- `src/data/openings/openings.data.ts` — convocatorias abiertas de `/convocatorias`; array vacío = "no hay convocatorias abiertas" (marcadores `[Contenido pendiente]`).
-- `src/data/international/international.data.ts` — experiencias internacionales de `/internacional` (país, evento, fotos). Las fotos apuntan a `public/imagestest/internacional_leadutp/`, no a `src/assets` (por eso se renderizan con `<img>` plano en `InternationalExperienceCard.astro`, no con `astro:assets`). Falta agregar la carpeta `16_aI_hackaton_lizbeth` (país sin confirmar).
-- `src/data/life/life.data.ts` — los 9 eventos locales de `/vida-lead` (año, nombre, fotos), mismo patrón de `<img>` plano apuntando a `public/imagestest/2025/` y `public/imagestest/2026/`. Las fechas exactas de cada evento no están confirmadas, por eso solo se muestra el año.
+- `src/data/events/events.data.ts` — eventos (fecha, hora, ubicación, categoría, imagen, link de registro, pilares relacionados). **Los 22 eventos actuales son de ejemplo**, ver `PENDIENTES.md` punto 1 antes de tocar este archivo.
+- `src/data/home/home.data.ts` — contenido específico de la home; `homeCommunityMoments` y `homeHeroSlides` ya usan fotos reales (`src/assets/home/` y `public/images/`), y `homeAlliances` tiene las 7 alianzas reales con logo. `HomeAlliances.astro` las anima en un marquee infinito (lista duplicada + `translateX(-50%)`), con tamaño de logo y ritmo (25s) ajustados para sentirse igual de fluido que en la página anterior de LEAD UTP. `homeHeroMedia` (el marco de foto fija del hero) sigue vacío.
+- `src/data/about/about.data.ts` — misión, visión y valores reales; `history` queda sin definir y `team` vacío hasta que la directiva confirme esos datos (la página oculta esas secciones en ese caso).
+- `src/data/projects/projects.data.ts` — lista de proyectos de `/proyectos`; vacío hasta que la directiva confirme los proyectos reales (la página ya maneja ese estado vacío).
+- `src/data/openings/openings.data.ts` — convocatorias abiertas de `/convocatorias`; array vacío = "no hay convocatorias abiertas" (estado real hoy).
+- `src/data/international/international.data.ts` — experiencias internacionales de `/internacional` (país, evento, fotos). Las fotos apuntan a `public/images/internacional_leadutp/`, no a `src/assets` (por eso se renderizan con `<img>` plano en `InternationalExperienceCard.astro`, no con `astro:assets`). Falta agregar la carpeta `16_aI_hackaton_lizbeth` (país sin confirmar).
+- `src/data/life/life.data.ts` — los 9 eventos locales de `/vida-lead` (año, nombre, fotos), mismo patrón de `<img>` plano apuntando a `public/images/2025/` y `public/images/2026/`. Las fechas exactas de cada evento no están confirmadas, por eso solo se muestra el año.
 
 Para **editar contenido** (textos, eventos, pilares), se trabaja directamente en esos archivos `.data.ts` — no hace falta tocar los componentes visuales.
 
@@ -66,10 +67,10 @@ Para **editar contenido** (textos, eventos, pilares), se trabaja directamente en
 ## Cómo correr el proyecto localmente
 
 ```bash
-npm install
-npm run dev       # http://localhost:4321
-npm run build     # build de producción
-npm run preview   # preview del build
+pnpm install
+pnpm dev       # http://localhost:4321
+pnpm build     # build de producción
+pnpm preview   # preview del build
 ```
 
 ## Pendientes / ideas abiertas

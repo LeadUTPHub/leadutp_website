@@ -1,6 +1,6 @@
 import type { InternationalExperience } from './international.types';
 
-const base = '/imagestest/internacional_leadutp';
+const base = '/images/internacional_leadutp';
 
 export const internationalExperiences: InternationalExperience[] = [
 	{
