@@ -19,7 +19,7 @@ La directiva todavía no confirmó este contenido. A diferencia del punto 1, ac�
 
 Apenas la directiva confirme la información real, solo hace falta completar esos 2 archivos `.data.ts` (historia + junta directiva, lista de proyectos) — no hace falta tocar los `.astro` de `src/pages/` ni los componentes visuales.
 
-`/convocatorias` **ya no está en esta lista**: tiene una convocatoria real ("Voluntariado 2026 - 2") con su Google Form embebido — ver `src/data/openings/openings.data.ts` y el punto 14.
+`/convocatorias` **ya no está en esta lista**: tiene una convocatoria real ("Voluntarios 2026 - 2") con su Google Form embebido — ver `src/data/openings/openings.data.ts` y el punto 14.
 
 ## Media prioridad
 
@@ -68,7 +68,7 @@ El sitio sigue en `leadutp.vercel.app`. Definir y conectar un dominio propio cua
 
 ### 12. Formato desactualizado en algunos archivos
 
-`pnpm format:check` marca 7 archivos que no coinciden con el Prettier instalado hoy (`HomeHero.astro`, `HomeHeroCarousel.astro`, `404.astro`, `eventos.astro`, `internacional.astro`, `pilares/index.astro`, `vida-lead.astro`) — parece un desfase de versión de Prettier/plugins desde la última vez que se formatearon, no algo introducido ahora. Correr `pnpm format` cuando se vaya a tocar alguno de esos archivos igual, para no mezclar un reformateo grande con un cambio de contenido puntual (así se hizo con `HomeAlliances.astro` y `convocatorias.astro`, que ya salieron de esta lista).
+`pnpm format:check` marca 7 archivos que no coinciden con el Prettier instalado hoy (`HomeHeroCarousel.astro`, `HomePillars.astro`, `404.astro`, `convocatorias.astro`, `eventos.astro`, `pilares/index.astro`, `vida-lead.astro`) — parece un desfase de versión de Prettier/plugins desde la última vez que se formatearon, no algo introducido ahora. Correr `pnpm format` cuando se vaya a tocar alguno de esos archivos igual, para no mezclar un reformateo grande con un cambio de contenido puntual (así se hizo con `HomeAlliances.astro` e `internacional.astro`, que ya salieron de esta lista).
 
 ### 13. Logos de alianzas: ¿monocromo blanco como en la página anterior?
 

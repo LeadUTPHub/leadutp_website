@@ -4,7 +4,7 @@ import type { AboutContent } from './about.types';
 // confirmación por parte de la directiva de LEAD UTP. Mientras tanto se
 // omiten (`history` sin definir, `team` vacío) y la página oculta esas
 // secciones en vez de mostrar marcadores de contenido pendiente.
-// Ver PENDIENTES.md, punto 1.
+// Ver PENDIENTES.md, punto 2.
 export const about: AboutContent = {
 	intro:
 		'Somos una comunidad de estudiantes apasionados por la tecnología y el liderazgo, comprometidos con el desarrollo profesional y personal de nuestros miembros.',
