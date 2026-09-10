@@ -1,6 +1,6 @@
 # Contexto del proyecto — LEAD UTP Website
 
-> Última actualización: 2026-09-08
+> Última actualización: 2026-09-10
 
 ## Qué es esto
 

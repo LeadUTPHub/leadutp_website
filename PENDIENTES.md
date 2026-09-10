@@ -1,6 +1,6 @@
 # Pendientes — LEAD UTP Website
 
-> Última actualización: 2026-09-08
+> Última actualización: 2026-09-10
 
 Lista de tareas abiertas para seguir avanzando en el sitio. Para contexto general del stack y la estructura del proyecto, ver [`CONTEXT.md`](./CONTEXT.md).
 
