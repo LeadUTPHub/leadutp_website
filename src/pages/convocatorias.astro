@@ -49,61 +49,62 @@ const hasOpenings = openings.length > 0;
 						{openings.map((opening) =>
 							opening.embedForm ? (
 								<li class="border-b border-white/12 py-10 sm:py-12">
-									<div class="grid gap-8 lg:grid-cols-[minmax(0,0.4fr)_minmax(0,0.6fr)] lg:gap-12">
-										<div>
-											<h2 class="font-display text-foreground text-2xl font-semibold tracking-[-0.045em] sm:text-3xl">
+									<div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,380px)] lg:gap-12">
+										<div
+											class="card-lift from-canvas-navy/70 rounded-2xl border border-white/10 bg-linear-to-b to-white/[0.02] p-8 sm:p-9 lg:flex lg:h-full lg:flex-col"
+										>
+											<h2 class="font-display text-foreground text-2xl font-bold tracking-[-0.045em] sm:text-3xl">
 												{opening.role}
 											</h2>
 											{opening.summary && (
-												<p class="text-foreground-secondary mt-3 text-sm leading-6">
+												<p class="text-foreground-secondary mt-4 text-sm leading-7 font-medium">
 													{opening.summary}
 												</p>
 											)}
-											<p class="text-foreground-secondary mt-3 text-sm leading-6">
+											<div class="mt-8">
+												<p class="text-secondary text-[0.7rem] font-bold tracking-[0.18em] uppercase">
+													Requisitos
+												</p>
+												<ul class="text-foreground-secondary mt-4 space-y-3 text-sm leading-6 font-medium">
+													{opening.requirements.map((requirement) => (
+														<li class="flex gap-2.5">
+															<span aria-hidden="true">•</span>
+															{requirement}
+														</li>
+													))}
+												</ul>
+											</div>
+											<p class="text-foreground-secondary hairline-t mt-8 pt-6 text-sm leading-6 font-medium lg:mt-auto">
 												{opening.deadline
 													? `Fecha límite: ${opening.deadline}`
 													: 'Convocatoria abierta, sin fecha límite fija.'}
 											</p>
 										</div>
-										<div>
-											<p class="text-secondary text-[0.7rem] font-bold tracking-[0.18em] uppercase">
-												Requisitos
-											</p>
-											<ul class="text-foreground-secondary mt-3 space-y-2 text-sm leading-6">
-												{opening.requirements.map((requirement) => (
-													<li class="flex gap-2">
-														<span aria-hidden="true">•</span>
-														{requirement}
-													</li>
-												))}
-											</ul>
-										</div>
-									</div>
-
-									<div class="mt-8">
-										<div class="flex flex-wrap items-center justify-between gap-3">
-											<p class="text-secondary text-[0.7rem] font-bold tracking-[0.18em] uppercase">
-												Postúlate aquí
-											</p>
-											<a
-												href={opening.applyUrl}
-												target="_blank"
-												rel="noopener noreferrer"
-												class="text-foreground-secondary focus-visible:outline-optional-3 inline-flex min-h-11 items-center gap-1.5 rounded-sm text-sm font-semibold transition-colors hover:text-white focus-visible:outline-3 focus-visible:outline-offset-3 motion-reduce:transition-none"
-											>
-												Abrir en una pestaña nueva
-												<ArrowUpRight class="size-4" aria-hidden="true" />
-											</a>
-										</div>
-										<div class="bg-surface mt-4 overflow-hidden rounded-xl border border-white/12">
-											<iframe
-												src={getEmbeddedFormUrl(opening.applyUrl)}
-												title={`Formulario de postulación: ${opening.role}`}
-												loading="lazy"
-												class="block h-[1400px] w-full border-0 sm:h-[1500px]"
-											>
-												Cargando formulario…
-											</iframe>
+										<div class="lg:pt-1">
+											<div class="flex flex-wrap items-center justify-between gap-3">
+												<p class="text-secondary text-[0.7rem] font-bold tracking-[0.18em] uppercase">
+													Postúlate aquí
+												</p>
+												<a
+													href={opening.applyUrl}
+													target="_blank"
+													rel="noopener noreferrer"
+													class="text-foreground-secondary focus-visible:outline-optional-3 inline-flex min-h-11 items-center gap-1.5 rounded-sm text-sm font-semibold transition-colors hover:text-white focus-visible:outline-3 focus-visible:outline-offset-3 motion-reduce:transition-none"
+												>
+													Abrir en una pestaña nueva
+													<ArrowUpRight class="size-4" aria-hidden="true" />
+												</a>
+											</div>
+											<div class="mt-4 overflow-hidden rounded-2xl">
+												<iframe
+													src={getEmbeddedFormUrl(opening.applyUrl)}
+													title={`Formulario de postulación: ${opening.role}`}
+													loading="lazy"
+													class="block h-[520px] w-full border-0 sm:h-[600px]"
+												>
+													Cargando formulario…
+												</iframe>
+											</div>
 										</div>
 									</div>
 								</li>
