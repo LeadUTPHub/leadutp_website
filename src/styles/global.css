@@ -132,11 +132,13 @@ body {
 	outline-offset: 3px;
 }
 
-/* Transición de cambio de página más ágil (crossfade del ClientRouter). */
+/* Crossfade del ClientRouter al cambiar de página: mismo timing suave
+   (cubic-bezier(0.4, 0, 0.2, 1), la curva por defecto de Tailwind para
+   transition-*) que usa el resto del sitio, en vez de un corte seco. */
 ::view-transition-old(root),
 ::view-transition-new(root) {
-	animation-duration: 0.12s;
-	animation-timing-function: ease-out;
+	animation-duration: 0.3s;
+	animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @media (prefers-reduced-motion: reduce) {

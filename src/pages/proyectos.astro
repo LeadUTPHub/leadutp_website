@@ -1,5 +1,6 @@
 ---
 import Badge from '../components/ui/Badge.astro';
+import Button from '../components/ui/Button.astro';
 import Container from '../components/ui/Container.astro';
 import { projects } from '../data/projects';
 import Layout from '../layouts/Layout.astro';
@@ -15,15 +16,15 @@ const statusTones = {
 	finalizado: 'primary',
 	planificado: 'optional',
 } as const;
+
+const hasProjects = projects.length > 0;
 ---
 
 <Layout
 	title="Proyectos | LEAD UTP"
 	description="Descubre los proyectos e iniciativas impulsados por la comunidad LEAD UTP."
 >
-	<section
-		class="bg-canvas-navy/35 hairline-b py-13 sm:py-16 lg:py-18"
-	>
+	<section class="bg-canvas-navy/35 hairline-b py-13 sm:py-16 lg:py-18">
 		<Container>
 			<header class="mx-auto max-w-2xl text-center">
 				<p
@@ -39,46 +40,70 @@ const statusTones = {
 				<p
 					class="text-foreground-secondary mx-auto mt-5 max-w-2xl text-base leading-7 sm:text-lg sm:leading-8"
 				>
-					Iniciativas que nuestra comunidad está construyendo, de la mano de sus
-					miembros.
+					{
+						hasProjects
+							? 'Iniciativas que nuestra comunidad está construyendo, de la mano de sus miembros.'
+							: 'Estamos preparando la lista de proyectos e iniciativas de la comunidad. Vuelve pronto.'
+					}
 				</p>
 			</header>
 		</Container>
 	</section>
 
-	<section class="py-14 sm:py-18 lg:py-22" aria-label="Lista de proyectos">
-		<Container>
-			<ol class="grid gap-x-8 border-y border-white/12 md:grid-cols-2">
-				{
-					projects.map((project, index) => (
-						<li
-							class:list={[
-								'border-white/12 py-8 sm:py-9',
-								index > 0 && 'border-t',
-								index === 1 && 'md:border-t-0',
-							]}
-						>
-							<Badge tone={statusTones[project.status]}>
-								{statusLabels[project.status]}
-							</Badge>
-							<h2 class="font-display text-foreground mt-4 max-w-md text-2xl leading-tight font-semibold tracking-[-0.05em] sm:text-3xl">
-								{project.name}
-							</h2>
-							<p class="text-foreground-secondary mt-3 max-w-md text-sm leading-6 sm:text-base sm:leading-7">
-								{project.description}
-							</p>
-							{project.link && (
-								<a
-									href={project.link}
-									class="text-foreground-secondary focus-visible:outline-optional-3 mt-5 inline-flex min-h-11 items-center gap-2 rounded-sm text-sm font-bold transition-colors hover:text-white focus-visible:outline-3 focus-visible:outline-offset-3 motion-reduce:transition-none"
-								>
-									Ver más
-								</a>
-							)}
-						</li>
-					))
-				}
-			</ol>
-		</Container>
-	</section>
+	{
+		hasProjects ? (
+			<section class="py-14 sm:py-18 lg:py-22" aria-label="Lista de proyectos">
+				<Container>
+					<ol class="grid gap-x-8 border-y border-white/12 md:grid-cols-2">
+						{projects.map((project, index) => (
+							<li
+								class:list={[
+									'border-white/12 py-8 sm:py-9',
+									index > 0 && 'border-t',
+									index === 1 && 'md:border-t-0',
+								]}
+							>
+								<Badge tone={statusTones[project.status]}>
+									{statusLabels[project.status]}
+								</Badge>
+								<h2 class="font-display text-foreground mt-4 max-w-md text-2xl leading-tight font-semibold tracking-[-0.05em] sm:text-3xl">
+									{project.name}
+								</h2>
+								<p class="text-foreground-secondary mt-3 max-w-md text-sm leading-6 sm:text-base sm:leading-7">
+									{project.description}
+								</p>
+								{project.link && (
+									<a
+										href={project.link}
+										class="text-foreground-secondary focus-visible:outline-optional-3 mt-5 inline-flex min-h-11 items-center gap-2 rounded-sm text-sm font-bold transition-colors hover:text-white focus-visible:outline-3 focus-visible:outline-offset-3 motion-reduce:transition-none"
+									>
+										Ver más
+									</a>
+								)}
+							</li>
+						))}
+					</ol>
+				</Container>
+			</section>
+		) : (
+			<section
+				class="py-20 sm:py-24 lg:py-28"
+				aria-label="Sin proyectos publicados"
+			>
+				<Container>
+					<div class="mx-auto max-w-xl text-center">
+						<p class="text-foreground-secondary text-base leading-7 sm:text-lg">
+							Todavía no publicamos proyectos por acá. Síguenos en nuestras
+							redes para enterarte apenas compartamos el primero.
+						</p>
+						<div class="mt-8">
+							<Button href="/" size="lg">
+								Volver al inicio
+							</Button>
+						</div>
+					</div>
+				</Container>
+			</section>
+		)
+	}
 </Layout>

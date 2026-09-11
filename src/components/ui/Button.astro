@@ -1,6 +1,10 @@
 ---
 interface Props {
 	href?: string;
+	/** Solo aplica cuando hay `href` (ej. `_blank` para enlaces externos como Luma). */
+	target?: string;
+	/** Solo aplica cuando hay `href`. Si no se pasa y `target="_blank"`, se agrega `noopener noreferrer` por defecto. */
+	rel?: string;
 	variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
 	size?: 'sm' | 'md' | 'lg';
 	type?: 'button' | 'submit' | 'reset';
@@ -10,12 +14,16 @@ interface Props {
 
 const {
 	href,
+	target,
+	rel,
 	variant = 'primary',
 	size = 'md',
 	type = 'button',
 	disabled = false,
 	class: className,
 } = Astro.props;
+
+const resolvedRel = rel ?? (target === '_blank' ? 'noopener noreferrer' : undefined);
 
 const variants = {
 	primary: 'border border-white/10 bg-optional-3 text-white hover:bg-[#6849d8]',
@@ -44,6 +52,8 @@ const classes = [
 	href ? (
 		<a
 			href={disabled ? undefined : href}
+			target={target}
+			rel={resolvedRel}
 			aria-disabled={disabled || undefined}
 			class:list={classes}
 		>

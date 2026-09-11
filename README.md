@@ -1,46 +1,43 @@
-# Astro Starter Kit: Basics
+# LEAD UTP — Website
 
-```sh
-pnpm create astro@latest -- --template basics
-```
+Sitio web oficial de **LEAD UTP**, construido con [Astro](https://astro.build) y [Tailwind CSS](https://tailwindcss.com).
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+🔗 Producción: [leadutp.vercel.app](https://leadutp.vercel.app)
 
-## 🚀 Project Structure
+## Stack
 
-Inside of your Astro project, you'll see the following folders and files:
+- **[Astro 7](https://astro.build)** (SSG) + TypeScript
+- **[Tailwind CSS 4](https://tailwindcss.com)** vía `@tailwindcss/vite`
+- **[@lucide/astro](https://lucide.dev)** para iconos
+- **@vercel/analytics** + **@vercel/speed-insights**
+- **@astrojs/sitemap** — `sitemap.xml` automático
+- **ESLint + Prettier** — lint y formato
+- **Vitest** — tests unitarios
+- Deploy en **Vercel**
 
-```text
-/
-├── public/
-│   └── favicon.svg
-├── src
-│   ├── assets
-│   │   └── astro.svg
-│   ├── components
-│   │   └── Welcome.astro
-│   ├── layouts
-│   │   └── Layout.astro
-│   └── pages
-│       └── index.astro
-└── package.json
-```
+## Requisitos
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+- Node.js `>= 22.12.0`
+- [pnpm](https://pnpm.io)
 
-## 🧞 Commands
+## Comandos
 
-All commands are run from the root of the project, from a terminal:
+Todos se corren desde la raíz del proyecto:
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+| Comando             | Acción                                        |
+| :------------------ | :-------------------------------------------- |
+| `pnpm install`      | Instala las dependencias                      |
+| `pnpm dev`          | Levanta el servidor local en `localhost:4321` |
+| `pnpm build`        | Genera el build de producción en `./dist/`    |
+| `pnpm preview`      | Sirve el build de producción localmente       |
+| `pnpm lint`         | Corre ESLint                                  |
+| `pnpm format`       | Formatea el proyecto con Prettier             |
+| `pnpm format:check` | Verifica el formato sin escribir cambios      |
+| `pnpm test`         | Corre los tests con Vitest                    |
+| `pnpm test:watch`   | Corre los tests en modo watch                 |
 
-## 👀 Want to learn more?
+## Estructura y contenido
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+El contenido del sitio (eventos, pilares, equipo, proyectos, convocatorias...) vive como datos tipados en `src/data/`, no en un CMS. Cada sección sigue el mismo patrón: `*.data.ts` (los datos), `*.types.ts` (los tipos) e `index.ts` (lo que se exporta). Para editar contenido alcanza con tocar el `.data.ts` correspondiente, sin tocar componentes.
+
+Para el detalle completo de la estructura del proyecto, el estado de cada página y las decisiones de arquitectura, ver [`CONTEXT.md`](./CONTEXT.md). Para la lista de pendientes, ver [`PENDIENTES.md`](./PENDIENTES.md).

@@ -49,18 +49,16 @@ const marqueeItems = [...alliances, ...alliances];
 						class="alliance-marquee__item"
 						aria-hidden={index >= alliances.length ? 'true' : undefined}
 					>
-						{alliance.logo &&
-						alliance.logoAlt &&
-						!alliance.logoIsTemporary ? (
+						{alliance.logo && alliance.logoAlt && !alliance.logoIsTemporary ? (
 							<Image
 								src={alliance.logo}
 								alt={index >= alliances.length ? '' : alliance.logoAlt}
-								class="max-h-12 w-auto max-w-[150px] object-contain opacity-80 transition-opacity hover:opacity-100"
-								widths={[150, 240, 320]}
-								sizes="240px"
+								class="h-20 w-auto object-contain opacity-80 transition-opacity hover:opacity-100 sm:h-24 lg:h-28"
+								widths={[240, 320, 480]}
+								sizes="(min-width: 1024px) 280px, (min-width: 640px) 240px, 200px"
 							/>
 						) : (
-							<span class="font-display text-lg font-semibold tracking-[0.08em] text-white/82 uppercase">
+							<span class="font-display text-2xl font-semibold tracking-[0.08em] text-white/82 uppercase sm:text-3xl">
 								{alliance.name}
 							</span>
 						)}
@@ -94,10 +92,11 @@ const marqueeItems = [...alliances, ...alliances];
 		display: flex;
 		width: max-content;
 		align-items: center;
+		gap: clamp(2.5rem, 5vw, 4.5rem);
 		margin: 0;
 		padding: 0;
 		list-style: none;
-		animation: alliance-scroll 34s linear infinite;
+		animation: alliance-scroll 25s linear infinite;
 	}
 
 	.alliance-marquee:hover .alliance-marquee__track,
@@ -110,8 +109,6 @@ const marqueeItems = [...alliances, ...alliances];
 		flex: none;
 		align-items: center;
 		justify-content: center;
-		min-height: 3.5rem;
-		padding-inline: 1.75rem;
 	}
 
 	@keyframes alliance-scroll {
@@ -135,7 +132,7 @@ const marqueeItems = [...alliances, ...alliances];
 			margin-inline: auto;
 			flex-wrap: wrap;
 			justify-content: center;
-			row-gap: 1.5rem;
+			gap: 2rem;
 			animation: none;
 		}
 

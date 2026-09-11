@@ -15,11 +15,12 @@ interface Props {
 }
 
 const { media, slides = [] } = Astro.props;
-const mediaClass = 'aspect-[4/3] sm:aspect-[16/10] lg:aspect-[4/5] xl:aspect-[5/4]';
+const mediaClass =
+	'aspect-[4/3] sm:aspect-[16/10] lg:aspect-[4/5] xl:aspect-[5/4]';
 ---
 
 <section
-	class="bg-canvas-navy/35 hairline-b py-14 sm:py-18 lg:py-22"
+	class="bg-canvas-navy/35 hairline-b pt-8 pb-14 sm:pt-12 sm:pb-18 lg:pt-16 lg:pb-22"
 	aria-labelledby="home-title"
 >
 	<Container>

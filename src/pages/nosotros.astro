@@ -121,7 +121,7 @@ const valueIcons = {
 					about.values.map((value) => {
 						const Icon = valueIcons[value.icon];
 						return (
-							<li class="card-lift border-white/10 bg-surface-raised/40 rounded-2xl border p-6 text-center">
+							<li class="card-lift bg-surface-raised/40 rounded-2xl border border-white/10 p-6 text-center">
 								<span
 									class="bg-optional-3/15 text-optional-3 mx-auto inline-flex size-12 items-center justify-center rounded-xl"
 									aria-hidden="true"
@@ -142,60 +142,61 @@ const valueIcons = {
 		</Container>
 	</section>
 
-	<section
-		class="bg-surface hairline-t py-16 sm:py-20"
-		aria-labelledby="history-title"
-	>
-		<Container>
-			<div
-				class="grid gap-6 lg:grid-cols-[minmax(0,0.38fr)_minmax(0,0.62fr)] lg:gap-16"
+	{
+		about.history && (
+			<section
+				class="bg-surface hairline-t py-16 sm:py-20"
+				aria-labelledby="history-title"
 			>
-				<div>
-					<p
-						class="text-secondary text-[0.7rem] font-bold tracking-[0.18em] uppercase"
-					>
-						Historia
-					</p>
-					<h2
-						id="history-title"
-						class="font-display text-foreground mt-3 text-3xl font-semibold tracking-[-0.05em] sm:text-4xl"
-					>
-						Cómo empezamos
-					</h2>
-				</div>
-				<p
-					class="text-foreground-secondary max-w-3xl text-base leading-8 sm:text-lg sm:leading-9"
-				>
-					{about.history}
-				</p>
-			</div>
-		</Container>
-	</section>
+				<Container>
+					<div class="grid gap-6 lg:grid-cols-[minmax(0,0.38fr)_minmax(0,0.62fr)] lg:gap-16">
+						<div>
+							<p class="text-secondary text-[0.7rem] font-bold tracking-[0.18em] uppercase">
+								Historia
+							</p>
+							<h2
+								id="history-title"
+								class="font-display text-foreground mt-3 text-3xl font-semibold tracking-[-0.05em] sm:text-4xl"
+							>
+								Cómo empezamos
+							</h2>
+						</div>
+						<p class="text-foreground-secondary max-w-3xl text-base leading-8 sm:text-lg sm:leading-9">
+							{about.history}
+						</p>
+					</div>
+				</Container>
+			</section>
+		)
+	}
 
-	<section class="py-16 sm:py-20 lg:py-24" aria-labelledby="team-title">
-		<Container>
-			<h2
-				id="team-title"
-				class="font-display text-foreground text-3xl font-semibold tracking-[-0.05em] sm:text-4xl"
+	{
+		about.team.length > 0 && (
+			<section
+				class="hairline-t py-16 sm:py-20 lg:py-24"
+				aria-labelledby="team-title"
 			>
-				Junta directiva
-			</h2>
-			<ul
-				class="mt-9 grid gap-x-8 gap-y-0 border-t border-white/12 sm:grid-cols-2 lg:grid-cols-3"
-			>
-				{
-					about.team.map((member) => (
-						<li class="border-b border-white/12 py-6 sm:py-7">
-							<p class="font-display text-foreground text-xl font-semibold tracking-[-0.035em]">
-								{member.name}
-							</p>
-							<p class="text-foreground-secondary mt-1 text-sm leading-6">
-								{member.role}
-							</p>
-						</li>
-					))
-				}
-			</ul>
-		</Container>
-	</section>
+				<Container>
+					<h2
+						id="team-title"
+						class="font-display text-foreground text-3xl font-semibold tracking-[-0.05em] sm:text-4xl"
+					>
+						Junta directiva
+					</h2>
+					<ul class="mt-9 grid gap-x-8 gap-y-0 border-t border-white/12 sm:grid-cols-2 lg:grid-cols-3">
+						{about.team.map((member) => (
+							<li class="border-b border-white/12 py-6 sm:py-7">
+								<p class="font-display text-foreground text-xl font-semibold tracking-[-0.035em]">
+									{member.name}
+								</p>
+								<p class="text-foreground-secondary mt-1 text-sm leading-6">
+									{member.role}
+								</p>
+							</li>
+						))}
+					</ul>
+				</Container>
+			</section>
+		)
+	}
 </Layout>

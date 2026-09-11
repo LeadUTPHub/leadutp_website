@@ -1,0 +1,14 @@
+---
+// Solo POST (form de AdminShell) — evita que un GET accidental (prefetch,
+// crawler) cierre la sesión. Un GET simplemente vuelve al panel, y el
+// middleware decide qué corresponde según haya o no sesión.
+export const prerender = false;
+
+import { getAuthGatewayForRequest } from '../../infra/container';
+
+if (Astro.request.method === 'POST') {
+	await getAuthGatewayForRequest(Astro).signOut();
+}
+
+return Astro.redirect('/administrator/login');
+---
