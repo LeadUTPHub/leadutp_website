@@ -1,23 +1,20 @@
 ---
-import FeaturedEvent from '../components/events/FeaturedEvent.astro';
-import PastEventGrid from '../components/events/PastEventGrid.astro';
-import UpcomingEventList from '../components/events/UpcomingEventList.astro';
+// Sprint 1 (piloto): los eventos próximos viven en Luma (fuente única
+// de verdad, sin sync). "Eventos pasados" queda vacío hasta Sprint 4
+// (galerías "así se vivió el evento"). Ver .sprints/BACKLOG.md Sprint 1
+// y MEMORY.md D-P4/D-P5.
+import EventsLuma from '../components/events/EventsLuma.astro';
 import Container from '../components/ui/Container.astro';
 import SectionHeader from '../components/ui/SectionHeader.astro';
-import {
-	events,
-	getFeaturedEvent,
-	getPastEvents,
-	getUpcomingEvents,
-} from '../data/events';
 import Layout from '../layouts/Layout.astro';
 
-const featuredEvent = getFeaturedEvent(events);
-const upcomingEvents = getUpcomingEvents(events);
-const pastEvents = getPastEvents(events);
-const agendaEvents = upcomingEvents.filter(
-	(event) => event.slug !== featuredEvent?.slug,
-);
+// PUBLIC_LUMA_CALENDAR_URL no es secreto (es una URL pública); se
+// resuelve por env var con este valor como default para no depender
+// de que el .env local la tenga cargada. PUBLIC_LUMA_EMBED_URL sí
+// requiere el snippet real del panel de Luma — sin ella, solo botón.
+const calendarUrl =
+	import.meta.env.PUBLIC_LUMA_CALENDAR_URL || 'https://luma.com/leadutp_';
+const embedUrl = import.meta.env.PUBLIC_LUMA_EMBED_URL;
 ---
 
 <Layout
@@ -42,14 +39,6 @@ const agendaEvents = upcomingEvents.filter(
 					futuro.
 				</p>
 			</header>
-
-			{
-				featuredEvent && (
-					<div class="mt-10 sm:mt-12">
-						<FeaturedEvent event={featuredEvent} />
-					</div>
-				)
-			}
 		</Container>
 	</section>
 
@@ -62,19 +51,10 @@ const agendaEvents = upcomingEvents.filter(
 			<SectionHeader
 				id="proximos-eventos-title"
 				title="Próximos eventos"
-				description="Descubre las próximas experiencias de la comunidad LEAD."
-			>
-				<p slot="action" class="text-foreground-muted text-sm font-semibold">
-					{upcomingEvents.length}
-					{
-						upcomingEvents.length === 1
-							? 'evento programado'
-							: 'eventos programados'
-					}
-				</p>
-			</SectionHeader>
+				description="Centralizamos nuestro calendario en Luma — ahí ves fecha, cupos y te inscribes."
+			/>
 			<div class="mt-7 sm:mt-8">
-				<UpcomingEventList events={agendaEvents} />
+				<EventsLuma calendarUrl={calendarUrl} embedUrl={embedUrl} />
 			</div>
 		</Container>
 	</section>
@@ -89,13 +69,17 @@ const agendaEvents = upcomingEvents.filter(
 				id="eventos-pasados-title"
 				title="Eventos pasados"
 				description="Una mirada a los momentos que hemos compartido como comunidad."
-			>
-				<p slot="action" class="text-foreground-muted text-sm font-semibold">
-					{pastEvents.length}
-					{pastEvents.length === 1 ? 'evento realizado' : 'eventos realizados'}
+			/>
+			<div class="mt-7 sm:mt-8 text-center">
+				<p class="text-foreground-secondary mx-auto max-w-lg text-sm leading-6 sm:text-base">
+					Todavía no publicamos acá el resumen de eventos pasados. Mientras
+					tanto, mira las fotos de nuestros encuentros anteriores en <a
+						href="/vida-lead"
+						class="text-foreground focus-visible:outline-optional-3 font-semibold underline decoration-white/30 underline-offset-4 transition-colors hover:text-white hover:decoration-white/60 focus-visible:outline-3 focus-visible:outline-offset-3 motion-reduce:transition-none"
+						>Vida LEAD</a
+					>.
 				</p>
-			</SectionHeader>
-			<div class="mt-7 sm:mt-8"><PastEventGrid events={pastEvents} /></div>
+			</div>
 		</Container>
 	</section>
 </Layout>

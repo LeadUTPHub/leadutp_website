@@ -1,0 +1,84 @@
+---
+// Shell del panel: barra superior + navegación lateral (placeholders,
+// Sprint 3+ los conecta a pantallas reales) + logout. Reutilizable por
+// cualquier pantalla de /administrator/** que necesite este marco.
+import { pillars } from '../../data/pillars';
+import type { Profile } from '../../domain/types';
+import Badge from '../ui/Badge.astro';
+import Button from '../ui/Button.astro';
+import Container from '../ui/Container.astro';
+
+interface Props {
+	profile: Profile;
+}
+
+const { profile } = Astro.props;
+
+const ROLE_LABELS: Record<Profile['role'], string> = {
+	director: 'Director',
+	subdirector: 'Subdirector',
+	super_admin: 'Super Admin',
+};
+
+const areaName = profile.areaSlug
+	? (pillars.find((pillar) => pillar.slug === profile.areaSlug)?.name ??
+		profile.areaSlug)
+	: null;
+
+const roleLabel = ROLE_LABELS[profile.role];
+
+const navItems = [
+	'Eventos',
+	'Galerías',
+	'Páginas',
+	...(profile.role === 'super_admin' ? ['Usuarios'] : []),
+];
+---
+
+<div class="flex min-h-svh flex-col">
+	<header class="bg-primary hairline-b">
+		<Container>
+			<div class="flex h-16 items-center justify-between">
+				<span class="font-display text-base font-bold text-white">
+					Panel LEAD UTP
+				</span>
+				<div class="flex items-center gap-3">
+					<Badge tone="optional" class="hidden sm:inline-flex">
+						{roleLabel}{areaName && ` · ${areaName}`}
+					</Badge>
+					<form method="POST" action="/administrator/logout">
+						<Button type="submit" variant="ghost" size="sm">Salir</Button>
+					</form>
+				</div>
+			</div>
+		</Container>
+	</header>
+
+	<div class="flex flex-1">
+		<nav
+			class="bg-canvas-deep hidden w-56 shrink-0 border-r border-white/10 p-4 sm:block"
+			aria-label="Navegación del panel"
+		>
+			<ul class="flex flex-col gap-1">
+				{
+					navItems.map((label) => (
+						<li>
+							<span class="text-foreground-muted flex min-h-11 items-center justify-between gap-2 rounded-md px-3 text-sm font-semibold">
+								{label}
+								<Badge tone="primary" class="text-[0.6rem]">
+									Pronto
+								</Badge>
+							</span>
+						</li>
+					))
+				}
+			</ul>
+		</nav>
+
+		<main class="flex-1 py-10">
+			<Container>
+				<slot />
+			</Container>
+		</main>
+	</div>
+</div>
