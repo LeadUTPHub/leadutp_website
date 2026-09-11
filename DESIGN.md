@@ -97,8 +97,8 @@ No hay componente de input en `src/components/ui/` todavía. Se crea `src/compon
 |---|---|
 | Cabecera | `SectionHeader` "Eventos" + slot `action`: `Button primary` "Nuevo evento" |
 | Lista | Filas tipo tarjeta (`bg-white/[0.06] ring-1 ring-white/12 rounded-lg`): título, chip de área (color del pilar), `Badge` Borrador/Publicado, acciones `ghost` (Editar, Abrir en Luma, Borrar) |
-| Form | `Field` título · `Field` URL de Luma (con validación visible) · `select` de pilar · switch `featured` · switch `published` · `Button primary` Guardar / `Button outline` Cancelar |
-| Aviso | Nota fija: "La fecha, el lugar y la inscripción viven en Luma. Aquí solo enlazas." |
+| Form | `Field` título · `Field` URL de Luma (con validación visible) · `Field` fecha/hora · `Field` ubicación · `Field` imagen (URL) · `textarea` descripción corta (máx. 280) · `select` de pilar · switch `featured` · switch `published` · `Button primary` Guardar / `Button outline` Cancelar |
+| Aviso | Nota fija: "La inscripción y el cupo se gestionan en Luma — el link de arriba lleva ahí. El resto de la tarjeta (fecha, ubicación, imagen, descripción) lo cargas tú." |
 
 ### 6.4 `/administrator/galerias` ("así se vivió el evento")
 | Aspecto | Aplicación |

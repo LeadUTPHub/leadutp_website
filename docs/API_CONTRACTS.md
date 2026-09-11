@@ -82,8 +82,11 @@ Desactiva (`is_active = false`); no borra `auth.users` por defecto. **204**.
 ```json
 { "pointers": [
   { "id": "uuid", "title": "Talent Room", "lumaUrl": "https://luma.com/xxxx",
+    "eventDate": "2026-05-10T18:00:00Z", "location": "Auditorio UTP",
+    "imageUrl": "https://res.cloudinary.com/leadutp/image/upload/.../talent-room.jpg",
+    "shortDescription": "Taller de talento y liderazgo estudiantil.",
     "pillarSlug": "liderazgo", "areaSlug": "liderazgo", "ownerId": "uuid",
-    "featured": true, "sortHint": "2026-05-10T00:00:00Z", "published": false }
+    "featured": true, "published": false }
 ] }
 ```
 
@@ -91,12 +94,19 @@ Desactiva (`is_active = false`); no borra `auth.users` por defecto. **204**.
 **Request**
 ```json
 { "title": "Talent Room", "lumaUrl": "https://luma.com/xxxx",
-  "pillarSlug": "liderazgo", "featured": true, "sortHint": "2026-05-10", "published": false }
+  "eventDate": "2026-05-10T18:00:00Z", "location": "Auditorio UTP",
+  "imageUrl": "https://res.cloudinary.com/leadutp/image/upload/.../talent-room.jpg",
+  "shortDescription": "Taller de talento y liderazgo estudiantil.",
+  "pillarSlug": "liderazgo", "featured": true, "published": false }
 ```
 | Campo | Regla |
 |---|---|
 | `title` | requerido, 3–120 chars |
-| `lumaUrl` | requerido, debe matchear `^https://(lu\.ma\|luma\.com)/` |
+| `lumaUrl` | requerido, debe matchear `^https://(lu\.ma\|luma\.com)/` — es la URL de registro; la inscripción real ocurre en Luma |
+| `eventDate` | opcional, ISO datetime — se muestra en la tarjeta y ordena la lista |
+| `location` | opcional, texto libre |
+| `imageUrl` | opcional, debe matchear `^https://` — URL externa en texto plano (sin subida firmada en este sprint) |
+| `shortDescription` | opcional, máx. 280 chars |
 | `pillarSlug` | opcional, debe existir en `pillars` |
 | `areaSlug` | **no se acepta del cliente** — el server lo fija a `auth_area()` (o lo pide si super_admin) |
 | `featured`, `published` | booleanos, default `false` |

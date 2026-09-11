@@ -26,11 +26,11 @@
 
 | Término | Definición |
 |---|---|
-| **Evento** | Una actividad de LEAD UTP. Su **verdad única está en Luma** (fecha, hora, lugar, cupos, inscripción). La web nunca la copia. |
-| **Evento próximo** | Evento que aún no ocurre. Se muestra en `/eventos` **vía embed/link a Luma**. La web no almacena sus datos. |
+| **Evento** | Una actividad de LEAD UTP. La **inscripción** ocurre en Luma; el **cupo** lo gestiona Luma. La web no sincroniza estos datos vía API (se descartó por costo) — quien cura el **Puntero a Luma** carga a mano la fecha/ubicación que quiere mostrar. |
+| **Evento próximo** | Evento que aún no ocurre. Se muestra en `/eventos` **vía embed/link a Luma** (calendario general) y, opcionalmente, como una o más **tarjetas de Puntero a Luma** curadas por un director. |
 | **Evento realizado** | Evento que ya ocurrió y del que se publica un recuerdo ("así se vivió…"). Se modela como **Galería** en Supabase + Cloudinary. No es un registro de Luma. |
-| **Puntero a Luma** (`luma_event_pointers`) | Referencia curada por un director a un evento próximo concreto de Luma: solo `title` + `luma_url` (+ `pillar_slug`, `featured`, `sort_hint` para ordenar). **No** contiene fecha/lugar/cupos autoritativos. Opcional; el embed del calendario ya cubre el caso general. |
-| **Inscripción** | Se hace **100 % en Luma**. La web **no** tiene ningún formulario ni área de inscripción. |
+| **Puntero a Luma** (`luma_event_pointers`) | Tarjeta de evento curada por un director/subdirector: `title`, `luma_url` (URL de registro, único lugar donde se inscribe), `event_date`, `location`, `image_url`, `short_description` (+ `pillar_slug`, `featured`). Todos estos datos —salvo `luma_url`— los carga el staff a mano; no se sincronizan desde Luma. Opcional; el embed del calendario ya cubre el caso general. |
+| **Inscripción** | Se hace **100 % en Luma**, a través del link de `luma_url`. La web **no** tiene ningún formulario ni área de inscripción. |
 | **Calendario de Luma** | `https://luma.com/leadutp_`. Único origen. Se embebe (iframe, snippet del panel de Luma) o se enlaza (botón). |
 
 ## Contenido

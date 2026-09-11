@@ -131,23 +131,34 @@ revoke execute on function public.custom_access_token_hook(jsonb) from anon, aut
 
 -- ─── 7. Tablas de contenido ────────────────────────────────────────────
 
--- 7.1 luma_event_pointers — puntero curado a un evento próximo de Luma.
---     NO copia datos autoritativos (fecha/lugar/cupos viven en Luma).
+-- 7.1 luma_event_pointers — tarjeta de evento cargada a mano por el director,
+--     con link de registro a Luma. Decisión revisada en Sprint 3: la API de
+--     Luma se descartó por costo, así que fecha/ubicación/imagen/descripción
+--     ya NO viven solo en Luma — el director las carga acá para poder
+--     mostrar la tarjeta completa en /eventos. luma_url sigue siendo el
+--     único lugar donde ocurre la inscripción real (la web nunca la duplica).
 create table if not exists public.luma_event_pointers (
-  id           uuid primary key default gen_random_uuid(),
-  title        text not null,
-  luma_url     text not null,
-  pillar_slug  text references public.pillars(slug),
-  area_slug    text not null references public.pillars(slug),
-  owner_id     uuid not null references public.profiles(id),
-  featured     boolean not null default false,
-  sort_hint    timestamptz,                 -- SOLO para ordenar en la web
-  source       public.content_source not null default 'supabase',
-  published    boolean not null default false,
-  created_at   timestamptz not null default now(),
-  updated_at   timestamptz not null default now(),
+  id                 uuid primary key default gen_random_uuid(),
+  title              text not null,
+  luma_url           text not null,          -- URL de registro (vive en Luma)
+  event_date         timestamptz,             -- fecha/hora a mostrar; también ordena
+  location           text,                    -- ubicación a mostrar
+  image_url          text,                    -- imagen de la tarjeta (URL externa, ej. Cloudinary)
+  short_description  text,                    -- descripción corta de la tarjeta
+  pillar_slug        text references public.pillars(slug),
+  area_slug          text not null references public.pillars(slug),
+  owner_id           uuid not null references public.profiles(id),
+  featured           boolean not null default false,
+  source             public.content_source not null default 'supabase',
+  published          boolean not null default false,
+  created_at         timestamptz not null default now(),
+  updated_at         timestamptz not null default now(),
   constraint luma_url_must_be_luma
-    check (luma_url ~* '^https://(lu\.ma|luma\.com)/')
+    check (luma_url ~* '^https://(lu\.ma|luma\.com)/'),
+  constraint image_url_must_be_https
+    check (image_url is null or image_url ~* '^https://'),
+  constraint short_description_max_length
+    check (short_description is null or char_length(short_description) <= 280)
 );
 
 -- 7.2 event_galleries — "así se vivió el evento"
