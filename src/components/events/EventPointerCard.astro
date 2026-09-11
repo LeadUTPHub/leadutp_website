@@ -1,0 +1,93 @@
+---
+// T3.5 — tarjeta pública de un puntero a Luma (published && featured,
+// ver selectFeaturedPointers.ts). Mismo lenguaje visual que EventCard.astro
+// (card-lift, bg-surface, Badge, ícono + Calendar/MapPin) pero para
+// EventPointer, no para el Event local de src/data/events — son tipos
+// distintos a propósito (DOMAIN.md: el puntero es contenido curado a
+// mano, no el evento estático del .data.ts).
+import { ArrowRight, Calendar, MapPin } from '@lucide/astro';
+import type { EventPointer } from '../../domain/ports/ContentRepository';
+import { pillars } from '../../data/pillars';
+import Badge from '../ui/Badge.astro';
+
+interface Props {
+	pointer: EventPointer;
+}
+
+const { pointer } = Astro.props;
+
+const pillarName = pointer.pillarSlug
+	? (pillars.find((pillar) => pillar.slug === pointer.pillarSlug)?.name ?? null)
+	: null;
+
+const formattedDate = pointer.eventDate
+	? new Intl.DateTimeFormat('es-PE', {
+			dateStyle: 'long',
+			timeStyle: 'short',
+			timeZone: 'America/Lima',
+		}).format(new Date(pointer.eventDate))
+	: null;
+---
+
+<article
+	class="card-lift group bg-surface hover:bg-surface-raised flex h-full flex-col overflow-hidden rounded-xl border border-white/10"
+>
+	{
+		pointer.imageUrl && (
+			<div class="bg-canvas-navy relative aspect-[16/10] overflow-hidden">
+				<img
+					src={pointer.imageUrl}
+					alt=""
+					loading="lazy"
+					class="h-full w-full object-cover transition duration-500 group-hover:scale-[1.02] motion-reduce:transform-none motion-reduce:transition-none"
+					onerror="this.parentElement.hidden = true"
+				/>
+			</div>
+		)
+	}
+	<div class="flex flex-1 flex-col p-5 sm:p-6">
+		{pillarName && <Badge tone="primary">{pillarName}</Badge>}
+		<h3
+			class="font-display text-foreground mt-4 text-xl leading-tight font-semibold tracking-[-0.04em]"
+		>
+			{pointer.title}
+		</h3>
+		{
+			pointer.shortDescription && (
+				<p class="text-foreground-secondary mt-3 text-sm leading-6">
+					{pointer.shortDescription}
+				</p>
+			)
+		}
+		<div class="mt-auto pt-6">
+			{
+				formattedDate && (
+					<div class="text-foreground-secondary flex items-center gap-2 text-sm font-medium">
+						<Calendar class="text-secondary size-4" aria-hidden="true" />
+						<span>{formattedDate}</span>
+					</div>
+				)
+			}
+			{
+				pointer.location && (
+					<div class="text-foreground-secondary mt-2 flex items-center gap-2 text-sm font-medium">
+						<MapPin class="text-secondary size-4" aria-hidden="true" />
+						<span>{pointer.location}</span>
+					</div>
+				)
+			}
+			<a
+				href={pointer.lumaUrl}
+				target="_blank"
+				rel="noopener noreferrer"
+				class="text-foreground mt-5 inline-flex min-h-11 items-center gap-1 text-sm font-bold transition hover:text-white focus-visible:rounded-sm"
+			>
+				Inscribirme en Luma
+				<ArrowRight
+					class="size-4 transition-transform duration-200 group-hover:translate-x-1 motion-reduce:transition-none"
+					aria-hidden="true"
+				/>
+			</a>
+		</div>
+	</div>
+</article>

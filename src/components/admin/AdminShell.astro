@@ -1,7 +1,8 @@
 ---
-// Shell del panel: barra superior + navegación lateral (placeholders,
-// Sprint 3+ los conecta a pantallas reales) + logout. Reutilizable por
-// cualquier pantalla de /administrator/** que necesite este marco.
+// Shell del panel: barra superior + navegación lateral + logout.
+// Reutilizable por cualquier pantalla de /administrator/** que necesite
+// este marco. T3.4 activa el link de Eventos; el resto sigue "Pronto"
+// hasta su propio sprint.
 import { pillars } from '../../data/pillars';
 import type { Profile } from '../../domain/types';
 import Badge from '../ui/Badge.astro';
@@ -27,11 +28,11 @@ const areaName = profile.areaSlug
 
 const roleLabel = ROLE_LABELS[profile.role];
 
-const navItems = [
-	'Eventos',
-	'Galerías',
-	'Páginas',
-	...(profile.role === 'super_admin' ? ['Usuarios'] : []),
+const navItems: { label: string; href?: string }[] = [
+	{ label: 'Eventos', href: '/administrator/eventos' },
+	{ label: 'Galerías' },
+	{ label: 'Páginas' },
+	...(profile.role === 'super_admin' ? [{ label: 'Usuarios' }] : []),
 ];
 ---
 
@@ -61,16 +62,27 @@ const navItems = [
 		>
 			<ul class="flex flex-col gap-1">
 				{
-					navItems.map((label) => (
-						<li>
-							<span class="text-foreground-muted flex min-h-11 items-center justify-between gap-2 rounded-md px-3 text-sm font-semibold">
-								{label}
-								<Badge tone="primary" class="text-[0.6rem]">
-									Pronto
-								</Badge>
-							</span>
-						</li>
-					))
+					navItems.map((item) =>
+						item.href ? (
+							<li>
+								<a
+									href={item.href}
+									class="text-foreground hover:bg-surface flex min-h-11 items-center gap-2 rounded-md px-3 text-sm font-semibold transition"
+								>
+									{item.label}
+								</a>
+							</li>
+						) : (
+							<li>
+								<span class="text-foreground-muted flex min-h-11 items-center justify-between gap-2 rounded-md px-3 text-sm font-semibold">
+									{item.label}
+									<Badge tone="primary" class="text-[0.6rem]">
+										Pronto
+									</Badge>
+								</span>
+							</li>
+						),
+					)
 				}
 			</ul>
 		</nav>

@@ -2,46 +2,99 @@
 // Envoltorio de consistencia (DESIGN.md §5) — no es un sistema nuevo.
 // Si el sitio público llegara a necesitar inputs, este es el candidato
 // a promoverse a src/components/ui/.
+//
+// T3.4: se extiende de solo `input` a `input | textarea | select` — las
+// mismas clases de DESIGN.md §5 para los tres, sin ningún token nuevo.
+interface SelectOption {
+	value: string;
+	label: string;
+}
+
 interface Props {
 	label: string;
 	name: string;
-	type?: 'text' | 'email' | 'password';
+	as?: 'input' | 'textarea' | 'select';
+	type?: 'text' | 'email' | 'password' | 'datetime-local' | 'url';
 	autocomplete?: string;
 	required?: boolean;
 	error?: string;
 	class?: string;
+	/** Solo para `as="textarea"`. */
+	rows?: number;
+	maxlength?: number;
+	/** Solo para `as="select"`. Se antepone una opción vacía si no hay `required`. */
+	options?: SelectOption[];
+	placeholder?: string;
 }
 
 const {
 	label,
 	name,
+	as = 'input',
 	type = 'text',
 	autocomplete,
 	required = false,
 	error,
 	class: className,
+	rows = 3,
+	maxlength,
+	options = [],
+	placeholder,
 } = Astro.props;
 
 const inputId = `field-${name}`;
+
+const fieldClasses = [
+	'text-foreground placeholder:text-foreground-muted focus-visible:outline-optional-3 w-full rounded-md bg-white/[0.06] px-3 text-sm ring-1 transition focus-visible:outline-3 focus-visible:outline-offset-3',
+	error ? 'ring-secondary/50' : 'ring-white/12',
+];
 ---
 
 <div class:list={['flex flex-col gap-1.5', className]}>
 	<label for={inputId} class="text-foreground-secondary text-sm font-semibold">
 		{label}
 	</label>
-	<input
-		id={inputId}
-		name={name}
-		type={type}
-		autocomplete={autocomplete}
-		required={required}
-		aria-invalid={error ? 'true' : undefined}
-		aria-describedby={error ? `${inputId}-error` : undefined}
-		class:list={[
-			'text-foreground placeholder:text-foreground-muted focus-visible:outline-optional-3 min-h-11 w-full rounded-md bg-white/[0.06] px-3 text-sm ring-1 transition focus-visible:outline-3 focus-visible:outline-offset-3',
-			error ? 'ring-secondary/50' : 'ring-white/12',
-		]}
-	/>
+	{
+		as === 'textarea' ? (
+			<textarea
+				id={inputId}
+				name={name}
+				rows={rows}
+				maxlength={maxlength}
+				required={required}
+				placeholder={placeholder}
+				aria-invalid={error ? 'true' : undefined}
+				aria-describedby={error ? `${inputId}-error` : undefined}
+				class:list={[...fieldClasses, 'min-h-24 resize-y py-2']}
+			/>
+		) : as === 'select' ? (
+			<select
+				id={inputId}
+				name={name}
+				required={required}
+				aria-invalid={error ? 'true' : undefined}
+				aria-describedby={error ? `${inputId}-error` : undefined}
+				class:list={[...fieldClasses, 'min-h-11']}
+			>
+				{!required && <option value="">Sin pilar</option>}
+				{options.map((option) => (
+					<option value={option.value}>{option.label}</option>
+				))}
+			</select>
+		) : (
+			<input
+				id={inputId}
+				name={name}
+				type={type}
+				autocomplete={autocomplete}
+				required={required}
+				placeholder={placeholder}
+				aria-invalid={error ? 'true' : undefined}
+				aria-describedby={error ? `${inputId}-error` : undefined}
+				class:list={[...fieldClasses, 'min-h-11']}
+			/>
+		)
+	}
 	{
 		error && (
 			<p id={`${inputId}-error`} class="text-secondary text-xs">

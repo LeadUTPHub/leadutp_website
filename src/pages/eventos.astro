@@ -3,9 +3,17 @@
 // de verdad, sin sync). "Eventos pasados" queda vacío hasta Sprint 4
 // (galerías "así se vivió el evento"). Ver .sprints/BACKLOG.md Sprint 1
 // y MEMORY.md D-P4/D-P5.
+//
+// T3.5: además del embed, se listan los punteros a Luma curados
+// (published && featured) como tarjetas completas. Build-time, con
+// cliente anon (RLS ya limita a published=true) — si Supabase falla,
+// degrada a lista vacía y el embed queda solo (regla inquebrantable 4).
+import EventPointerCard from '../components/events/EventPointerCard.astro';
 import EventsLuma from '../components/events/EventsLuma.astro';
 import Container from '../components/ui/Container.astro';
 import SectionHeader from '../components/ui/SectionHeader.astro';
+import { selectFeaturedPointers } from '../domain/selectFeaturedPointers';
+import { getContentRepository } from '../infra/container';
 import Layout from '../layouts/Layout.astro';
 
 // PUBLIC_LUMA_CALENDAR_URL no es secreto (es una URL pública); se
@@ -15,6 +23,16 @@ import Layout from '../layouts/Layout.astro';
 const calendarUrl =
 	import.meta.env.PUBLIC_LUMA_CALENDAR_URL || 'https://luma.com/leadutp_';
 const embedUrl = import.meta.env.PUBLIC_LUMA_EMBED_URL;
+
+let featuredPointers: Awaited<ReturnType<typeof selectFeaturedPointers>> = [];
+try {
+	const pointers = await getContentRepository().listPointers();
+	featuredPointers = selectFeaturedPointers(pointers);
+} catch {
+	// Degradación elegante: la sección de Luma (botón + embed) queda
+	// intacta, solo se omiten las tarjetas curadas.
+	featuredPointers = [];
+}
 ---
 
 <Layout
@@ -56,6 +74,17 @@ const embedUrl = import.meta.env.PUBLIC_LUMA_EMBED_URL;
 			<div class="mt-7 sm:mt-8">
 				<EventsLuma calendarUrl={calendarUrl} embedUrl={embedUrl} />
 			</div>
+			{
+				featuredPointers.length > 0 && (
+					<ul class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+						{featuredPointers.map((pointer) => (
+							<li>
+								<EventPointerCard pointer={pointer} />
+							</li>
+						))}
+					</ul>
+				)
+			}
 		</Container>
 	</section>
 
