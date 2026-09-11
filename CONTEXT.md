@@ -43,6 +43,21 @@ SEO/infra ya cubierto:
 - `robots.txt` + sitemap
 - Transiciones de página (`astro:transitions`); el crossfade está afinado a 300ms con `cubic-bezier(0.4, 0, 0.2, 1)` (la misma curva que usa Tailwind en el resto del sitio) en vez del corte seco que tenía antes
 
+## Panel de administración + integración Luma (en desarrollo)
+
+El VP pidió centralizar los eventos en Luma y que directores y subdirectores puedan cargar su propio contenido (eventos, fotos de "así se vivió el evento", y más adelante Nosotros y Proyectos) sin depender de alguien que edite los `.data.ts` a mano. Para eso se está construyendo un panel de administración en una ruta oculta (`/administrator`, sin botón de login en el sitio público), con roles por director/subdirector. Luma queda como única fuente de verdad de los eventos: la web solo los muestra o enlaza. Nada de esto puede romper las páginas públicas de la tabla de arriba.
+
+Stack decidido:
+
+- **Supabase** — Auth (roles director / subdirector / super-admin con Row Level Security) + Postgres para los datos
+- **Cloudinary** — todas las fotos; Supabase no guarda archivos pesados
+- **Luma** — solo embed/link desde el sitio, sin sincronizar datos vía API
+- **Astro hybrid solo en `/administrator/*`** — el resto del sitio sigue prerenderizado (SSG)
+
+Este trabajo vive en la rama `cms-admin` y no llega a `main` hasta el merge. Sigue el proceso de sprints documentado en [`docs/GUIA_METODOLOGIA_ADMIN.md`](./docs/GUIA_METODOLOGIA_ADMIN.md): cada sprint cierra con su DoD validada en un preview de Vercel antes de abrir el siguiente.
+
+Estado del backlog: los 7 sprints (0–6) ya están formalizados en [`.sprints/BACKLOG.md`](./.sprints/BACKLOG.md), con sus tareas en Given-When-Then. Sprint en curso: **Sprint 0 (infraestructura) — no iniciado**.
+
 ## Estructura de datos (contenido)
 
 El contenido vive como datos tipados en `src/data/`, **no en un CMS todavía**:
