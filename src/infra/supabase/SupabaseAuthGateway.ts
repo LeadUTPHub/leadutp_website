@@ -1,9 +1,5 @@
 import { createServerClient } from '@supabase/ssr';
-import type {
-	AuthAssuranceLevel,
-	AuthGateway,
-	Session,
-} from '../../domain/ports/AuthGateway';
+import type { AuthGateway, Session } from '../../domain/ports/AuthGateway';
 import { mapUserToProfile } from './mapUserToProfile';
 
 /**
@@ -44,25 +40,33 @@ export class SupabaseAuthGateway implements AuthGateway {
 	}
 
 	async getSession(): Promise<Session | null> {
-		// getUser() valida el JWT contra Supabase, no solo lo decodifica
-		// (regla de DISENO_TECNICO §1.5).
-		const { data, error } = await this.client.auth.getUser();
-		if (error || !data.user) return null;
+		// getClaims() valida el JWT (JWKS o red, según el proyecto) y
+		// devuelve las claims REALES del access token — a diferencia de
+		// getUser(), cuyo `data.user.app_metadata` es el raw_app_meta_data
+		// crudo de auth.users, sin las claims que agrega el Auth Hook
+		// (bug encontrado en Sprint 2, T2.8 — ver MEMORY.md L19).
+		const { data, error } = await this.client.auth.getClaims();
+		if (error || !data) return null;
 
-		return await this.buildSession(data.user);
+		return this.buildSession(data.claims);
 	}
 
 	async signInWithPassword(email: string, password: string): Promise<Session> {
-		const { data, error } = await this.client.auth.signInWithPassword({
+		const { error: signInError } = await this.client.auth.signInWithPassword({
 			email,
 			password,
 		});
 
-		if (error || !data.user) {
+		if (signInError) {
 			throw new Error('Usuario o contraseña incorrectos.');
 		}
 
-		const session = await this.buildSession(data.user);
+		const { data, error: claimsError } = await this.client.auth.getClaims();
+		if (claimsError || !data) {
+			throw new Error('No se pudo validar la sesión.');
+		}
+
+		const session = this.buildSession(data.claims);
 		if (!session) {
 			throw new Error('Este usuario no tiene un perfil asignado.');
 		}
@@ -74,23 +78,22 @@ export class SupabaseAuthGateway implements AuthGateway {
 		await this.client.auth.signOut();
 	}
 
-	private async buildSession(user: {
-		id: string;
+	private buildSession(claims: {
+		sub: string;
 		app_metadata?: Record<string, unknown>;
-	}): Promise<Session | null> {
-		const profile = mapUserToProfile(user);
+		aal?: string;
+	}): Session | null {
+		const profile = mapUserToProfile({
+			id: claims.sub,
+			app_metadata: claims.app_metadata,
+		});
 		if (!profile || !profile.isActive) return null;
 
 		return {
 			profile,
-			// MFA-ready (D-P3): se lee el AAL actual del JWT (sin llamada de
-			// red adicional), pero nada en este sprint exige aal2 todavía.
-			assuranceLevel: await this.readAssuranceLevel(),
+			// MFA-ready (D-P3): getClaims() ya trae el AAL actual, sin
+			// llamada de red adicional. Nada en este sprint exige aal2.
+			assuranceLevel: claims.aal === 'aal2' ? 'aal2' : 'aal1',
 		};
-	}
-
-	private async readAssuranceLevel(): Promise<AuthAssuranceLevel> {
-		const { data } = await this.client.auth.mfa.getAuthenticatorAssuranceLevel();
-		return data?.currentLevel === 'aal2' ? 'aal2' : 'aal1';
 	}
 }
