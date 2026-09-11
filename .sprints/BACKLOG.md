@@ -8,7 +8,7 @@
 | Sprint | Épica | Estado | Piloto |
 |---|---|---|---|
 | 0 | Infraestructura base | ✅ DONE | — |
-| 1 | Eventos + embed Luma | TODO | ✅ **piloto** |
+| 1 | Eventos + embed Luma | ✅ DONE (6/6 + 1 extra) | ✅ **piloto** |
 | 2 | Autenticación y roles | TODO | — |
 | 3 | CRUD de eventos propios | TODO | — |
 | 4 | Galería "así se vivió el evento" | TODO | — |
@@ -40,16 +40,19 @@ Regla de secuencia: el Sprint 2 (auth) no arranca hasta que el Sprint 1 esté va
 
 **Meta / DoD:** `/eventos` muestra en local (`pnpm preview`) el calendario de Luma (`https://luma.com/leadutp_`) como **botón siempre visible + iframe opcional**, con degradación elegante (si el iframe no carga o no hay `PUBLIC_LUMA_EMBED_URL`, queda solo el botón). El array de `events.data.ts` se vacía. `pnpm build` limpio, 10 páginas estáticas. Cero cambios en Supabase.
 
+> **Estado real (2026-09-10): ✅ 6/6 + 1 tarea extra aprobada por el PO.** Verificado antes de implementar: `luma.com/leadutp_` tiene `X-Frame-Options: SAMEORIGIN` (bloquea iframe); `luma.com/embed/calendar/leadutp_/events` no tiene esa cabecera ni CSP `frame-ancestors` ni JS anti-framing → **sí es embebible**, funciona directo con el slug público (sin necesitar el `cal-id` privado del dashboard).
+
 | ID | Tarea | Given / When / Then | Estado |
 |---|---|---|---|
-| T1.1 | (Rojo) `buildLumaLinks()` en dominio | **Given** `{ calendarUrl, embedUrl }` de env · **When** falta `embedUrl` · **Then** devuelve `{ calendarUrl, embedUrl: null }`; con ambos, los dos | TODO |
-| T1.2 | (Verde) Componente `EventsLuma.astro` | **Given** `buildLumaLinks()` · **When** se renderiza · **Then** muestra `Button` (variant `primary`) "Ver eventos en Luma" → `calendarUrl` (target `_blank`, `rel`), y si hay `embedUrl` una tarjeta con `<iframe loading="lazy">` + estado "Cargando calendario…" | TODO |
-| T1.3 | Fallback del iframe (script) | **Given** el iframe · **When** no dispara `load` en 8 s o dispara `error` · **Then** la tarjeta se oculta (`el.hidden = true`); el botón permanece. Respeta `prefers-reduced-motion` | TODO |
-| T1.4 | Integrar en `/eventos` | **Given** `eventos.astro` con secciones Próximos/Pasados · **When** se coloca `EventsLuma` en "Próximos eventos" y se **vacía** `events` en `events.data.ts` (se conservan `events.utils.ts` y su test) · **Then** "Próximos" muestra Luma, "Pasados" muestra su estado vacío, `FeaturedEvent` no rompe | TODO |
-| T1.5 | Texto de contexto | **Given** la sección · **When** se redacta · **Then** explica que la inscripción se hace en Luma; sin prometer datos que la web no tiene | TODO |
-| T1.6 | Build + validación local | **Given** todo lo anterior · **When** `pnpm build && pnpm preview` (y `git push origin cms-admin` como respaldo) · **Then** 10 HTML estáticos, `/eventos` funcional en local con y sin `PUBLIC_LUMA_EMBED_URL` | TODO |
+| T1.1 | (Rojo) `buildLumaLinks()` en dominio | **Given** `{ calendarUrl, embedUrl }` de env · **When** falta `embedUrl` · **Then** devuelve `{ calendarUrl, embedUrl: null }`; con ambos, los dos | ✅ DONE — `src/domain/lumaLinks.ts` + `lumaLinks.test.ts`, Rojo→Verde |
+| T1.2 | (Verde) Componente `EventsLuma.astro` | **Given** `buildLumaLinks()` · **When** se renderiza · **Then** muestra `Button` (variant `primary`) "Ver eventos en Luma" → `calendarUrl` (target `_blank`, `rel`), y si hay `embedUrl` una tarjeta con `<iframe loading="lazy">` + estado "Cargando calendario…" | ✅ DONE — `src/components/events/EventsLuma.astro`; `Button.astro` extendido con `target`/`rel` opcionales (9 archivos auditados, 0 afectados) |
+| T1.3 | Fallback del iframe (script) | **Given** el iframe · **When** no dispara `load` en 8 s o dispara `error` · **Then** la tarjeta se oculta (`el.hidden = true`); el botón permanece. Respeta `prefers-reduced-motion` | ✅ DONE — custom element `<events-luma-embed>` en el mismo archivo; verificado en build real: sin `PUBLIC_LUMA_EMBED_URL`, 0 iframes renderizados |
+| T1.4 | Integrar en `/eventos` | **Given** `eventos.astro` con secciones Próximos/Pasados · **When** se coloca `EventsLuma` en "Próximos eventos" y se **vacía** `events` en `events.data.ts` (se conservan `events.utils.ts` y su test) · **Then** "Próximos" muestra Luma, "Pasados" muestra su estado vacío, `FeaturedEvent` no rompe | ✅ DONE — "Pasados" enlaza a `/vida-lead` en vez de placeholder genérico |
+| T1.5 | Texto de contexto | **Given** la sección · **When** se redacta · **Then** explica que la inscripción se hace en Luma; sin prometer datos que la web no tiene | ✅ DONE |
+| T1.6 | Build + validación local | **Given** todo lo anterior · **When** `pnpm build && pnpm preview` (y `git push origin cms-admin` como respaldo) · **Then** 10 HTML estáticos, `/eventos` funcional en local con y sin `PUBLIC_LUMA_EMBED_URL` | ✅ DONE — 15 HTML, 0 funciones, `build-boundary.test.ts` en verde contra build fresco |
+| T1.7 *(extra, aprobada por el PO)* | CTA de Luma en `HomeEventsCta.astro` mientras no haya `featuredEvent` local | **Given** la Home sin eventos destacados locales (hasta Sprint 3) · **When** se reemplaza el hueco silencioso de `HomeEvents` por un CTA simple (mismo `buildLumaLinks()`, sin listar eventos) · **Then** la Home no pierde la sección antes de una demo a la junta directiva | ✅ DONE — `src/components/home/HomeEventsCta.astro`; swap a `HomeEvents` real trivial en Sprint 3 |
 
-**Nota Luma (P5):** el `cal-id` del iframe se copia del panel de Luma del equipo (Calendar → Settings → Embed) y se guarda en `PUBLIC_LUMA_EMBED_URL`. Si no se consigue → solo botón (T1.2 ya lo contempla).
+**Nota Luma (P5) — resuelta:** `PUBLIC_LUMA_EMBED_URL` recomendada: `https://luma.com/embed/calendar/leadutp_/events`. Sin ella en `.env`, el sitio degrada a solo botón (comportamiento ya probado en el build).
 
 ---
 
@@ -138,7 +141,7 @@ Regla de secuencia: el Sprint 2 (auth) no arranca hasta que el Sprint 1 esté va
 | Sprint | Fecha cierre | Validación (local / preview URL) | Aprobado por PO | Notas en MEMORY.md |
 |---|---|---|---|---|
 | 0 | 2026-09-10 | local (`pnpm dev` + `pnpm build && pnpm preview`, por el PO) + T0.3 verificado en dashboard de Supabase por el PO | ✅ Sí — Sprint 0 completo (6/6) | Ver entrada de cierre de Sprint 0 |
-| 1 | — | — | — | — |
+| 1 | 2026-09-10 | local (`pnpm dev` + `pnpm build && pnpm preview`) | Pendiente — reportado, esperando aprobación explícita del PO | Ver entrada de cierre de Sprint 1 |
 | 2 | — | — | — | — |
 | 3 | — | — | — | — |
 | 4 | — | — | — | — |
