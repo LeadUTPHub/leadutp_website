@@ -12,7 +12,7 @@ Intersección estricta de tres marcos:
 |---|---|
 | **Spec-Driven Development (SDD)** | Ningún código sin un SPEC (tarea del backlog con Given-When-Then) que lo contrate. |
 | **Arquitectura Limpia + Hexagonal** | Dominio puro; dependencias hacia adentro (ver `ARCHITECTURE.md`). |
-| **Scrum** | Sprints 0–6 de `.sprints/BACKLOG.md`, en orden, sin fusionar. Cada sprint cierra con su DoD validada en preview de Vercel antes de abrir el siguiente. |
+| **Scrum** | Sprints 0–6 de `.sprints/BACKLOG.md`, en orden, sin fusionar. Cada sprint cierra con su DoD validada antes de abrir el siguiente — **hoy 100% en local** (`pnpm dev` + `pnpm build && pnpm preview`); en preview de Vercel una vez que el repo se conecte (ver nota de fase en `docs/GUIA_METODOLOGIA_ADMIN.md`). |
 
 El PO (Product Owner) es quien aprueba cada paso y cada cierre de sprint.
 
@@ -23,7 +23,7 @@ El PO (Product Owner) es quien aprueba cada paso y cada cierre de sprint.
 3. **Dominio puro.** `src/domain/**` no importa `@supabase/*`, `cloudinary`, `astro` ni ninguna otra capa.
 4. **Degradación elegante.** Si Luma, Supabase o Cloudinary fallan, la página pública NO se rompe (nunca un 500). Ver `docs/DISENO_TECNICO.md` §5.
 5. **Trazabilidad.** Todo dato conserva su procedencia: columna `source` (`supabase` / `cloudinary` / `static`).
-6. **Solo cuenta lo demostrable.** Nada es "hecho" si no corre end-to-end en un preview de Vercel.
+6. **Solo cuenta lo demostrable.** Nada es "hecho" si no corre end-to-end — hoy con `pnpm build && pnpm preview` en local (Vercel aún no conectado); más adelante, también en preview de Vercel.
 7. **Sin scope creep.** No se añaden funcionalidades fuera del SPEC activo. No se adelanta trabajo de sprints posteriores.
 8. **No se tocan páginas públicas existentes** (Home, Pilares, Nosotros, Convocatorias, Internacional, Vida LEAD, Eventos, 404) fuera del sprint que explícitamente las toque. `pnpm build` debe pasar en cada commit.
 9. **Aislamiento de rutas.** Todo lo nuevo con servidor vive en `/administrator/**`. Al añadir el adaptador de Vercel, las 10 rutas públicas siguen **prerenderizadas**; solo `/administrator/**` lleva `export const prerender = false`.
@@ -50,7 +50,7 @@ El PO (Product Owner) es quien aprueba cada paso y cada cierre de sprint.
 - Todo reporte al PO va en **tablas de doble entrada** (estilo Notion).
 - Al cerrar cada tarea/sprint se documentan decisiones y errores en [`MEMORY.md`](./MEMORY.md) (raíz).
 - Cada 2 tareas dentro de un sprint: resumen en tabla (qué se hizo, qué test lo cubre, si `pnpm build` sigue pasando).
-- Al terminar un sprint: recordar al PO `git push origin cms-admin` para el preview de Vercel.
+- Al terminar un sprint: correr `pnpm build && pnpm preview` y reportar el resultado al PO (quien prueba con `pnpm dev` antes de aprobar el DoD). Recordar además `git push origin cms-admin` como respaldo remoto en GitHub — Vercel aún no está conectado, así que el push **no genera preview todavía**.
 
 ## Definition of Done (transversal, además de la DoD específica de cada sprint)
 
@@ -60,4 +60,4 @@ El PO (Product Owner) es quien aprueba cada paso y cada cierre de sprint.
 - [ ] `pnpm lint` sin errores nuevos.
 - [ ] Sin secretos hardcodeados (todo por variable de entorno).
 - [ ] `MEMORY.md` actualizado.
-- [ ] Demostrado en preview de Vercel y aprobado por el PO.
+- [ ] Demostrado localmente (`pnpm build && pnpm preview` por el agente, `pnpm dev` por el PO) — o en preview de Vercel una vez conectado — y aprobado por el PO.

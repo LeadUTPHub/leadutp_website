@@ -1,7 +1,7 @@
 # BACKLOG — Panel de administración + integración Luma (LEAD UTP)
 
 > Secuencia **fija** de 7 sprints (0–6), decidida en `docs/GUIA_METODOLOGIA_ADMIN.md`. No se reordena ni se fusiona.
-> Ningún sprint arranca sin la DoD del anterior cumplida y validada en preview de Vercel.
+> Ningún sprint arranca sin la DoD del anterior cumplida y validada — **hoy 100% en local** (`pnpm build && pnpm preview` + `pnpm dev`); Vercel aún no está conectado (ver nota de fase en `docs/GUIA_METODOLOGIA_ADMIN.md`, sección "Flujo de trabajo con git y Vercel").
 > Ciclo por tarea: Rojo (test que falla) → Verde (código mínimo) → `pnpm build` completo → `MEMORY.md`.
 > Estados: `TODO` · `WIP` · `BLOCKED` · `DONE`.
 
@@ -15,13 +15,13 @@
 | 5 | Extensión a Nosotros y Proyectos | TODO | — |
 | 6 | Pulido UX/UI | TODO | — |
 
-Regla de secuencia: el Sprint 2 (auth) no arranca hasta que el Sprint 1 esté validado en preview — así, si Supabase se complica, Eventos ya quedó entregado de forma independiente.
+Regla de secuencia: el Sprint 2 (auth) no arranca hasta que el Sprint 1 esté validado en local — así, si Supabase se complica, Eventos ya quedó entregado de forma independiente.
 
 ---
 
 ## Sprint 0 · Infraestructura base
 
-**Meta / DoD:** proyecto Supabase creado y con `schema.sql` aplicado, cuenta Cloudinary lista, variables de entorno configuradas, `astro.config.mjs` con adaptador, capa hexagonal vacía compilando. **Sin UI.** `pnpm build` produce las mismas 10 páginas públicas estáticas y **cero** funciones de servidor. Validado en preview.
+**Meta / DoD:** proyecto Supabase creado y con `schema.sql` aplicado, cuenta Cloudinary lista, variables de entorno configuradas, `astro.config.mjs` con adaptador, capa hexagonal vacía compilando. **Sin UI.** `pnpm build` produce las mismas 10 páginas públicas estáticas y **cero** funciones de servidor. Validado localmente con `pnpm build && pnpm preview`.
 
 | ID | Tarea | Given / When / Then | Estado |
 |---|---|---|---|
@@ -36,7 +36,7 @@ Regla de secuencia: el Sprint 2 (auth) no arranca hasta que el Sprint 1 esté va
 
 ## Sprint 1 · Eventos + embed Luma  (PILOTO — sin auth, sin Supabase)
 
-**Meta / DoD:** `/eventos` muestra en preview el calendario de Luma (`https://luma.com/leadutp_`) como **botón siempre visible + iframe opcional**, con degradación elegante (si el iframe no carga o no hay `PUBLIC_LUMA_EMBED_URL`, queda solo el botón). El array de `events.data.ts` se vacía. `pnpm build` limpio, 10 páginas estáticas. Cero cambios en Supabase.
+**Meta / DoD:** `/eventos` muestra en local (`pnpm preview`) el calendario de Luma (`https://luma.com/leadutp_`) como **botón siempre visible + iframe opcional**, con degradación elegante (si el iframe no carga o no hay `PUBLIC_LUMA_EMBED_URL`, queda solo el botón). El array de `events.data.ts` se vacía. `pnpm build` limpio, 10 páginas estáticas. Cero cambios en Supabase.
 
 | ID | Tarea | Given / When / Then | Estado |
 |---|---|---|---|
@@ -45,7 +45,7 @@ Regla de secuencia: el Sprint 2 (auth) no arranca hasta que el Sprint 1 esté va
 | T1.3 | Fallback del iframe (script) | **Given** el iframe · **When** no dispara `load` en 8 s o dispara `error` · **Then** la tarjeta se oculta (`el.hidden = true`); el botón permanece. Respeta `prefers-reduced-motion` | TODO |
 | T1.4 | Integrar en `/eventos` | **Given** `eventos.astro` con secciones Próximos/Pasados · **When** se coloca `EventsLuma` en "Próximos eventos" y se **vacía** `events` en `events.data.ts` (se conservan `events.utils.ts` y su test) · **Then** "Próximos" muestra Luma, "Pasados" muestra su estado vacío, `FeaturedEvent` no rompe | TODO |
 | T1.5 | Texto de contexto | **Given** la sección · **When** se redacta · **Then** explica que la inscripción se hace en Luma; sin prometer datos que la web no tiene | TODO |
-| T1.6 | Build + preview | **Given** todo lo anterior · **When** `pnpm build` + push · **Then** 10 HTML estáticos, `/eventos` funcional en preview con y sin `PUBLIC_LUMA_EMBED_URL` | TODO |
+| T1.6 | Build + validación local | **Given** todo lo anterior · **When** `pnpm build && pnpm preview` (y `git push origin cms-admin` como respaldo) · **Then** 10 HTML estáticos, `/eventos` funcional en local con y sin `PUBLIC_LUMA_EMBED_URL` | TODO |
 
 **Nota Luma (P5):** el `cal-id` del iframe se copia del panel de Luma del equipo (Calendar → Settings → Embed) y se guarda en `PUBLIC_LUMA_EMBED_URL`. Si no se consigue → solo botón (T1.2 ya lo contempla).
 
@@ -53,7 +53,7 @@ Regla de secuencia: el Sprint 2 (auth) no arranca hasta que el Sprint 1 esté va
 
 ## Sprint 2 · Autenticación y roles  (Supabase Auth + RLS)
 
-**Meta / DoD:** `/administrator` accesible solo por URL directa (sin enlace público, fuera de sitemap/robots). Login usuario+contraseña contra Supabase Auth funcional en preview. Roles `director`/`subdirector`/`super_admin` con RLS verificada (bloqueo cruzado real, probado con 3 usuarios de prueba). Sin CRUD de contenido. Middleware **MFA-ready** (lee AAL, no exige). Build público intacto.
+**Meta / DoD:** `/administrator` accesible solo por URL directa (sin enlace público, fuera de sitemap/robots). Login usuario+contraseña contra Supabase Auth funcional en local (`pnpm preview`). Roles `director`/`subdirector`/`super_admin` con RLS verificada (bloqueo cruzado real, probado con 3 usuarios de prueba). Sin CRUD de contenido. Middleware **MFA-ready** (lee AAL, no exige). Build público intacto.
 
 | ID | Tarea | Given / When / Then | Estado |
 |---|---|---|---|
@@ -64,7 +64,7 @@ Regla de secuencia: el Sprint 2 (auth) no arranca hasta que el Sprint 1 esté va
 | T2.5 | `/administrator/index.astro` (dashboard shell) | **Given** sesión válida · **When** entra · **Then** `AdminLayout` + saludo por rol + navegación del panel (placeholders); logout funciona | TODO |
 | T2.6 | Verificación de RLS | **Given** seed de 1 `super_admin` + 1 `director(liderazgo)` + 1 `subdirector(liderazgo)` · **When** un test de integración inserta filas y consulta con cada JWT · **Then** se cumple la matriz de `DOMAIN.md` (`canEdit`) | TODO |
 | T2.7 | sitemap / robots / sin enlaces | **Given** el sitio · **When** build · **Then** `sitemap-index.xml` no contiene `/administrator`; `robots.txt` tiene `Disallow: /administrator`; `grep` no encuentra enlaces a `/administrator` en componentes públicos | TODO |
-| T2.8 | Build + preview | **When** push · **Then** login real en preview; bloqueo por rol correcto; 10 páginas públicas siguen estáticas | TODO |
+| T2.8 | Build + validación local | **When** `pnpm build && pnpm preview` (y push como respaldo) · **Then** login real en local; bloqueo por rol correcto; 10 páginas públicas siguen estáticas | TODO |
 
 ---
 
@@ -79,7 +79,7 @@ Regla de secuencia: el Sprint 2 (auth) no arranca hasta que el Sprint 1 esté va
 | T3.3 | Endpoints `/administrator/api/event-pointers` | **Given** `docs/API_CONTRACTS.md` · **When** GET/POST/PATCH/DELETE · **Then** validan sesión + delegan la autorización a la RLS; errores tipados | TODO |
 | T3.4 | UI `/administrator/eventos` | **Given** sesión · **When** el director abre la pantalla · **Then** ve solo lo editable por su rol; puede crear (título + URL de Luma + pilar + `featured`), editar y borrar; validación de que `luma_url` sea de Luma | TODO |
 | T3.5 | Web pública: punteros destacados | **Given** punteros `published && featured` · **When** build de `/eventos` · **Then** se listan junto al embed; si Supabase falla → fallback → se omite la lista, el embed queda | TODO |
-| T3.6 | Build + preview | **When** push · **Then** en preview un director crea/edita/borra solo lo suyo; un subdirector no puede tocar lo de otro | TODO |
+| T3.6 | Build + validación local | **When** `pnpm build && pnpm preview` (y push como respaldo) · **Then** en local un director crea/edita/borra solo lo suyo; un subdirector no puede tocar lo de otro | TODO |
 
 ---
 
@@ -95,7 +95,7 @@ Regla de secuencia: el Sprint 2 (auth) no arranca hasta que el Sprint 1 esté va
 | T4.4 | Endpoints de galería | **Given** contrato · **When** `POST/PATCH/DELETE /administrator/api/galleries` y `POST/PATCH/DELETE /administrator/api/galleries/:id/photos` · **Then** RLS aplica; re-valida permiso antes de insertar foto | TODO |
 | T4.5 | UI `/administrator/galerias` | **Given** sesión · **When** el director crea galería y sube N fotos · **Then** subida directa a Cloudinary con barra de progreso; reordenar (`position`); borrar; editar texto/alt | TODO |
 | T4.6 | Web pública: "Eventos realizados" | **Given** galerías `published` · **When** build de `/eventos` (sección realizados) · **Then** render con `buildCloudinaryUrl`, `width/height` reservados, `onerror` → placeholder local; texto visible aunque Cloudinary caiga | TODO |
-| T4.7 | Build + preview | **When** push · **Then** flujo completo demostrable en preview | TODO |
+| T4.7 | Build + validación local | **When** `pnpm build && pnpm preview` (y push como respaldo) · **Then** flujo completo demostrable en local | TODO |
 
 ---
 
@@ -110,7 +110,7 @@ Regla de secuencia: el Sprint 2 (auth) no arranca hasta que el Sprint 1 esté va
 | T5.3 | UI `/administrator/paginas` | **Given** sesión · **When** el director de su área edita historia / junta / proyectos · **Then** formularios tipados; preview del estado publicado/borrador | TODO |
 | T5.4 | Loaders de `/nosotros` y `/proyectos` | **Given** `CompositeContentRepository` · **When** build · **Then** usan DB→fallback→`.data.ts`→vacío; los `.astro` de página no cambian su estructura | TODO |
 | T5.5 | `prebuild` snapshot | **Given** script `prebuild` · **When** corre con Supabase OK · **Then** escribe `about.fallback.json` / `projects.fallback.json`; con Supabase caído, no borra el anterior y el build pasa | TODO |
-| T5.6 | Build + preview | **When** push · **Then** un director de área edita y se ve en preview | TODO |
+| T5.6 | Build + validación local | **When** `pnpm build && pnpm preview` (y push como respaldo) · **Then** un director de área edita y se ve en local | TODO |
 
 ---
 
@@ -131,7 +131,9 @@ Regla de secuencia: el Sprint 2 (auth) no arranca hasta que el Sprint 1 esté va
 
 ## Registro de cierres (se completa sprint a sprint)
 
-| Sprint | Fecha cierre | Preview URL | Aprobado por PO | Notas en MEMORY.md |
+> Columna "Validación": hoy siempre `local` (`pnpm build && pnpm preview` + `pnpm dev`). Cuando se conecte Vercel (ver `docs/GUIA_METODOLOGIA_ADMIN.md`), pasa a llevar la URL de preview del PR.
+
+| Sprint | Fecha cierre | Validación (local / preview URL) | Aprobado por PO | Notas en MEMORY.md |
 |---|---|---|---|---|
 | 0 | — | — | — | — |
 | 1 | — | — | — | — |
