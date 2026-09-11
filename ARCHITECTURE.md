@@ -80,7 +80,7 @@ BUILD:  src/pages/nosotros.astro
           └─ render HTML → dist/nosotros/index.html  (estático, con data-source)  ◄────┘
 
 PREBUILD (script npm, antes de astro build):
-  src/infra/snapshot.ts consulta Supabase (anon key, solo published)
+  src/infra/snapshot.ts consulta Supabase (publishable key, solo published)
     → escribe src/data/**/**.fallback.json { fetchedAt, source:'supabase', data }
     → si Supabase no responde: no escribe nada; queda el .fallback.json anterior (versionado)
 ```

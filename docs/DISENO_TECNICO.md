@@ -124,7 +124,7 @@ create policy "staff deletes by scope"
 | Paso | Cómo |
 |---|---|
 | Deshabilitar registro público | Supabase Dashboard → Auth → *Allow new users to sign up* = **OFF**. |
-| Crear un director/subdirector | Pantalla `/administrator/usuarios` (solo `super_admin`) → endpoint server `POST /administrator/api/users` → usa `SUPABASE_SERVICE_ROLE_KEY` (solo servidor) con `supabase.auth.admin.inviteUserByEmail()` o `createUser()` + inserta su `profile` (rol + área). |
+| Crear un director/subdirector | Pantalla `/administrator/usuarios` (solo `super_admin`) → endpoint server `POST /administrator/api/users` → usa `SUPABASE_SECRET_KEY` (solo servidor; reemplaza a la `service_role key` legacy, mismo privilegio elevado) con `supabase.auth.admin.inviteUserByEmail()` o `createUser()` + inserta su `profile` (rol + área). |
 | Primer `super_admin` | Se crea a mano una vez desde el Dashboard de Supabase + `insert into profiles`. Documentado en `MEMORY.md` en Sprint 2. |
 
 ### 1.5 Acceso por URL oculta `/administrator` (sin botón de login público)
@@ -281,7 +281,7 @@ Supabase Auth soporta MFA con **factor TOTP** (app de autenticación, GA) y expo
 | `/administrator` (dashboard) | **On-demand** | `export const prerender = false` | sesión + Supabase en runtime |
 | `/administrator/login` | **On-demand** | `prerender = false` (única ruta abierta del prefijo) | — |
 | `/administrator/eventos`, `/administrator/galerias`, `/administrator/paginas`, `/administrator/usuarios`, … | **On-demand** | `prerender = false` por archivo | sesión + RLS |
-| `/administrator/api/**` (endpoints `.ts`: `uploads/sign`, `galleries/*`, `users`, …) | **On-demand** | `prerender = false` | sesión + service role donde aplique |
+| `/administrator/api/**` (endpoints `.ts`: `uploads/sign`, `galleries/*`, `users`, …) | **On-demand** | `prerender = false` | sesión + `SUPABASE_SECRET_KEY` donde aplique |
 
 ### 4.3 Cómo se garantiza que las públicas NO se vuelvan dinámicas
 
@@ -328,8 +328,8 @@ Cada fila de contenido y cada foto llevan `source` (`supabase` / `cloudinary` / 
 | Variable | Uso | ¿Llega al cliente? |
 |---|---|---|
 | `PUBLIC_SUPABASE_URL` | build + runtime + login del cliente | Sí (`PUBLIC_`) |
-| `PUBLIC_SUPABASE_ANON_KEY` | login del cliente + lectura en build | Sí (protegida por RLS) |
-| `SUPABASE_SERVICE_ROLE_KEY` | **solo** endpoints server (crear usuarios) | **NO — nunca** |
+| `PUBLIC_SUPABASE_PUBLISHABLE_KEY` | login del cliente + lectura en build — reemplaza a la `anon key` legacy | Sí (protegida por RLS) |
+| `SUPABASE_SECRET_KEY` | **solo** endpoints server (crear usuarios) — reemplaza a `service_role` | **NO — nunca** |
 | `PUBLIC_CLOUDINARY_CLOUD_NAME` | derivar URLs de entrega en render | Sí |
 | `CLOUDINARY_API_KEY` | firma (endpoint server) | No |
 | `CLOUDINARY_API_SECRET` | firma (endpoint server) | **NO — nunca** |
@@ -339,7 +339,7 @@ Cada fila de contenido y cada foto llevan `source` (`supabase` / `cloudinary` / 
 
 | Paquete | Para qué | Capa |
 |---|---|---|
-| `@supabase/supabase-js` | Cliente Supabase | Solo `src/infra/` |
+| `@supabase/supabase-js` | Cliente Supabase (compatible con las keys `publishable`/`secret` en cualquier versión ^2, sin cambios de código — son strings opacos que se pasan igual a `createClient(url, key)`) | Solo `src/infra/` |
 | `@supabase/ssr` | Sesión con cookies en Astro SSR (middleware + endpoints) | Solo `src/infra/` + `src/middleware.ts` |
 | `@astrojs/vercel` | Adaptador para rutas on-demand | `astro.config.mjs` |
 | — Cloudinary | **Ninguna.** Firma con `crypto` nativo + `fetch`; subida directa del browser. | — |

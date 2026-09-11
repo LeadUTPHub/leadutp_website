@@ -45,7 +45,7 @@ Lista perfiles visibles para el actor (RLS: super_admin todos; director los de s
 ```
 
 ### `POST /administrator/api/users` — solo `super_admin`
-Crea un usuario en Supabase Auth (vía `SUPABASE_SERVICE_ROLE_KEY`, solo servidor) y su `profile`.
+Crea un usuario en Supabase Auth (vía `SUPABASE_SECRET_KEY`, solo servidor — reemplaza a la `service_role key` legacy) y su `profile`.
 
 **Request**
 ```json
@@ -208,7 +208,7 @@ Borra la fila y el asset en Cloudinary (best-effort). **204/403/404**.
 
 | Tema | Regla |
 |---|---|
-| Cliente Supabase en endpoints | Se crea **por request** con el JWT del usuario (`@supabase/ssr`), para que RLS aplique. El `service_role` solo en `/users`. |
+| Cliente Supabase en endpoints | Se crea **por request** con el JWT del usuario (`@supabase/ssr`), para que RLS aplique. La `SUPABASE_SECRET_KEY` (reemplaza a `service_role`) solo en `/users`. |
 | Idempotencia | `POST` de creación no es idempotente; el cliente deshabilita el botón mientras espera. |
 | Rate limiting | Se confía en el de Supabase Auth para login; los endpoints de escritura no añaden límite propio en esta fase. |
 | CORS | Todos los endpoints son same-origin (`/administrator/api/**`); no se habilita CORS. |

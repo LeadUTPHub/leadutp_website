@@ -22,7 +22,7 @@
 | Paquete | Versión objetivo | Para qué | Capa que lo usa |
 |---|---|---|---|
 | `@astrojs/vercel` | ^8 (compatible Astro 7) | Adaptador que habilita rutas on-demand | `astro.config.mjs` |
-| `@supabase/supabase-js` | ^2 | Cliente de Postgres + Auth | Solo `src/infra/` |
+| `@supabase/supabase-js` | ^2 (cualquier ^2 reciente) | Cliente de Postgres + Auth | Solo `src/infra/` |
 | `@supabase/ssr` | ^0.6 | Sesión con cookies en Astro SSR (middleware + endpoints) | `src/infra/` + `src/middleware.ts` |
 
 **Cloudinary: sin paquete.** La firma de subida se hace con el módulo `crypto` nativo de Node (SHA-1 de los parámetros + `api_secret`) y `fetch`. La subida la hace el navegador directamente contra `https://api.cloudinary.com/v1_1/<cloud>/image/upload`. Las URLs de entrega se construyen como strings (`res.cloudinary.com/<cloud>/image/upload/f_auto,q_auto,w_<w>/<public_id>`).
@@ -40,8 +40,8 @@
 | Variable | Ámbito | ¿Cliente? |
 |---|---|---|
 | `PUBLIC_SUPABASE_URL` | build + runtime + cliente | Sí |
-| `PUBLIC_SUPABASE_ANON_KEY` | cliente (login) + lectura en build | Sí (protegida por RLS) |
-| `SUPABASE_SERVICE_ROLE_KEY` | solo endpoints server (`/administrator/api/users`) | **NO** |
+| `PUBLIC_SUPABASE_PUBLISHABLE_KEY` | cliente (login) + lectura en build — reemplaza a la `anon key` legacy, mismo privilegio bajo, misma RLS | Sí (protegida por RLS) |
+| `SUPABASE_SECRET_KEY` | solo endpoints server (`/administrator/api/users`) — reemplaza a `service_role`, salta RLS | **NO** |
 | `PUBLIC_CLOUDINARY_CLOUD_NAME` | render de URLs + firma | Sí |
 | `CLOUDINARY_API_KEY` | firma (server) | No |
 | `CLOUDINARY_API_SECRET` | firma (server) | **NO** |
@@ -49,6 +49,8 @@
 | `PUBLIC_LUMA_EMBED_URL` | `src` del iframe (snippet del panel de Luma) | Sí — opcional; sin él, solo botón |
 
 Local: `.env` (en `.gitignore`). Producción/preview: Vercel Environment Variables. Tipado en `src/env.d.ts`. **Nunca** hardcodeadas.
+
+> **Nomenclatura de keys de Supabase:** proyectos creados después de noviembre de 2025 (el nuestro) ya no exponen `anon`/`service_role` — dan **publishable** (`sb_publishable_...`) y **secret** (`sb_secret_...`). Funcionalmente son equivalentes (mismo nivel de privilegio, misma RLS); solo cambia el nombre y el formato del string. `@supabase/supabase-js` las acepta en cualquier versión ^2 sin cambios de código — se pasan igual a `createClient(url, key)`.
 
 ## 5. Vetado explícitamente
 

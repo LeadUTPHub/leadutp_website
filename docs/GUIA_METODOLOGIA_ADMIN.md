@@ -327,7 +327,7 @@ pnpm build   # confirma que el sitio actual sigue compilando ANTES de seguir
 ```
 
 Crea las cuentas y proyectos:
-- Un proyecto nuevo en [supabase.com](https://supabase.com) (free tier) → guarda `SUPABASE_URL` y `SUPABASE_ANON_KEY` como variables de entorno, nunca hardcodeadas.
+- Un proyecto nuevo en [supabase.com](https://supabase.com) (free tier) → guarda `SUPABASE_URL` y `PUBLIC_SUPABASE_PUBLISHABLE_KEY` como variables de entorno, nunca hardcodeadas.
 - Una cuenta en [cloudinary.com](https://cloudinary.com) (free tier) → guarda el `cloud_name` y configura un upload preset unsigned si el diseño técnico lo recomienda.
 
 ### 4.2 · Onboarding del agente (pegar en Claude Code)
