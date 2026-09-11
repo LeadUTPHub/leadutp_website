@@ -1,0 +1,92 @@
+---
+// T2.4 — única ruta abierta bajo /administrator/** (middleware.ts la
+// excluye del guard). Server-rendered: procesa el POST del formulario
+// acá mismo, sin endpoint aparte (ver docs/API_CONTRACTS.md §0 — el
+// login no tiene endpoint propio, lo hace el cliente de Supabase).
+export const prerender = false;
+
+// OJO: <img> plano, NO el componente <Image> de astro:assets. En una
+// página con prerender=false, <Image> necesita el servicio de imágenes
+// (sharp) disponible en runtime, y el bundler de @astrojs/vercel intenta
+// symlinkear sharp dentro de la función — en Windows sin permisos de
+// symlink eso revienta el build local con EPERM. <img src={asset.src}>
+// sigue optimizado en build-time (Vite lo hashea igual) sin arrastrar
+// sharp al bundle de la función.
+import leadLogo from '../../assets/brand/lead-utp-logo.png';
+import Field from '../../components/admin/Field.astro';
+import Button from '../../components/ui/Button.astro';
+import Container from '../../components/ui/Container.astro';
+import { getAuthGatewayForRequest } from '../../infra/container';
+import AdminLayout from '../../layouts/AdminLayout.astro';
+
+let error: string | null = null;
+
+if (Astro.request.method === 'POST') {
+	const form = await Astro.request.formData();
+	const email = String(form.get('email') ?? '').trim();
+	const password = String(form.get('password') ?? '');
+
+	if (!email || !password) {
+		error = 'Usuario o contraseña incorrectos.';
+	} else {
+		try {
+			await getAuthGatewayForRequest(Astro).signInWithPassword(
+				email,
+				password,
+			);
+			return Astro.redirect('/administrator');
+		} catch {
+			// Mensaje genérico a propósito (DESIGN.md §6.1): no se filtra
+			// si falló el email, la contraseña, o el usuario sin perfil.
+			error = 'Usuario o contraseña incorrectos.';
+		}
+	}
+}
+---
+
+<AdminLayout title="Iniciar sesión — Panel LEAD UTP">
+	<main class="glow-heading flex flex-1 items-center justify-center py-16">
+		<Container class="max-w-sm">
+			<div class="flex flex-col items-center text-center">
+				<img
+					src={leadLogo.src}
+					width={leadLogo.width}
+					height={leadLogo.height}
+					alt="LEAD UTP"
+					class="h-auto w-28"
+				/>
+				<h1
+					class="font-display text-foreground mt-6 text-2xl font-semibold tracking-[-0.045em]"
+				>
+					Panel LEAD UTP
+				</h1>
+				<p class="text-foreground-secondary mt-2 text-sm leading-6">
+					Acceso solo para directores, subdirectores y administradores.
+				</p>
+			</div>
+
+			<form method="POST" class="mt-8 flex flex-col gap-5" novalidate>
+				<Field
+					label="Correo"
+					name="email"
+					type="email"
+					autocomplete="username"
+					required
+				/>
+				<Field
+					label="Contraseña"
+					name="password"
+					type="password"
+					autocomplete="current-password"
+					required
+				/>
+
+				{error && <p class="text-secondary text-sm">{error}</p>}
+
+				<Button type="submit" size="lg" class="mt-2 w-full">
+					Entrar
+				</Button>
+			</form>
+		</Container>
+	</main>
+</AdminLayout>

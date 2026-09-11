@@ -1,6 +1,7 @@
 ---
 import HomeAlliances from '../components/home/HomeAlliances.astro';
 import HomeEvents from '../components/home/HomeEvents.astro';
+import HomeEventsCta from '../components/home/HomeEventsCta.astro';
 import HomeHero from '../components/home/HomeHero.astro';
 import HomeInitiative from '../components/home/HomeInitiative.astro';
 import HomeLife from '../components/home/HomeLife.astro';
@@ -28,6 +29,13 @@ const secondaryEvents = featuredEvent
 			.slice(0, 2)
 	: [];
 const leadAcademia = getPillarBySlug(pillars, 'lead-academia');
+
+// Sprint 1 (extra): mientras no haya featuredEvent local (hasta Sprint 3,
+// punteros a Luma), esta sección muestra un CTA simple en vez de
+// desaparecer del todo. Ver .sprints/BACKLOG.md Sprint 1.
+const calendarUrl =
+	import.meta.env.PUBLIC_LUMA_CALENDAR_URL || 'https://luma.com/leadutp_';
+const embedUrl = import.meta.env.PUBLIC_LUMA_EMBED_URL;
 ---
 
 <Layout
@@ -38,11 +46,13 @@ const leadAcademia = getPillarBySlug(pillars, 'lead-academia');
 	<HomeAlliances alliances={homeAlliances} />
 	<HomeWays />
 	{
-		featuredEvent && (
+		featuredEvent ? (
 			<HomeEvents
 				featuredEvent={featuredEvent}
 				secondaryEvents={secondaryEvents}
 			/>
+		) : (
+			<HomeEventsCta calendarUrl={calendarUrl} embedUrl={embedUrl} />
 		)
 	}
 	<HomePillars pillars={pillars} />

@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /administrator
 
 Sitemap: https://leadutp.vercel.app/sitemap-index.xml

@@ -1,7 +1,7 @@
 import type { LifeEvent } from './life.types';
 
-const base2025 = '/imagestest/2025';
-const base2026 = '/imagestest/2026';
+const base2025 = '/images/2025';
+const base2026 = '/images/2026';
 
 export const lifeEvents: LifeEvent[] = [
 	{
