@@ -42,10 +42,21 @@ const links = buildLumaLinks({ calendarUrl, embedUrl });
 					hidden
 					class="overflow-hidden rounded-2xl border border-white/10"
 				>
+					{
+						/*
+							OJO: sin loading="lazy" a propósito. Este wrapper empieza
+							`hidden` (sin layout) y solo se revela cuando el iframe
+							dispara `load` — pero un iframe lazy nunca arranca la carga
+							mientras su ancestro no tiene layout, así que nunca dispara
+							`load`, así que nunca se revela: candado circular. El
+							control de "cuándo se ve" ya lo hace el script de abajo,
+							por eso no hace falta (ni conviene) que el navegador
+							decida además "cuándo carga".
+						*/
+					}
 					<iframe
 						data-luma-frame
 						title="Calendario de eventos de LEAD UTP en Luma"
-						loading="lazy"
 						class="h-[600px] w-full bg-white"
 					/>
 				</div>
