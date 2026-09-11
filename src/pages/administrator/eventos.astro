@@ -57,7 +57,7 @@ try {
 
 <AdminLayout title="Eventos — Panel LEAD UTP">
 	<AdminShell profile={profile}>
-		<event-pointer-admin>
+		<event-pointer-admin data-role={profile.role}>
 			<SectionHeader
 				id="eventos-title"
 				title="Eventos"
@@ -207,7 +207,24 @@ try {
 						as="textarea"
 						maxlength={280}
 					/>
-					<Field label="Pilar" name="pillarSlug" as="select" options={pillarOptions} />
+					{
+						// UN solo selector "Pilar" para todos los roles — no dos. Para
+						// super_admin (sin área propia) este mismo valor fija también
+						// areaSlug al guardar (ver el submit handler). No hay un caso
+						// de uso real hoy donde area_slug y pillar_slug deban diferir
+						// para este panel, así que dos selectores con la misma lista
+						// de opciones era confuso sin aportar nada (mismo ajuste que
+						// galerias.astro). Para director/subdirector, pillarSlug sigue
+						// siendo una etiqueta de contenido opcional, independiente de
+						// su área ya fija por su perfil.
+					}
+					<Field
+						label="Pilar"
+						name="pillarSlug"
+						as="select"
+						options={pillarOptions}
+						required={profile.role === 'super_admin'}
+					/>
 
 					<div class="flex flex-wrap gap-5">
 						<label class="text-foreground-secondary flex items-center gap-2 text-sm">
@@ -257,6 +274,8 @@ try {
 		pillarSlug: string | null;
 		featured: boolean;
 		published: boolean;
+		/** Solo presente en el form para super_admin — ver el campo "Área" arriba. */
+		areaSlug?: string;
 	}
 
 	function toDatetimeLocalValue(iso: string): string {
@@ -373,6 +392,8 @@ try {
 
 				const data = new FormData(form);
 				const eventDateLocal = String(data.get('eventDate') ?? '').trim();
+				const pillarSlug = String(data.get('pillarSlug') ?? '').trim() || null;
+				const isSuperAdmin = this.dataset.role === 'super_admin';
 
 				const payload: PointerFormPayload = {
 					title: String(data.get('title') ?? '').trim(),
@@ -381,9 +402,14 @@ try {
 					location: String(data.get('location') ?? '').trim() || null,
 					imageUrl: String(data.get('imageUrl') ?? '').trim() || null,
 					shortDescription: String(data.get('shortDescription') ?? '').trim() || null,
-					pillarSlug: String(data.get('pillarSlug') ?? '').trim() || null,
+					pillarSlug,
 					featured: data.get('featured') === 'on',
 					published: data.get('published') === 'on',
+					// Un solo selector "Pilar" para todos los roles — para
+					// super_admin (sin área propia) ese mismo valor también fija
+					// areaSlug al crear. En 'edit' el endpoint no acepta areaSlug
+					// (docs/API_CONTRACTS.md §2), así que solo se manda al crear.
+					...(mode === 'create' && isSuperAdmin && pillarSlug && { areaSlug: pillarSlug }),
 				};
 
 				const url =

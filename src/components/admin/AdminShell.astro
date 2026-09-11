@@ -28,9 +28,12 @@ const areaName = profile.areaSlug
 
 const roleLabel = ROLE_LABELS[profile.role];
 
+// T4.5 activa Galerías (mismo criterio que Eventos en T3.4: sin
+// restricción de rol — la RLS decide qué puede editar cada quién,
+// el sidebar solo necesita mostrar el link a todo el staff logueado).
 const navItems: { label: string; href?: string }[] = [
 	{ label: 'Eventos', href: '/administrator/eventos' },
-	{ label: 'Galerías' },
+	{ label: 'Galerías', href: '/administrator/galerias' },
 	{ label: 'Páginas' },
 	...(profile.role === 'super_admin' ? [{ label: 'Usuarios' }] : []),
 ];
