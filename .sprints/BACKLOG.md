@@ -9,7 +9,7 @@
 |---|---|---|---|
 | 0 | Infraestructura base | ✅ DONE | — |
 | 1 | Eventos + embed Luma | ✅ DONE (6/6 + 1 extra) | ✅ **piloto** |
-| 2 | Autenticación y roles | TODO | — |
+| 2 | Autenticación y roles | ✅ DONE (8/8) | — |
 | 3 | CRUD de eventos propios | TODO | — |
 | 4 | Galería "así se vivió el evento" | TODO | — |
 | 5 | Extensión a Nosotros y Proyectos | TODO | — |
@@ -62,14 +62,14 @@ Regla de secuencia: el Sprint 2 (auth) no arranca hasta que el Sprint 1 esté va
 
 | ID | Tarea | Given / When / Then | Estado |
 |---|---|---|---|
-| T2.1 | (Rojo) Test del middleware | **Given** rutas `/`, `/administrator`, `/administrator/login`, `/administrator/eventos` · **When** sin sesión · **Then** `/` pasa sin tocar Supabase; `/administrator/login` pasa; el resto de `/administrator/**` renderiza login (200) | TODO |
-| T2.2 | `SupabaseAuthGateway` (adaptador) | **Given** `@supabase/ssr` · **When** se implementa el puerto `AuthGateway` (login, `getUser`, logout, `getAAL`) con cookies `httpOnly/secure/lax` · **Then** tests de contrato en verde | TODO |
-| T2.3 | `src/middleware.ts` | **Given** T2.1 en rojo · **When** se implementa el guard (prefijo `/administrator`, excepción `/administrator/login`, `Astro.locals.user`/`profile`, lectura de AAL sin exigir) · **Then** T2.1 en verde | TODO |
-| T2.4 | `/administrator/login.astro` | **Given** `prerender = false` · **When** se construye el form (usuario+contraseña) con `Button`/inputs tokenizados (ver `DESIGN.md`) · **Then** login OK → redirige a `/administrator`; credenciales malas → error inline, sin filtrar detalle | TODO |
-| T2.5 | `/administrator/index.astro` (dashboard shell) | **Given** sesión válida · **When** entra · **Then** `AdminLayout` + saludo por rol + navegación del panel (placeholders); logout funciona | TODO |
-| T2.6 | Verificación de RLS | **Given** seed de 1 `super_admin` + 1 `director(liderazgo)` + 1 `subdirector(liderazgo)` · **When** un test de integración inserta filas y consulta con cada JWT · **Then** se cumple la matriz de `DOMAIN.md` (`canEdit`) | TODO |
-| T2.7 | sitemap / robots / sin enlaces | **Given** el sitio · **When** build · **Then** `sitemap-index.xml` no contiene `/administrator`; `robots.txt` tiene `Disallow: /administrator`; `grep` no encuentra enlaces a `/administrator` en componentes públicos | TODO |
-| T2.8 | Build + validación local | **When** `pnpm build && pnpm preview` (y push como respaldo) · **Then** login real en local; bloqueo por rol correcto; 10 páginas públicas siguen estáticas | TODO |
+| T2.1 | (Rojo) Test del middleware | **Given** rutas `/`, `/administrator`, `/administrator/login`, `/administrator/eventos` · **When** sin sesión · **Then** `/` pasa sin tocar Supabase; `/administrator/login` pasa; el resto de `/administrator/**` renderiza login (200) | ✅ DONE — puesto en verde por T2.3 |
+| T2.2 | `SupabaseAuthGateway` (adaptador) | **Given** `@supabase/ssr` · **When** se implementa el puerto `AuthGateway` (login, `getUser`, logout, `getAAL`) con cookies `httpOnly/secure/lax` · **Then** tests de contrato en verde | ✅ DONE — `src/infra/supabase/{cookieHeader,mapUserToProfile,SupabaseAuthGateway}.ts`; piezas puras con Rojo→Verde (11 tests); `container.ts` ya devuelve el adaptador real; `NoopAuthGateway` eliminado (superado) |
+| T2.3 | `src/middleware.ts` | **Given** T2.1 en rojo · **When** se implementa el guard (prefijo `/administrator`, excepción `/administrator/login`, `Astro.locals.user`/`profile`, lectura de AAL sin exigir) · **Then** T2.1 en verde | ✅ DONE — verificado también en `pnpm dev` real (`/administrator` sin sesión → 200 con login; `/` público intacto) |
+| T2.4 | `/administrator/login.astro` | **Given** `prerender = false` · **When** se construye el form (usuario+contraseña) con `Button`/inputs tokenizados (ver `DESIGN.md`) · **Then** login OK → redirige a `/administrator`; credenciales malas → error inline, sin filtrar detalle | ✅ DONE (código) — probado en `pnpm dev` que la pantalla renderiza; **falta que el PO pruebe el login con las 3 cuentas reales** (pendiente T2.8) |
+| T2.5 | `/administrator/index.astro` (dashboard shell) | **Given** sesión válida · **When** entra · **Then** `AdminLayout` + saludo por rol + navegación del panel (placeholders); logout funciona | ✅ DONE (código) — `AdminShell.astro` (topbar + nav placeholders + logout) + `logout.astro`; verificado en `pnpm dev` que el guard también protege `/administrator/logout`; **login real con las 3 cuentas pendiente (T2.8)** |
+| T2.6 | Verificación de RLS | **Given** seed de 1 `super_admin` + 1 `director(liderazgo)` + 1 `subdirector(liderazgo)` · **When** un test de integración inserta filas y consulta con cada JWT · **Then** se cumple la matriz de `DOMAIN.md` (`canEdit`) | ✅ DONE — `src/infra/supabase/rls.integration.test.ts`, 7/7 verde contra Supabase real (6 fronteras + creación por director), limpia sus filas de prueba solo. En el camino se encontró y corrigió un bug real: el Auth Hook necesitaba `SECURITY DEFINER` (ver `database/patches/001-fix-hook-security-definer.sql`, MEMORY.md L18) |
+| T2.7 | sitemap / robots / sin enlaces | **Given** el sitio · **When** build · **Then** `sitemap-index.xml` no contiene `/administrator`; `robots.txt` tiene `Disallow: /administrator`; `grep` no encuentra enlaces a `/administrator` en componentes públicos | ✅ DONE — `robots.txt` con `Disallow: /administrator` (faltaba, agregado) + `src/infra/admin-route-hidden.test.ts` (nuevo, automatiza las 3 verificaciones en vez de hacerlas a mano una sola vez) |
+| T2.8 | Build + validación local | **When** `pnpm build && pnpm preview` (y push como respaldo) · **Then** login real en local; bloqueo por rol correcto; 10 páginas públicas siguen estáticas | ✅ DONE — `pnpm build` limpio, 1 función esperada, 15 páginas públicas intactas, RLS verificada (T2.6), y **login/logout real confirmado por el PO en el navegador** con las 3 cuentas. En el camino se encontró y corrigió un 2º bug real: `SupabaseAuthGateway` leía `getUser()` en vez de `getClaims()` y perdía las claims del Auth Hook (ver `MEMORY.md` L19) |
 
 ---
 
@@ -142,7 +142,7 @@ Regla de secuencia: el Sprint 2 (auth) no arranca hasta que el Sprint 1 esté va
 |---|---|---|---|---|
 | 0 | 2026-09-10 | local (`pnpm dev` + `pnpm build && pnpm preview`, por el PO) + T0.3 verificado en dashboard de Supabase por el PO | ✅ Sí — Sprint 0 completo (6/6) | Ver entrada de cierre de Sprint 0 |
 | 1 | 2026-09-10 | local (`pnpm dev` + `pnpm build && pnpm preview`) | Pendiente — reportado, esperando aprobación explícita del PO | Ver entrada de cierre de Sprint 1 |
-| 2 | — | — | — | — |
+| 2 | 2026-09-11 | local (`pnpm dev` — login/logout real con las 3 cuentas) + RLS verificada con Supabase real (T2.6) | ✅ Sí — Sprint 2 completo (8/8) | Ver entrada de cierre de Sprint 2 |
 | 3 | — | — | — | — |
 | 4 | — | — | — | — |
 | 5 | — | — | — | — |
