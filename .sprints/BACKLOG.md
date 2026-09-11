@@ -7,7 +7,7 @@
 
 | Sprint | Épica | Estado | Piloto |
 |---|---|---|---|
-| 0 | Infraestructura base | 🟡 WIP — 5/6 (T0.3 pendiente de acción del PO) | — |
+| 0 | Infraestructura base | ✅ DONE | — |
 | 1 | Eventos + embed Luma | TODO | ✅ **piloto** |
 | 2 | Autenticación y roles | TODO | — |
 | 3 | CRUD de eventos propios | TODO | — |
@@ -23,13 +23,13 @@ Regla de secuencia: el Sprint 2 (auth) no arranca hasta que el Sprint 1 esté va
 
 **Meta / DoD:** proyecto Supabase creado y con `schema.sql` aplicado, cuenta Cloudinary lista, variables de entorno configuradas, `astro.config.mjs` con adaptador, capa hexagonal vacía compilando. **Sin UI.** `pnpm build` produce las mismas 10 páginas públicas estáticas y **cero** funciones de servidor. Validado localmente con `pnpm build && pnpm preview`.
 
-> **Estado real (2026-09-10):** 5 de 6 tareas cerradas y validadas (código, tests, build). **T0.3 sigue pendiente** — requiere que el PO aplique `database/schema.sql` en el SQL Editor de Supabase y registre el Auth Hook a mano; confirmado explícitamente por el PO que todavía no se hizo. El resto del Sprint 0 no depende de eso para quedar demostrado end-to-end (Supabase no se usa desde código todavía — solo adaptadores no-op).
+> **Estado real (2026-09-10):** ✅ **6/6 — Sprint 0 completo.** T0.1/T0.2/T0.4/T0.5/T0.6 verificados por el agente (código, tests, build). **T0.3 verificado por el PO directamente en el dashboard de Supabase** (Table Editor + Authentication → Policies), no por código ni por test automatizado — ver detalle en `MEMORY.md`. Corroborado además con una lectura de solo lectura (`select slug, name from pillars` vía `PUBLIC_SUPABASE_PUBLISHABLE_KEY`) → las 6 filas sembradas.
 
 | ID | Tarea | Given / When / Then | Estado |
 |---|---|---|---|
 | T0.1 | Adaptador Vercel + config | **Given** `astro.config.mjs` sin `output` ni adaptador · **When** se añade `output: 'static'`, `adapter: vercel()` y `sitemap({ filter })` · **Then** `pnpm build` pasa y `dist/` tiene los 10 HTML públicos; ninguna función generada | ✅ DONE |
 | T0.2 | Variables de entorno | **Given** cuentas Supabase/Cloudinary · **When** se cargan en Vercel (+ `.env` local gitignored + `src/env.d.ts` tipado) · **Then** el build compila y `git grep` no encuentra ninguna key | ✅ DONE |
-| T0.3 | Aplicar `database/schema.sql` | **Given** proyecto Supabase nuevo · **When** se corre el schema · **Then** existen las tablas/enums, RLS habilitado en todas, `pillars` tiene 6 filas, el Auth Hook está registrado | 🔴 BLOCKED — pendiente de que el PO lo aplique en el dashboard de Supabase (sin CLI instalado, el agente no puede correrlo) |
+| T0.3 | Aplicar `database/schema.sql` | **Given** proyecto Supabase nuevo · **When** se corre el schema · **Then** existen las tablas/enums, RLS habilitado en todas, `pillars` tiene 6 filas, el Auth Hook está registrado | ✅ DONE — **verificado manualmente por el PO** en el dashboard de Supabase (Table Editor: `profiles`, `pillars`, `luma_event_pointers`, `event_galleries`, `gallery_photos`, `page_blocks` creadas; Authentication → Policies: RLS creada sin errores/warnings). Corroborado por el agente con una lectura de solo lectura de `pillars` (6 filas) |
 | T0.4 | Cloudinary + firma de prueba | **Given** cuenta Cloudinary · **When** se define el `cloud_name` y un script local firma y sube 1 imagen de test · **Then** la imagen aparece en la carpeta `lead-utp/` y se borra | ✅ DONE — subida y borrado confirmados; verificado además con una segunda llamada de solo lectura al Admin API (`resources?prefix=lead-utp/_test` → `[]`) |
 | T0.5 | Esqueleto hexagonal | **Given** repo sin `src/domain` · **When** se crean `src/domain/`, `src/domain/ports/` (interfaces `ContentRepository`, `PhotoStorage`, `AuthGateway`), `src/infra/` (adaptador no-op) y `src/infra/container.ts` · **Then** `pnpm test` y `pnpm build` pasan; un test verifica que `src/domain/**` no importa `astro`/`@supabase`/`cloudinary` | ✅ DONE — Rojo→Verde con `src/domain/purity.test.ts` |
 | T0.6 | Test de frontera de build | **Given** el build actual · **When** se añade un test que inspecciona `dist/` (+ manifest Vercel) · **Then** afirma: 10 HTML públicos prerenderizados y funciones solo bajo `/administrator` (hoy: 0 funciones) | ✅ DONE — `src/infra/build-boundary.test.ts`, 15 HTML / 0 funciones confirmado contra build real |
@@ -137,7 +137,7 @@ Regla de secuencia: el Sprint 2 (auth) no arranca hasta que el Sprint 1 esté va
 
 | Sprint | Fecha cierre | Validación (local / preview URL) | Aprobado por PO | Notas en MEMORY.md |
 |---|---|---|---|---|
-| 0 | 2026-09-10 | local (`pnpm dev` + `pnpm build && pnpm preview`, por el PO) | Sí — código (T0.1,T0.2,T0.4,T0.5,T0.6). **T0.3 queda fuera de esta aprobación**, confirmado pendiente por el PO | Ver entrada de cierre de Sprint 0 |
+| 0 | 2026-09-10 | local (`pnpm dev` + `pnpm build && pnpm preview`, por el PO) + T0.3 verificado en dashboard de Supabase por el PO | ✅ Sí — Sprint 0 completo (6/6) | Ver entrada de cierre de Sprint 0 |
 | 1 | — | — | — | — |
 | 2 | — | — | — | — |
 | 3 | — | — | — | — |

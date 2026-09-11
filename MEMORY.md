@@ -8,10 +8,10 @@
 | Dimensión | Estado a 2026-09-10 |
 |---|---|
 | Rama | `cms-admin` (oficial, sin prefijo `feature/`). Nunca se commitea a `main`. |
-| Paso de la metodología | Paso 4 (onboarding) **completado**; Sprint 0 cerrado (5/6). |
-| Sprint en curso | **Sprint 0: 🟡 5/6 — T0.3 pendiente de acción del PO.** Sprint 1 **no arranca** hasta confirmación explícita del PO. |
+| Paso de la metodología | Paso 4 (onboarding) **completado**; **Sprint 0 cerrado (6/6, DONE).** |
+| Sprint en curso | **Ninguno — Sprint 0 completo.** Sprint 1 **no arranca** hasta confirmación explícita del PO. |
 | Sitio público | Intacto. `astro.config.mjs` ya tiene el adaptador de Vercel (`output: 'static'` + `adapter: vercel()`); build sigue generando las mismas 15 páginas HTML, 0 funciones. |
-| Supabase | Proyecto creado por el PO, 6 env vars en `.env` (nomenclatura nueva). **`database/schema.sql` todavía NO aplicado** (T0.3) — pendiente de que el PO lo corra en el SQL Editor + registre el Auth Hook. |
+| Supabase | Proyecto creado por el PO, 6 env vars en `.env` (nomenclatura nueva). **`database/schema.sql` aplicado y verificado** (T0.3) — tablas y políticas RLS confirmadas por el PO en el dashboard; corroborado por el agente con lectura de solo lectura de `pillars` (6 filas). |
 | Cloudinary | Cuenta creada y **verificada end-to-end** (T0.4): firma, sube y borra correctamente; confirmado además con una segunda llamada de solo lectura al Admin API. |
 | Docs generados | `AGENTS.md`, `ARCHITECTURE.md`, `TECH_STACK.md`, `DOMAIN.md`, `DESIGN.md`, `database/schema.sql`, `.sprints/BACKLOG.md`, `docs/API_CONTRACTS.md`, `docs/REQUISITOS_ADMIN.md`, `docs/DISENO_TECNICO.md`. |
 | Tests | 29 tests, 3 archivos: `events.utils.test.ts` (preexistente, 22) + `src/domain/purity.test.ts` (5) + `src/infra/build-boundary.test.ts` (2). Todos en verde. |
@@ -71,7 +71,17 @@ Verificado además con una **segunda llamada independiente**, de solo lectura, a
 
 **Decisiones/hallazgos nuevos de este sprint:** ver L7 (patrón `void nombre;` en vez de `_prefijo` para parámetros no usados), L8 (`.vercel/` debe ignorarse en `.gitignore` **y** `eslint.config.mjs`), L9 (aplicar `schema.sql` requiere acción manual del PO, sin CLI instalado).
 
-**Estado de cierre — IMPORTANTE:** el PO aprobó Sprint 0 dando por válida la parte de código (T0.1, T0.2, T0.4, T0.5, T0.6 — las 5 verificadas por el agente con tests/build en verde y validadas en local por el PO con `pnpm dev` + `pnpm build && pnpm preview`). Al preguntarle explícitamente por **T0.3** (aplicar `schema.sql` + registrar el Auth Hook), el PO confirmó que **todavía no lo hizo**. Por eso Sprint 0 queda marcado **🟡 5/6, no ✅ DONE completo**, hasta que T0.3 se cierre y se verifique (lectura de `select * from pillars` con la publishable key, sin que el agente ejecute DDL). **Sprint 1 no arranca sin confirmación explícita del PO**, según su instrucción.
+**Estado de cierre — primera pasada (registrado, luego corregido):** el PO aprobó Sprint 0 dando por válida la parte de código (T0.1, T0.2, T0.4, T0.5, T0.6 — las 5 verificadas por el agente con tests/build en verde y validadas en local con `pnpm dev` + `pnpm build && pnpm preview`). Al preguntarle explícitamente por **T0.3** (aplicar `schema.sql` + registrar el Auth Hook), el PO confirmó en ese momento que **todavía no lo había hecho**. Sprint 0 se marcó **🟡 5/6** y se commiteó así (`412f3e9`).
+
+**T0.3 — cierre real (2026-09-10, mismo día):** el PO corrió `database/schema.sql` completo en el SQL Editor de Supabase, sin errores ni warnings, y verificó dos cosas **a mano en el dashboard**:
+1. **Table Editor** — las 6 tablas esperadas existen: `profiles`, `pillars`, `luma_event_pointers`, `event_galleries`, `gallery_photos`, `page_blocks`.
+2. **Authentication → Policies** — las políticas RLS se crearon correctamente.
+
+Esta verificación **es manual, del PO, en el dashboard de Supabase — no por código ni por test automatizado del agente** (a diferencia de T0.1/T0.2/T0.4/T0.5/T0.6, que sí tienen test o build en verde como evidencia). Queda documentado así explícitamente porque este tipo de tarea (aplicar DDL en un proyecto Supabase real, sin CLI instalado) se valida de forma distinta al resto del sprint: es responsabilidad exclusiva del PO, el agente no tiene medio para ejecutarla ni para inspeccionar el dashboard directamente.
+
+El agente sí pudo dar una **corroboración independiente de solo lectura** después de la confirmación del PO: `GET /rest/v1/pillars?select=slug,name` con `PUBLIC_SUPABASE_PUBLISHABLE_KEY` → HTTP 200, las 6 filas sembradas (`desarrollo-profesional`, `liderazgo`, `excelencia-femenina`, `desarrollo-del-capitulo`, `excelencia-academica`, `lead-academia`). Esto confirma que el schema y al menos la política "pillars: world readable" quedaron activos — no reemplaza la verificación del PO sobre las políticas de las demás tablas (esas no son legibles por `anon`, así que no hay forma de corroborarlas sin credenciales de más privilegio; eso es justamente lo que valida Sprint 2, T2.6).
+
+**Sprint 0: ✅ DONE, 6/6.** Sprint 1 sigue sin arrancar — requiere confirmación explícita del PO.
 
 ## Errores / correcciones
 
