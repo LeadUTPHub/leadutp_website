@@ -19,11 +19,13 @@
 
 ## 2. Dependencias que se añaden
 
-| Paquete | Versión objetivo | Para qué | Capa que lo usa |
+| Paquete | Versión instalada (Sprint 0, T0.1) | Para qué | Capa que lo usa |
 |---|---|---|---|
-| `@astrojs/vercel` | ^8 (compatible Astro 7) | Adaptador que habilita rutas on-demand | `astro.config.mjs` |
-| `@supabase/supabase-js` | ^2 (cualquier ^2 reciente) | Cliente de Postgres + Auth | Solo `src/infra/` |
-| `@supabase/ssr` | ^0.6 | Sesión con cookies en Astro SSR (middleware + endpoints) | `src/infra/` + `src/middleware.ts` |
+| `@astrojs/vercel` | `^11.0.10` | Adaptador que habilita rutas on-demand | `astro.config.mjs` |
+| `@supabase/supabase-js` | `^2.116.0` | Cliente de Postgres + Auth | Solo `src/infra/` |
+| `@supabase/ssr` | `^0.12.7` | Sesión con cookies en Astro SSR (middleware + endpoints) | `src/infra/` + `src/middleware.ts` |
+
+> Las versiones del Paso 2 (`^8`, `^2`, `^0.6`) eran estimaciones previas a instalar de verdad. Estas son las que `pnpm add` resolvió en Sprint 0 contra el registro npm real — quedan fijadas acá como referencia.
 
 **Cloudinary: sin paquete.** La firma de subida se hace con el módulo `crypto` nativo de Node (SHA-1 de los parámetros + `api_secret`) y `fetch`. La subida la hace el navegador directamente contra `https://api.cloudinary.com/v1_1/<cloud>/image/upload`. Las URLs de entrega se construyen como strings (`res.cloudinary.com/<cloud>/image/upload/f_auto,q_auto,w_<w>/<public_id>`).
 

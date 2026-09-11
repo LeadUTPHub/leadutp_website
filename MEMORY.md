@@ -8,13 +8,14 @@
 | Dimensión | Estado a 2026-09-10 |
 |---|---|
 | Rama | `cms-admin` (oficial, sin prefijo `feature/`). Nunca se commitea a `main`. |
-| Paso de la metodología | Paso 3 (scaffolding SDD) **entregado**, esperando aprobación del PO. |
-| Sprint en curso | Ninguno. Sprint 0 = `TODO`. |
-| Sitio público | Intacto. `astro.config.mjs` aún sin adaptador (cambia en T0.1). |
-| Supabase | Proyecto no creado todavía (T0.3). `database/schema.sql` listo para aplicar. |
-| Cloudinary | Cuenta no creada todavía (T0.4). |
+| Paso de la metodología | Paso 4 (onboarding) **completado**; Sprint 0 cerrado (5/6). |
+| Sprint en curso | **Sprint 0: 🟡 5/6 — T0.3 pendiente de acción del PO.** Sprint 1 **no arranca** hasta confirmación explícita del PO. |
+| Sitio público | Intacto. `astro.config.mjs` ya tiene el adaptador de Vercel (`output: 'static'` + `adapter: vercel()`); build sigue generando las mismas 15 páginas HTML, 0 funciones. |
+| Supabase | Proyecto creado por el PO, 6 env vars en `.env` (nomenclatura nueva). **`database/schema.sql` todavía NO aplicado** (T0.3) — pendiente de que el PO lo corra en el SQL Editor + registre el Auth Hook. |
+| Cloudinary | Cuenta creada y **verificada end-to-end** (T0.4): firma, sube y borra correctamente; confirmado además con una segunda llamada de solo lectura al Admin API. |
 | Docs generados | `AGENTS.md`, `ARCHITECTURE.md`, `TECH_STACK.md`, `DOMAIN.md`, `DESIGN.md`, `database/schema.sql`, `.sprints/BACKLOG.md`, `docs/API_CONTRACTS.md`, `docs/REQUISITOS_ADMIN.md`, `docs/DISENO_TECNICO.md`. |
-| Tests | Solo el preexistente (`events.utils.test.ts`). Sin tests nuevos aún (empiezan en Sprint 0). |
+| Tests | 29 tests, 3 archivos: `events.utils.test.ts` (preexistente, 22) + `src/domain/purity.test.ts` (5) + `src/infra/build-boundary.test.ts` (2). Todos en verde. |
+| Código Sprint 0 | `src/env.d.ts`, `src/domain/{types.ts, ports/*, purity.test.ts}`, `src/infra/{container.ts, noop/*, build-boundary.test.ts}`, `scripts/verify-cloudinary-upload.mjs`. |
 | Vercel | **No conectado todavía.** Validación de cada sprint es 100% local (`pnpm build && pnpm preview` + `pnpm dev`). `git push origin cms-admin` es solo respaldo remoto, no genera preview. Se conecta más adelante, antes del merge final (ver D-P7). |
 
 ## Lecciones aprendidas
@@ -27,6 +28,9 @@
 | L4 | 2026-09-10 | `docs/GUIA_METODOLOGIA_ADMIN.md` contenía 12 menciones a `feature/cms-admin` en su cuerpo (flujo git, regla 10, Pasos 4–6) pese a que el PO indicó haberlo corregido. **RESUELTO (2026-09-10):** el reemplazo `feature/cms-admin` → `cms-admin` (+ la URL de preview `leadutp-git-feature-cms-admin-…` → `leadutp-git-cms-admin-…`) se aplicó directamente sobre el archivo del repo por el agente, no por reemplazo manual del PO. Verificado con grep: 0 ocurrencias de `feature/cms-admin` ni `feature-cms-admin`. | Paso 2 |
 | L5 | 2026-09-10 | Los 22 eventos de `events.data.ts` son ficticios. En Sprint 1 se **vacía** el array (no se borra el archivo ni `events.utils.ts`, que lo usa `/pilares/[slug]`). | Paso 1 |
 | L6 | 2026-09-10 | El repo **todavía no está conectado a Vercel** (más allá del deploy ya existente del sitio público desde `main`) — `git push origin cms-admin` hoy es solo respaldo en GitHub, no genera preview. Todo texto que asumía "validar en preview de Vercel" como gate de cada sprint (`AGENTS.md`, `.sprints/BACKLOG.md`) se corrigió a "validar en local" (`pnpm build && pnpm preview` + `pnpm dev`). Ver D-P7. | Corrección del PO tras el Paso 3 |
+| L7 | 2026-09-10 | Este repo **no tiene `argsIgnorePattern: '^_'`** configurado en `@typescript-eslint/no-unused-vars` — prefijar un parámetro no usado con `_` (convención común en otros proyectos) sigue marcando error aquí. Patrón adoptado: referenciar el parámetro con `void nombre;` dentro del cuerpo de la función (ver `src/infra/noop/*.ts`). | Sprint 0, T0.5 (`pnpm lint`) |
+| L8 | 2026-09-10 | Agregar `adapter: vercel()` crea `.vercel/output/` como nuevo artefacto de build (en paralelo a `dist/`). Hay que ignorarlo en **dos lugares independientes**: `.gitignore` (para no commitearlo) **y** `eslint.config.mjs` → `ignores` (si no, ESLint lintea el JS minificado de `.vercel/output/static/_astro/*.js` y produce decenas de falsos positivos `no-unused-expressions`). `dist/` ya estaba cubierto en ambos; `.vercel/` no lo estaba en ninguno hasta Sprint 0. | Sprint 0, T0.1/T0.5 |
+| L9 | 2026-09-10 | Sin Supabase CLI instalado, el agente **no puede aplicar `database/schema.sql`** de forma autónoma — requiere pegarlo en el SQL Editor del dashboard de Supabase (acción del PO) o instalar y enlazar el CLI. Se trató como acción externa que requiere confirmación explícita, igual que la subida de prueba a Cloudinary (T0.4). | Sprint 0, T0.3 |
 
 ## Decisiones tomadas (con su porqué)
 
@@ -43,6 +47,31 @@
 | D-03 | 2026-09-10 | Claims de rol/área en el JWT vía **Auth Hook** (`custom_access_token_hook`) para que RLS no haga subconsultas por fila. | Rendimiento de las políticas. |
 | D-04 | 2026-09-10 | Nomenclatura de env vars de Supabase actualizada a las **API keys nuevas**: `PUBLIC_SUPABASE_PUBLISHABLE_KEY` (reemplaza `PUBLIC_SUPABASE_ANON_KEY`) y `SUPABASE_SECRET_KEY` (reemplaza `SUPABASE_SERVICE_ROLE_KEY`) en `TECH_STACK.md`, `docs/DISENO_TECNICO.md`, `docs/API_CONTRACTS.md`, `ARCHITECTURE.md`. Sin cambio de comportamiento (mismo privilegio, misma RLS) ni de versión mínima de `@supabase/supabase-js` (cualquier ^2 las acepta, son strings opacos a `createClient`). | Supabase migró su sistema de keys; los proyectos creados después de noviembre de 2025 (el nuestro) ya no exponen `anon`/`service_role`. Nota: `docs/GUIA_METODOLOGIA_ADMIN.md` (línea del Paso 4.1, escrita por el PO) todavía dice `SUPABASE_ANON_KEY` — señalado, no editado (fuera del alcance de "donde el agente lo mencionó"). Los roles de Postgres `anon`/`authenticated` usados en `database/schema.sql` y en las políticas RLS **no cambian de nombre** — son un concepto distinto de las API keys. |
 | D-P7 | 2026-09-10 | La validación de DoD de cada sprint es **100% local** hasta que el PO conecte Vercel (`pnpm dev` para el PO; `pnpm build && pnpm preview` corrido y reportado por el agente al cerrar cada sprint). `git push origin cms-admin` sigue siendo obligatorio, pero solo como respaldo remoto. Cuando Vercel se conecte, este mismo rol se traslada a la preview URL del PR. | El proyecto aún no está conectado a Vercel; se trabaja primero 100% en local, Vercel se conecta más adelante, antes del merge final. Decisión del PO, aplicada en `docs/GUIA_METODOLOGIA_ADMIN.md`, `AGENTS.md` y `.sprints/BACKLOG.md`. |
+
+## Retrospectiva de sprints
+
+### Sprint 0 · Infraestructura base — cierre 2026-09-10
+
+**Qué se construyó:**
+
+| Área | Detalle |
+|---|---|
+| Adaptador de servidor (T0.1) | `astro.config.mjs`: `output: 'static'` explícito + `adapter: vercel()` + `sitemap({ filter: page => !page.includes('/administrator') })`. Sin ningún `prerender = false` todavía (no hay rutas `/administrator/**`). |
+| Env vars tipadas (T0.2) | `src/env.d.ts` con las 6 vars de Supabase/Cloudinary (nomenclatura nueva) + 2 de Luma (opcional). |
+| Esqueleto hexagonal (T0.5) | `src/domain/types.ts` (Role, AreaSlug, ContentSource, Profile, OwnedResource) + 3 puertos (`ContentRepository`, `PhotoStorage`, `AuthGateway`) + `src/infra/container.ts` (composition root) + 3 adaptadores no-op. |
+| Tests nuevos | `src/domain/purity.test.ts` (Rojo→Verde: garantiza que `src/domain/**` no importa Astro/Supabase/Cloudinary/otras capas) + `src/infra/build-boundary.test.ts` (verifica 15 HTML públicos / 0 funciones serverless, se salta sin build previo). |
+| Script de verificación (T0.4) | `scripts/verify-cloudinary-upload.mjs` — manual, no en CI. |
+
+**Verificación de Cloudinary (T0.4) — resultado:**
+```
+✓ Subida OK: lead-utp/_test/htktah0uias9odayconu
+✓ Borrado OK. Cloudinary configurado correctamente.
+```
+Verificado además con una **segunda llamada independiente**, de solo lectura, al Admin API (`GET /resources/image?prefix=lead-utp/_test` → `{ "resources": [] }`) — no se confió únicamente en el "Borrado OK" del propio script. Sin huérfanos.
+
+**Decisiones/hallazgos nuevos de este sprint:** ver L7 (patrón `void nombre;` en vez de `_prefijo` para parámetros no usados), L8 (`.vercel/` debe ignorarse en `.gitignore` **y** `eslint.config.mjs`), L9 (aplicar `schema.sql` requiere acción manual del PO, sin CLI instalado).
+
+**Estado de cierre — IMPORTANTE:** el PO aprobó Sprint 0 dando por válida la parte de código (T0.1, T0.2, T0.4, T0.5, T0.6 — las 5 verificadas por el agente con tests/build en verde y validadas en local por el PO con `pnpm dev` + `pnpm build && pnpm preview`). Al preguntarle explícitamente por **T0.3** (aplicar `schema.sql` + registrar el Auth Hook), el PO confirmó que **todavía no lo hizo**. Por eso Sprint 0 queda marcado **🟡 5/6, no ✅ DONE completo**, hasta que T0.3 se cierre y se verifique (lectura de `select * from pillars` con la publishable key, sin que el agente ejecute DDL). **Sprint 1 no arranca sin confirmación explícita del PO**, según su instrucción.
 
 ## Errores / correcciones
 
