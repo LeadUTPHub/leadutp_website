@@ -8,13 +8,29 @@
 // (published && featured) como tarjetas completas. Build-time, con
 // cliente anon (RLS ya limita a published=true) — si Supabase falla,
 // degrada a lista vacía y el embed queda solo (regla inquebrantable 4).
+//
+// T4.6: "Eventos realizados" muestra las galerías `published` (más
+// recientes primero) con sus fotos, mismo criterio de degradación:
+// si Supabase falla, degrada al estado vacío curado que ya existía
+// (link a /vida-lead), nunca un error.
 import EventPointerCard from '../components/events/EventPointerCard.astro';
 import EventsLuma from '../components/events/EventsLuma.astro';
+import GalleryEventCard from '../components/events/GalleryEventCard.astro';
 import Container from '../components/ui/Container.astro';
 import SectionHeader from '../components/ui/SectionHeader.astro';
+import type { GalleryPhoto, GalleryWithPhotoCount } from '../domain/ports/ContentRepository';
 import { selectFeaturedPointers } from '../domain/selectFeaturedPointers';
 import { getContentRepository } from '../infra/container';
+import { renderMarkdown } from '../infra/markdown/renderMarkdown';
 import Layout from '../layouts/Layout.astro';
+
+interface GalleryWithPhotos extends Omit<GalleryWithPhotoCount, 'body'> {
+	bodyHtml: string | null;
+	photos: GalleryPhoto[];
+}
+
+const MAX_GALLERIES = 4;
+const MAX_PHOTOS_PER_GALLERY = 5;
 
 // PUBLIC_LUMA_CALENDAR_URL no es secreto (es una URL pública); se
 // resuelve por env var con este valor como default para no depender
@@ -32,6 +48,29 @@ try {
 	// Degradación elegante: la sección de Luma (botón + embed) queda
 	// intacta, solo se omiten las tarjetas curadas.
 	featuredPointers = [];
+}
+
+let recentGalleries: GalleryWithPhotos[] = [];
+try {
+	const repo = getContentRepository();
+	// listGalleries() ya ordena por happened_on descendente (más
+	// recientes primero) — mismo criterio que lifeEvents.slice() en
+	// vida-lead.astro.
+	const galleries = (await repo.listGalleries()).slice(0, MAX_GALLERIES);
+	recentGalleries = await Promise.all(
+		galleries.map(async (gallery) => {
+			const { body, ...rest } = gallery;
+			return {
+				...rest,
+				bodyHtml: body ? renderMarkdown(body) : null,
+				photos: (await repo.listPhotos(gallery.id)).slice(0, MAX_PHOTOS_PER_GALLERY),
+			};
+		}),
+	);
+} catch {
+	// Degradación elegante: cae al estado vacío curado que ya existía
+	// (link a /vida-lead) — nunca un error.
+	recentGalleries = [];
 }
 ---
 
@@ -99,16 +138,29 @@ try {
 				title="Eventos pasados"
 				description="Una mirada a los momentos que hemos compartido como comunidad."
 			/>
-			<div class="mt-7 sm:mt-8 text-center">
-				<p class="text-foreground-secondary mx-auto max-w-lg text-sm leading-6 sm:text-base">
-					Todavía no publicamos acá el resumen de eventos pasados. Mientras
-					tanto, mira las fotos de nuestros encuentros anteriores en <a
-						href="/vida-lead"
-						class="text-foreground focus-visible:outline-optional-3 font-semibold underline decoration-white/30 underline-offset-4 transition-colors hover:text-white hover:decoration-white/60 focus-visible:outline-3 focus-visible:outline-offset-3 motion-reduce:transition-none"
-						>Vida LEAD</a
-					>.
-				</p>
-			</div>
+			{
+				recentGalleries.length > 0 ? (
+					<div class="mt-10 flex flex-col gap-16 sm:gap-20">
+						{recentGalleries.map((gallery, index) => (
+							<GalleryEventCard gallery={gallery} index={index} />
+						))}
+					</div>
+				) : (
+					<div class="mt-7 sm:mt-8 text-center">
+						<p class="text-foreground-secondary mx-auto max-w-lg text-sm leading-6 sm:text-base">
+							Todavía no publicamos acá el resumen de eventos pasados. Mientras
+							tanto, mira las fotos de nuestros encuentros anteriores en{' '}
+							<a
+								href="/vida-lead"
+								class="text-foreground focus-visible:outline-optional-3 font-semibold underline decoration-white/30 underline-offset-4 transition-colors hover:text-white hover:decoration-white/60 focus-visible:outline-3 focus-visible:outline-offset-3 motion-reduce:transition-none"
+							>
+								Vida LEAD
+							</a>
+							.
+						</p>
+					</div>
+				)
+			}
 		</Container>
 	</section>
 </Layout>
