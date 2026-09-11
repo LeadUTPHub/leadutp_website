@@ -1,0 +1,46 @@
+---
+// CTA temporal mientras no hay eventos destacados locales (sin
+// featuredEvent). Reemplaza a <HomeEvents> hasta que Sprint 3 (punteros
+// a Luma) entregue contenido real para destacar acá — deliberadamente
+// simple, sin listar eventos individuales, para que el swap sea trivial.
+import { buildLumaLinks } from '../../domain/lumaLinks';
+import Button from '../ui/Button.astro';
+import Container from '../ui/Container.astro';
+
+interface Props {
+	calendarUrl: string;
+	embedUrl?: string;
+}
+
+const { calendarUrl, embedUrl } = Astro.props;
+const links = buildLumaLinks({ calendarUrl, embedUrl });
+---
+
+<section
+	class="bg-canvas-navy/30 hairline-y py-16 sm:py-20 lg:py-24"
+	aria-labelledby="current-title"
+>
+	<Container>
+		<div class="flex flex-col items-center gap-4 text-center">
+			<p
+				class="text-secondary text-[0.7rem] font-bold tracking-[0.18em] uppercase"
+			>
+				Experiencias actuales
+			</p>
+			<h2
+				id="current-title"
+				class="font-display text-foreground text-3xl font-semibold tracking-[-0.05em] sm:text-4xl"
+			>
+				Nuestros próximos eventos están en Luma
+			</h2>
+			<p class="text-foreground-secondary max-w-xl text-sm leading-6 sm:text-base sm:leading-7">
+				Ahí ves fecha, cupos y te inscribes directamente.
+			</p>
+			<div class="mt-2">
+				<Button href={links.calendarUrl} target="_blank" size="lg">
+					Ver eventos en Luma
+				</Button>
+			</div>
+		</div>
+	</Container>
+</section>

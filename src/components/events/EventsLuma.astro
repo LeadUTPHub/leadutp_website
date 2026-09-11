@@ -1,0 +1,120 @@
+---
+// Sección "Próximos eventos": Luma es la única fuente de verdad (sin
+// sync, sin API). El botón siempre está presente y funciona solo;
+// el iframe es una mejora progresiva opcional — si no carga, se oculta
+// solo y el botón queda (degradación elegante, regla inquebrantable 4).
+import { buildLumaLinks } from '../../domain/lumaLinks';
+import Button from '../ui/Button.astro';
+
+interface Props {
+	calendarUrl: string;
+	embedUrl?: string;
+}
+
+const { calendarUrl, embedUrl } = Astro.props;
+const links = buildLumaLinks({ calendarUrl, embedUrl });
+---
+
+<div class="flex flex-col items-center gap-6 text-center">
+	<p class="text-foreground-secondary max-w-xl text-sm leading-6 sm:text-base">
+		La inscripción a nuestros eventos se hace directamente en Luma —
+		acá no es necesario crear una cuenta aparte.
+	</p>
+
+	<Button href={links.calendarUrl} target="_blank" variant="primary" size="lg">
+		Ver eventos en Luma
+	</Button>
+
+	{
+		links.embedUrl && (
+			<events-luma-embed
+				data-embed-url={links.embedUrl}
+				class="mt-2 w-full max-w-3xl"
+			>
+				<p
+					data-luma-loading
+					class="text-foreground-muted rounded-2xl border border-white/10 bg-white/[0.04] py-10 text-sm"
+				>
+					Cargando calendario…
+				</p>
+				<div
+					data-luma-frame-wrapper
+					hidden
+					class="overflow-hidden rounded-2xl border border-white/10"
+				>
+					<iframe
+						data-luma-frame
+						title="Calendario de eventos de LEAD UTP en Luma"
+						loading="lazy"
+						class="h-[600px] w-full bg-white"
+					/>
+				</div>
+			</events-luma-embed>
+		)
+	}
+</div>
+
+<script>
+	const LOAD_TIMEOUT_MS = 8000;
+
+	class EventsLumaEmbed extends HTMLElement {
+		connectedCallback() {
+			if (this.dataset.ready === 'true') return;
+			this.dataset.ready = 'true';
+
+			const embedUrl = this.dataset.embedUrl;
+			const loading = this.querySelector<HTMLElement>('[data-luma-loading]');
+			const wrapper = this.querySelector<HTMLElement>(
+				'[data-luma-frame-wrapper]',
+			);
+			const iframe = this.querySelector<HTMLIFrameElement>(
+				'[data-luma-frame]',
+			);
+
+			if (!embedUrl || !loading || !wrapper || !iframe) return;
+
+			let settled = false;
+
+			const showFrame = () => {
+				if (settled) return;
+				settled = true;
+				loading.hidden = true;
+				wrapper.hidden = false;
+			};
+
+			const hideEmbed = () => {
+				if (settled) return;
+				settled = true;
+				// El botón (fuera de este custom element) sigue disponible.
+				this.hidden = true;
+			};
+
+			const timeoutId = window.setTimeout(hideEmbed, LOAD_TIMEOUT_MS);
+
+			iframe.addEventListener(
+				'load',
+				() => {
+					window.clearTimeout(timeoutId);
+					showFrame();
+				},
+				{ once: true },
+			);
+			iframe.addEventListener(
+				'error',
+				() => {
+					window.clearTimeout(timeoutId);
+					hideEmbed();
+				},
+				{ once: true },
+			);
+
+			// El src se asigna después de enganchar los listeners de arriba,
+			// para no perder un load/error que dispare muy rápido.
+			iframe.src = embedUrl;
+		}
+	}
+
+	if (!customElements.get('events-luma-embed')) {
+		customElements.define('events-luma-embed', EventsLumaEmbed);
+	}
+</script>
