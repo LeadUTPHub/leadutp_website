@@ -11,7 +11,7 @@
 | 1 | Eventos + embed Luma | ✅ DONE (6/6 + 1 extra) | ✅ **piloto** |
 | 2 | Autenticación y roles | ✅ DONE (8/8) | — |
 | 3 | CRUD de eventos propios | ✅ DONE (6/6) | — |
-| 4 | Galería "así se vivió el evento" | TODO | — |
+| 4 | Galería "así se vivió el evento" | ✅ DONE (7/7) | — |
 | 5 | Extensión a Nosotros y Proyectos | TODO | — |
 | 6 | Pulido UX/UI | TODO | — |
 
@@ -94,15 +94,17 @@ Regla de secuencia: el Sprint 2 (auth) no arranca hasta que el Sprint 1 esté va
 
 **Meta / DoD:** desde el panel se crea una galería (texto + fecha + pilar) y se suben fotos **directo a Cloudinary** (firma en endpoint propio), asociadas a la galería en Supabase, visibles en una página pública tipo `/vida-lead`. Degradación de imágenes probada.
 
+> **Estado real (2026-09-11): ✅ 7/7 — Sprint 4 completo.** Antes de T4.1, se confirmó que el schema de `event_galleries`/`gallery_photos` alcanzaba tal cual (sin migración, a diferencia de Sprint 3). Todas las tareas verificadas por el agente y con flujo real de punta a punta contra Supabase/Cloudinary reales, confirmado por el PO. En la validación del sprint (probando la UI real, no solo tests) el PO encontró 5 bugs reales que se corrigieron antes del cierre — detalle completo en `MEMORY.md`, sección "Sprint 4 · Galería 'así se vivió el evento'".
+
 | ID | Tarea | Given / When / Then | Estado |
 |---|---|---|---|
-| T4.1 | (Rojo) `buildSignature(params, secret)` | **Given** params ordenados + secret · **When** se firma · **Then** SHA-1 coincide con el esperado por Cloudinary (vector de prueba) | TODO |
-| T4.2 | Endpoint `POST /administrator/api/uploads/sign` | **Given** sesión + `galleryId` · **When** el actor puede editar esa galería · **Then** devuelve `{ timestamp, signature, apiKey, cloudName, folder }`; si no, 403 | TODO |
-| T4.3 | `CloudinaryPhotoStorage` (adaptador) | **Given** el puerto `PhotoStorage` · **When** se implementa `sign()` y `deliveryUrl(publicId, w)` · **Then** tests en verde; sin SDK | TODO |
-| T4.4 | Endpoints de galería | **Given** contrato · **When** `POST/PATCH/DELETE /administrator/api/galleries` y `POST/PATCH/DELETE /administrator/api/galleries/:id/photos` · **Then** RLS aplica; re-valida permiso antes de insertar foto | TODO |
-| T4.5 | UI `/administrator/galerias` | **Given** sesión · **When** el director crea galería y sube N fotos · **Then** subida directa a Cloudinary con barra de progreso; reordenar (`position`); borrar; editar texto/alt | TODO |
-| T4.6 | Web pública: "Eventos realizados" | **Given** galerías `published` · **When** build de `/eventos` (sección realizados) · **Then** render con `buildCloudinaryUrl`, `width/height` reservados, `onerror` → placeholder local; texto visible aunque Cloudinary caiga | TODO |
-| T4.7 | Build + validación local | **When** `pnpm build && pnpm preview` (y push como respaldo) · **Then** flujo completo demostrable en local | TODO |
+| T4.1 | (Rojo) `buildSignature(params, secret)` | **Given** params ordenados + secret · **When** se firma · **Then** SHA-1 coincide con el esperado por Cloudinary (vector de prueba) | ✅ DONE |
+| T4.2 | Endpoint `POST /administrator/api/uploads/sign` | **Given** sesión + `galleryId` · **When** el actor puede editar esa galería · **Then** devuelve `{ timestamp, signature, apiKey, cloudName, folder }`; si no, 403 | ✅ DONE |
+| T4.3 | `CloudinaryPhotoStorage` (adaptador) | **Given** el puerto `PhotoStorage` · **When** se implementa `sign()` y `deliveryUrl(publicId, w)` · **Then** tests en verde; sin SDK | ✅ DONE |
+| T4.4 | Endpoints de galería | **Given** contrato · **When** `POST/PATCH/DELETE /administrator/api/galleries` y `POST/PATCH/DELETE /administrator/api/galleries/:id/photos` · **Then** RLS aplica; re-valida permiso antes de insertar foto | ✅ DONE |
+| T4.5 | UI `/administrator/galerias` | **Given** sesión · **When** el director crea galería y sube N fotos · **Then** subida directa a Cloudinary con barra de progreso; reordenar (`position`); borrar; editar texto/alt | ✅ DONE |
+| T4.6 | Web pública: "Eventos realizados" | **Given** galerías `published` · **When** build de `/eventos` (sección realizados) · **Then** render con `buildCloudinaryUrl`, `width/height` reservados, `onerror` → placeholder local; texto visible aunque Cloudinary caiga | ✅ DONE |
+| T4.7 | Build + validación local | **When** `pnpm build` + `pnpm dev` (y push como respaldo; `pnpm preview` no aplica, ver MEMORY.md L20) · **Then** flujo completo demostrable en local | ✅ DONE |
 
 ---
 
@@ -146,6 +148,6 @@ Regla de secuencia: el Sprint 2 (auth) no arranca hasta que el Sprint 1 esté va
 | 1 | 2026-09-10 | local (`pnpm dev` + `pnpm build && pnpm preview`) | Pendiente — reportado, esperando aprobación explícita del PO | Ver entrada de cierre de Sprint 1 |
 | 2 | 2026-09-11 | local (`pnpm dev` — login/logout real con las 3 cuentas) + RLS verificada con Supabase real (T2.6) | ✅ Sí — Sprint 2 completo (8/8) | Ver entrada de cierre de Sprint 2 |
 | 3 | 2026-09-11 | local (`pnpm dev` — CRUD real de punteros con las 3 cuentas) + `pnpm build`/`pnpm lint` limpios (167/167 tests) | ✅ Sí — Sprint 3 completo (6/6) | Ver entrada de cierre de Sprint 3 |
-| 4 | — | — | — | — |
+| 4 | 2026-09-11 | local (`pnpm dev` — flujo real de galerías/fotos con las 3 cuentas, subida real a Cloudinary) + `pnpm build`/`pnpm lint` limpios (285/285 tests) | ✅ Sí — Sprint 4 completo (7/7), 5 bugs encontrados en la validación y corregidos antes del cierre | Ver entrada de cierre de Sprint 4 |
 | 5 | — | — | — | — |
 | 6 | — | — | — | — |
