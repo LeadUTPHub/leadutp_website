@@ -1,7 +1,7 @@
 # BACKLOG — Panel de administración + integración Luma (LEAD UTP)
 
 > Secuencia **fija** de 7 sprints (0–6), decidida en `docs/GUIA_METODOLOGIA_ADMIN.md`. No se reordena ni se fusiona.
-> Ningún sprint arranca sin la DoD del anterior cumplida y validada — **hoy 100% en local** (`pnpm build && pnpm preview` + `pnpm dev`); Vercel aún no está conectado (ver nota de fase en `docs/GUIA_METODOLOGIA_ADMIN.md`, sección "Flujo de trabajo con git y Vercel").
+> Ningún sprint arranca sin la DoD del anterior cumplida y validada — **hoy 100% en local** (`pnpm build` + `pnpm dev`; `pnpm preview` no es compatible con `@astrojs/vercel`, ver MEMORY.md L20); Vercel aún no está conectado (ver nota de fase en `docs/GUIA_METODOLOGIA_ADMIN.md`, sección "Flujo de trabajo con git y Vercel").
 > Ciclo por tarea: Rojo (test que falla) → Verde (código mínimo) → `pnpm build` completo → `MEMORY.md`.
 > Estados: `TODO` · `WIP` · `BLOCKED` · `DONE`.
 
@@ -10,7 +10,7 @@
 | 0 | Infraestructura base | ✅ DONE | — |
 | 1 | Eventos + embed Luma | ✅ DONE (6/6 + 1 extra) | ✅ **piloto** |
 | 2 | Autenticación y roles | ✅ DONE (8/8) | — |
-| 3 | CRUD de eventos propios | TODO | — |
+| 3 | CRUD de eventos propios | ✅ DONE (6/6) | — |
 | 4 | Galería "así se vivió el evento" | TODO | — |
 | 5 | Extensión a Nosotros y Proyectos | TODO | — |
 | 6 | Pulido UX/UI | TODO | — |
@@ -77,14 +77,16 @@ Regla de secuencia: el Sprint 2 (auth) no arranca hasta que el Sprint 1 esté va
 
 **Meta / DoD:** un `director`/`subdirector` logueado crea/edita/borra **solo** los `luma_event_pointers` que le permite la RLS, guardados en Supabase. `/eventos` (público) puede mostrar los punteros `featured` publicados, en build-time, con fallback.
 
+> **Estado real (2026-09-11): ✅ 6/6 — Sprint 3 completo.** Antes de T3.1, el PO pidió revisar si `luma_event_pointers` alcanzaba para la tarjeta visual completa (no alcanzaba — ver `database/patches/002-event-pointers-full-card.sql` y MEMORY.md D-09/D-10). Todas las tareas verificadas por el agente (tests + build en verde) y con CRUD real de punta a punta contra Supabase con las 3 cuentas de prueba, confirmado por el PO. Detalle completo en MEMORY.md, sección "Sprint 3 · CRUD de eventos propios".
+
 | ID | Tarea | Given / When / Then | Estado |
 |---|---|---|---|
-| T3.1 | (Rojo) `canEdit()` — matriz completa | **Given** actor × recurso (propio / misma área / otra área) × rol · **When** se evalúa · **Then** coincide con `DOMAIN.md` | TODO |
-| T3.2 | `SupabaseContentRepository` — punteros | **Given** el puerto `ContentRepository` · **When** se implementan `listPointers`, `createPointer`, `updatePointer`, `deletePointer` · **Then** tests de contrato (con RLS) en verde | TODO |
-| T3.3 | Endpoints `/administrator/api/event-pointers` | **Given** `docs/API_CONTRACTS.md` · **When** GET/POST/PATCH/DELETE · **Then** validan sesión + delegan la autorización a la RLS; errores tipados | TODO |
-| T3.4 | UI `/administrator/eventos` | **Given** sesión · **When** el director abre la pantalla · **Then** ve solo lo editable por su rol; puede crear (título + URL de Luma + pilar + `featured`), editar y borrar; validación de que `luma_url` sea de Luma | TODO |
-| T3.5 | Web pública: punteros destacados | **Given** punteros `published && featured` · **When** build de `/eventos` · **Then** se listan junto al embed; si Supabase falla → fallback → se omite la lista, el embed queda | TODO |
-| T3.6 | Build + validación local | **When** `pnpm build && pnpm preview` (y push como respaldo) · **Then** en local un director crea/edita/borra solo lo suyo; un subdirector no puede tocar lo de otro | TODO |
+| T3.1 | (Rojo) `canEdit()` — matriz completa | **Given** actor × recurso (propio / misma área / otra área) × rol · **When** se evalúa · **Then** coincide con `DOMAIN.md` | ✅ DONE |
+| T3.2 | `SupabaseContentRepository` — punteros | **Given** el puerto `ContentRepository` · **When** se implementan `listPointers`, `createPointer`, `updatePointer`, `deletePointer` · **Then** tests de contrato (con RLS) en verde | ✅ DONE |
+| T3.3 | Endpoints `/administrator/api/event-pointers` | **Given** `docs/API_CONTRACTS.md` · **When** GET/POST/PATCH/DELETE · **Then** validan sesión + delegan la autorización a la RLS; errores tipados | ✅ DONE |
+| T3.4 | UI `/administrator/eventos` | **Given** sesión · **When** el director abre la pantalla · **Then** ve solo lo editable por su rol; puede crear (título + URL de Luma + fecha + ubicación + imagen (URL) + descripción corta + pilar + `featured`), editar y borrar; validación de que `luma_url` sea de Luma, `imageUrl` sea `https://` y `shortDescription` ≤ 280 chars | ✅ DONE |
+| T3.5 | Web pública: punteros destacados | **Given** punteros `published && featured` · **When** build de `/eventos` · **Then** se listan junto al embed; si Supabase falla → fallback → se omite la lista, el embed queda | ✅ DONE |
+| T3.6 | Build + validación local | **When** `pnpm build` + `pnpm dev` (y push como respaldo; `pnpm preview` no aplica, ver MEMORY.md L20) · **Then** en local un director crea/edita/borra solo lo suyo; un subdirector no puede tocar lo de otro | ✅ DONE |
 
 ---
 
@@ -136,14 +138,14 @@ Regla de secuencia: el Sprint 2 (auth) no arranca hasta que el Sprint 1 esté va
 
 ## Registro de cierres (se completa sprint a sprint)
 
-> Columna "Validación": hoy siempre `local` (`pnpm build && pnpm preview` + `pnpm dev`). Cuando se conecte Vercel (ver `docs/GUIA_METODOLOGIA_ADMIN.md`), pasa a llevar la URL de preview del PR.
+> Columna "Validación": hoy siempre `local` (`pnpm build` + `pnpm dev`; `pnpm preview` no aplica con `@astrojs/vercel`, ver MEMORY.md L20). Cuando se conecte Vercel (ver `docs/GUIA_METODOLOGIA_ADMIN.md`), pasa a llevar la URL de preview del PR.
 
 | Sprint | Fecha cierre | Validación (local / preview URL) | Aprobado por PO | Notas en MEMORY.md |
 |---|---|---|---|---|
 | 0 | 2026-09-10 | local (`pnpm dev` + `pnpm build && pnpm preview`, por el PO) + T0.3 verificado en dashboard de Supabase por el PO | ✅ Sí — Sprint 0 completo (6/6) | Ver entrada de cierre de Sprint 0 |
 | 1 | 2026-09-10 | local (`pnpm dev` + `pnpm build && pnpm preview`) | Pendiente — reportado, esperando aprobación explícita del PO | Ver entrada de cierre de Sprint 1 |
 | 2 | 2026-09-11 | local (`pnpm dev` — login/logout real con las 3 cuentas) + RLS verificada con Supabase real (T2.6) | ✅ Sí — Sprint 2 completo (8/8) | Ver entrada de cierre de Sprint 2 |
-| 3 | — | — | — | — |
+| 3 | 2026-09-11 | local (`pnpm dev` — CRUD real de punteros con las 3 cuentas) + `pnpm build`/`pnpm lint` limpios (167/167 tests) | ✅ Sí — Sprint 3 completo (6/6) | Ver entrada de cierre de Sprint 3 |
 | 4 | — | — | — | — |
 | 5 | — | — | — | — |
 | 6 | — | — | — | — |
