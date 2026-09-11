@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import type { AuthGateway } from '../domain/ports/AuthGateway';
 import type { ContentRepository } from '../domain/ports/ContentRepository';
 import type { PhotoStorage } from '../domain/ports/PhotoStorage';
+import { CloudinaryPhotoStorage } from './cloudinary/CloudinaryPhotoStorage';
 import { NoopContentRepository } from './noop/NoopContentRepository';
 import { NoopPhotoStorage } from './noop/NoopPhotoStorage';
 import type { CookieContext } from './supabase/createCookieAdapter';
@@ -43,8 +44,21 @@ export function getContentRepository(): ContentRepository {
 	return new SupabaseContentRepository(createClient(env.url, env.publishableKey));
 }
 
+/**
+ * Sin SDK, sin sesión (a diferencia de ContentRepository, la firma no
+ * depende del JWT del actor — la autorización la valida el endpoint
+ * antes de llamar `sign()`, ver T4.2). Degrada a `NoopPhotoStorage`
+ * si faltan las env vars — `sign()` tira, el endpoint lo traduce a 503
+ * (docs/API_CONTRACTS.md: "503 falta config de Cloudinary").
+ */
 export function getPhotoStorage(): PhotoStorage {
-	return new NoopPhotoStorage();
+	const cloudName = import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME;
+	const apiKey = import.meta.env.CLOUDINARY_API_KEY;
+	const apiSecret = import.meta.env.CLOUDINARY_API_SECRET;
+	if (!cloudName || !apiKey || !apiSecret) {
+		return new NoopPhotoStorage();
+	}
+	return new CloudinaryPhotoStorage({ cloudName, apiKey, apiSecret });
 }
 
 /**

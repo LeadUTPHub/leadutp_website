@@ -156,14 +156,17 @@ Devuelve una firma para subir **directo a Cloudinary** desde el navegador.
 **200**
 ```json
 { "timestamp": 1757500000, "signature": "sha1hex...", "apiKey": "1234567890",
-  "cloudName": "leadutp", "folder": "lead-utp/liderazgo/talent-room-2026-05" }
+  "cloudName": "leadutp", "folder": "lead-utp/liderazgo/talent-room-2026-05",
+  "allowedFormats": "jpg,png,webp", "maxFileSize": 10485760 }
 ```
 - El server valida `can_edit_gallery(galleryId)` antes de firmar.
-- `folder`, `tags` (`area:<slug>`), `allowed_formats`, `max_file_size` los fija el server y entran en la firma (el cliente no los puede cambiar sin invalidarla).
+- `folder` y `allowedFormats` (`"jpg,png,webp"`) los fija el server y **entran en la firma** — el cliente no los puede cambiar sin invalidarla. Al subir a Cloudinary, el cliente debe reenviar `allowedFormats` bajo el nombre de parámetro real de Cloudinary: `allowed_formats` (snake_case) — es el nombre con el que se firmó.
+- **`maxFileSize` (bytes; `10485760` = 10 MB) NO entra en la firma ni se manda a Cloudinary.** Bug real encontrado (ver MEMORY.md): `max_file_size` es un parámetro de *upload preset* (unsigned) de Cloudinary, no de una subida firmada ad-hoc — Cloudinary no lo incluye en su propio cálculo de firma (firmarlo invalida la firma para **toda** subida) y lo ignora en silencio si se manda sin firmar. El límite lo hace cumplir el **cliente**, comparando `file.size` contra `maxFileSize` antes de intentar subir.
+- `tags` queda **fuera** por ahora (sin uso definido todavía) — se agrega en un sprint futuro si hace falta.
 
 **403** si el actor no puede editar la galería. **404** galería inexistente. **503** falta config de Cloudinary.
 
-**Luego, el cliente** hace `POST https://api.cloudinary.com/v1_1/<cloudName>/image/upload` (multipart: `file`, `api_key`, `timestamp`, `signature`, `folder`, …) y recibe de Cloudinary `{ public_id, secure_url, width, height, format, bytes }`.
+**Luego, el cliente** hace `POST https://api.cloudinary.com/v1_1/<cloudName>/image/upload` (multipart: `file`, `api_key`, `timestamp`, `signature`, `folder`, `allowed_formats`, …) y recibe de Cloudinary `{ public_id, secure_url, width, height, format, bytes }`.
 
 ### `POST /administrator/api/galleries/:id/photos`
 Registra en Supabase la foto ya subida a Cloudinary.

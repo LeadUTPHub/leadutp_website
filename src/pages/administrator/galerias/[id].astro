@@ -1,0 +1,533 @@
+---
+// T4.5 — edición de una galería: metadata + gestión de fotos (subir con
+// progreso, reordenar, editar alt, borrar). El folder de Cloudinary ya
+// quedó fijo desde la creación (T4.2: lead-utp/<área>/<slug>), por eso
+// crear la galería es un paso aparte (galerias.astro) antes de poder
+// subir nada acá.
+export const prerender = false;
+
+import { canEdit } from '../../../domain/canEdit';
+import Field from '../../../components/admin/Field.astro';
+import AdminShell from '../../../components/admin/AdminShell.astro';
+import Badge from '../../../components/ui/Badge.astro';
+import Button from '../../../components/ui/Button.astro';
+import SectionHeader from '../../../components/ui/SectionHeader.astro';
+import { pillars } from '../../../data/pillars';
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { getContentRepositoryForRequest, getPhotoStorage } from '../../../infra/container';
+
+const { profile } = Astro.locals;
+if (!profile) {
+	return Astro.redirect('/administrator/login');
+}
+
+const id = Astro.params.id;
+if (!id) return Astro.redirect('/administrator/galerias');
+
+const repo = getContentRepositoryForRequest(Astro);
+const gallery = await repo.getGallery(id);
+if (!gallery) return Astro.redirect('/administrator/galerias');
+
+const photos = await repo.listPhotos(id);
+const editable = canEdit(profile, { ownerId: gallery.ownerId, areaSlug: gallery.areaSlug });
+
+const pillarOptions = pillars.map((pillar) => ({ value: pillar.slug, label: pillar.name }));
+const photoStorage = getPhotoStorage();
+---
+
+<AdminLayout title={`${gallery.title} — Panel LEAD UTP`}>
+	<AdminShell profile={profile}>
+		<gallery-editor-admin data-gallery-id={gallery.id} data-editable={String(editable)}>
+			<SectionHeader id="gallery-editor-title" title={gallery.title}>
+				<Button slot="action" href="/administrator/galerias" variant="outline">
+					Volver a galerías
+				</Button>
+			</SectionHeader>
+			<Badge tone={gallery.published ? 'optional' : 'primary'} class="mt-3">
+				{gallery.published ? 'Publicado' : 'Borrador'}
+			</Badge>
+
+			<div class="mt-8 grid gap-8 lg:grid-cols-[1fr_1.4fr]">
+				<section aria-labelledby="gallery-meta-heading">
+					<h3
+						id="gallery-meta-heading"
+						class="font-display text-xl font-bold tracking-[-0.03em]"
+					>
+						Datos de la galería
+					</h3>
+
+					{
+						editable ? (
+							<form id="gallery-meta-form" class="mt-4 flex flex-col gap-4" novalidate>
+								<Field label="Título" name="title" required maxlength={140} value={gallery.title} />
+								<Field
+									label="Fecha del evento"
+									name="happenedOn"
+									placeholder="2026-05-10"
+									value={gallery.happenedOn}
+								/>
+								<Field
+									label="Pilar"
+									name="pillarSlug"
+									as="select"
+									options={pillarOptions}
+									value={gallery.pillarSlug}
+								/>
+								<Field
+									label="Texto (markdown)"
+									name="body"
+									as="textarea"
+									rows={5}
+									value={gallery.body}
+								/>
+
+								<label class="text-foreground-secondary flex items-center gap-2 text-sm">
+									<input
+										type="checkbox"
+										name="published"
+										checked={gallery.published}
+										class="accent-optional-3 h-4 w-4 rounded"
+									/>
+									Publicado
+								</label>
+
+								<p
+									id="gallery-meta-error"
+									class="text-secondary hidden text-sm"
+									role="alert"
+								/>
+								<p id="gallery-meta-saved" class="text-optional-3 hidden text-sm">
+									Guardado.
+								</p>
+
+								<div class="mt-2 flex justify-between gap-3">
+									<Button type="button" variant="ghost" class="text-secondary" data-delete-gallery>
+										Borrar galería
+									</Button>
+									<Button type="submit">Guardar</Button>
+								</div>
+							</form>
+						) : (
+							<p class="text-foreground-secondary mt-4 text-sm">
+								No podés editar esta galería (no es de tu área).
+							</p>
+						)
+					}
+				</section>
+
+				<section aria-labelledby="gallery-photos-heading">
+					<h3
+						id="gallery-photos-heading"
+						class="font-display text-xl font-bold tracking-[-0.03em]"
+					>
+						Fotos ({photos.length})
+					</h3>
+
+					{
+						editable && (
+							<form id="photo-upload-form" class="mt-4 flex flex-wrap items-center gap-3">
+								<input
+									id="photo-file-input"
+									type="file"
+									name="files"
+									accept="image/jpeg,image/png,image/webp"
+									multiple
+									class="text-foreground-secondary text-sm file:mr-3 file:rounded-md file:border-0 file:bg-white/[0.08] file:px-3 file:py-2 file:text-sm file:font-semibold file:text-white"
+								/>
+								<Button type="submit" size="sm">
+									Subir fotos
+								</Button>
+							</form>
+						)
+					}
+					<div id="upload-queue" class="mt-3 flex flex-col gap-2" />
+
+					{
+						photos.length === 0 ? (
+							<p class="text-foreground-muted mt-6 text-sm">
+								Todavía no hay fotos en esta galería.
+							</p>
+						) : (
+							<ul class="mt-6 flex flex-col gap-3">
+								{photos.map((photo, index) => {
+									const prev = photos[index - 1];
+									const next = photos[index + 1];
+									const thumbUrl = photoStorage.deliveryUrl(photo.cloudinaryPublicId, 200);
+									return (
+										<li
+											class="flex gap-3 rounded-lg bg-white/[0.06] p-3 ring-1 ring-white/12"
+											data-photo-id={photo.id}
+										>
+											<img
+												src={thumbUrl}
+												data-secure-url-fallback={photo.secureUrl}
+												alt=""
+												width={80}
+												height={80}
+												loading="lazy"
+												class="h-20 w-20 shrink-0 rounded-md bg-white/[0.04] object-cover"
+												onerror="this.src=this.dataset.secureUrlFallback; this.onerror=null;"
+											/>
+											<div class="min-w-0 flex-1">
+												{editable ? (
+													<form
+														data-photo-alt-form
+														data-photo-id={photo.id}
+														class="flex flex-wrap items-center gap-2"
+													>
+														<input
+															type="text"
+															name="alt"
+															value={photo.alt ?? ''}
+															placeholder="Descripción de la foto (alt)"
+															class="text-foreground placeholder:text-foreground-muted focus-visible:outline-optional-3 min-h-9 flex-1 rounded-md bg-white/[0.06] px-2.5 text-sm ring-1 ring-white/12 transition focus-visible:outline-3 focus-visible:outline-offset-3"
+														/>
+														<Button type="submit" variant="ghost" size="sm">
+															Guardar
+														</Button>
+													</form>
+												) : (
+													<p class="text-foreground-secondary text-sm">
+														{photo.alt || 'Sin descripción'}
+													</p>
+												)}
+												{editable && (
+													<div class="mt-2 flex flex-wrap gap-2">
+														<Button
+															type="button"
+															variant="ghost"
+															size="sm"
+															disabled={!prev}
+															data-move-up
+															data-photo-id={photo.id}
+															data-position={photo.position}
+															data-swap-id={prev?.id}
+															data-swap-position={prev?.position}
+														>
+															Subir
+														</Button>
+														<Button
+															type="button"
+															variant="ghost"
+															size="sm"
+															disabled={!next}
+															data-move-down
+															data-photo-id={photo.id}
+															data-position={photo.position}
+															data-swap-id={next?.id}
+															data-swap-position={next?.position}
+														>
+															Bajar
+														</Button>
+														<Button
+															type="button"
+															variant="ghost"
+															size="sm"
+															class="text-secondary"
+															data-delete-photo
+															data-photo-id={photo.id}
+														>
+															Borrar
+														</Button>
+													</div>
+												)}
+											</div>
+										</li>
+									);
+								})}
+							</ul>
+						)
+					}
+				</section>
+			</div>
+		</gallery-editor-admin>
+	</AdminShell>
+</AdminLayout>
+
+<script>
+	interface CloudinaryUploadResult {
+		public_id: string;
+		secure_url: string;
+		width: number;
+		height: number;
+	}
+
+	interface SignedUpload {
+		timestamp: number;
+		signature: string;
+		apiKey: string;
+		cloudName: string;
+		folder: string;
+		allowedFormats: string;
+		maxFileSize: number;
+	}
+
+	// Bug real (encontrado subiendo 2 fotos reales, ver MEMORY.md):
+	// max_file_size NO es un parámetro válido para subidas firmadas — es
+	// una configuración de *upload preset* (unsigned). Firmarlo invalidaba
+	// la firma para TODA subida ("Invalid Signature", sin importar
+	// formato/tamaño del archivo); mandarlo sin firmar tampoco lo hace
+	// cumplir (Cloudinary lo ignora). El límite se hace cumplir ACÁ, en
+	// el cliente, antes de intentar subir nada.
+	function formatBytes(bytes: number): string {
+		return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+	}
+
+	interface CloudinaryErrorBody {
+		error?: { message?: string };
+	}
+
+	function uploadToCloudinary(
+		file: File,
+		signed: SignedUpload,
+		onProgress: (percent: number) => void,
+	): Promise<CloudinaryUploadResult> {
+		if (file.size > signed.maxFileSize) {
+			return Promise.reject(
+				new Error(
+					`El archivo pesa ${formatBytes(file.size)}, el máximo permitido es ${formatBytes(signed.maxFileSize)}.`,
+				),
+			);
+		}
+
+		return new Promise((resolve, reject) => {
+			const form = new FormData();
+			form.append('file', file);
+			form.append('api_key', signed.apiKey);
+			form.append('timestamp', String(signed.timestamp));
+			form.append('signature', signed.signature);
+			form.append('folder', signed.folder);
+			// snake_case a propósito: es el nombre real de Cloudinary, el
+			// mismo con el que el server firmó (ver CloudinaryPhotoStorage.ts).
+			// NO se manda max_file_size (ver comentario arriba).
+			form.append('allowed_formats', signed.allowedFormats);
+
+			const xhr = new XMLHttpRequest();
+			xhr.open('POST', `https://api.cloudinary.com/v1_1/${signed.cloudName}/image/upload`);
+			xhr.upload.addEventListener('progress', (event) => {
+				if (event.lengthComputable) {
+					onProgress(Math.round((event.loaded / event.total) * 100));
+				}
+			});
+			xhr.addEventListener('load', () => {
+				if (xhr.status >= 200 && xhr.status < 300) {
+					resolve(JSON.parse(xhr.responseText));
+					return;
+				}
+
+				// Mensaje real de Cloudinary en vez de uno genérico — ayuda a
+				// diagnosticar (formato rechazado, firma inválida, etc.) sin
+				// tener que abrir devtools. Se loguea completo a consola y se
+				// muestra un resumen corto en la UI.
+				let detail = `HTTP ${xhr.status}`;
+				try {
+					const body = JSON.parse(xhr.responseText) as CloudinaryErrorBody;
+					if (body.error?.message) detail = body.error.message;
+				} catch {
+					// Respuesta no-JSON (raro en Cloudinary) — se usa el HTTP status.
+				}
+				console.error('Cloudinary rechazó la subida:', xhr.status, xhr.responseText);
+				reject(new Error(`Cloudinary rechazó la subida: ${detail}`));
+			});
+			xhr.addEventListener('error', () =>
+				reject(new Error('Error de red subiendo a Cloudinary.')),
+			);
+			xhr.send(form);
+		});
+	}
+
+	class GalleryEditorAdmin extends HTMLElement {
+		connectedCallback() {
+			if (this.dataset.ready === 'true') return;
+			this.dataset.ready = 'true';
+
+			const galleryId = this.dataset.galleryId;
+			if (!galleryId) return;
+
+			this.setupMetaForm(galleryId);
+			this.setupDeleteGallery(galleryId);
+			this.setupUpload(galleryId);
+			this.setupPhotoRows(galleryId);
+		}
+
+		setupMetaForm(galleryId: string) {
+			const form = this.querySelector<HTMLFormElement>('#gallery-meta-form');
+			const errorEl = this.querySelector<HTMLElement>('#gallery-meta-error');
+			const savedEl = this.querySelector<HTMLElement>('#gallery-meta-saved');
+			if (!form || !errorEl || !savedEl) return;
+
+			form.addEventListener('submit', async (event) => {
+				event.preventDefault();
+				errorEl.hidden = true;
+				savedEl.hidden = true;
+
+				const data = new FormData(form);
+				const payload = {
+					title: String(data.get('title') ?? '').trim(),
+					body: String(data.get('body') ?? '').trim() || null,
+					happenedOn: String(data.get('happenedOn') ?? '').trim() || null,
+					pillarSlug: String(data.get('pillarSlug') ?? '').trim() || null,
+					published: data.get('published') === 'on',
+				};
+
+				const response = await fetch(`/administrator/api/galleries/${galleryId}`, {
+					method: 'PATCH',
+					headers: { 'content-type': 'application/json' },
+					body: JSON.stringify(payload),
+				});
+
+				if (response.ok) {
+					savedEl.hidden = false;
+					return;
+				}
+				const body = await response.json().catch(() => null);
+				errorEl.textContent = body?.error ?? 'No se pudo guardar.';
+				errorEl.hidden = false;
+			});
+		}
+
+		setupDeleteGallery(galleryId: string) {
+			const button = this.querySelector<HTMLButtonElement>('[data-delete-gallery]');
+			button?.addEventListener('click', async () => {
+				if (
+					!window.confirm(
+						'¿Borrar esta galería y todas sus fotos? No se puede deshacer.',
+					)
+				) {
+					return;
+				}
+				const response = await fetch(`/administrator/api/galleries/${galleryId}`, {
+					method: 'DELETE',
+				});
+				if (response.ok) {
+					window.location.href = '/administrator/galerias';
+				} else {
+					window.alert('No se pudo borrar la galería.');
+				}
+			});
+		}
+
+		setupUpload(galleryId: string) {
+			const form = this.querySelector<HTMLFormElement>('#photo-upload-form');
+			const fileInput = this.querySelector<HTMLInputElement>('#photo-file-input');
+			const queue = this.querySelector<HTMLElement>('#upload-queue');
+			if (!form || !fileInput || !queue) return;
+
+			form.addEventListener('submit', async (event) => {
+				event.preventDefault();
+				const files = Array.from(fileInput.files ?? []);
+				if (files.length === 0) return;
+
+				for (const file of files) {
+					const row = document.createElement('p');
+					row.className = 'text-foreground-secondary text-xs';
+					row.textContent = `${file.name}: subiendo…`;
+					queue.appendChild(row);
+
+					try {
+						const signResponse = await fetch('/administrator/api/uploads/sign', {
+							method: 'POST',
+							headers: { 'content-type': 'application/json' },
+							body: JSON.stringify({ galleryId }),
+						});
+						if (!signResponse.ok) {
+							const body = await signResponse.json().catch(() => null);
+							throw new Error(body?.error ?? 'No se pudo firmar la subida.');
+						}
+						const signed: SignedUpload = await signResponse.json();
+
+						const uploaded = await uploadToCloudinary(file, signed, (percent) => {
+							row.textContent = `${file.name}: ${percent}%`;
+						});
+
+						const registerResponse = await fetch(
+							`/administrator/api/galleries/${galleryId}/photos`,
+							{
+								method: 'POST',
+								headers: { 'content-type': 'application/json' },
+								body: JSON.stringify({
+									cloudinaryPublicId: uploaded.public_id,
+									secureUrl: uploaded.secure_url,
+									width: uploaded.width,
+									height: uploaded.height,
+								}),
+							},
+						);
+						if (!registerResponse.ok) {
+							throw new Error('Se subió a Cloudinary pero no se pudo registrar.');
+						}
+						row.textContent = `${file.name}: listo.`;
+					} catch (error) {
+						row.textContent = `${file.name}: ${error instanceof Error ? error.message : 'error al subir'}`;
+						row.classList.add('text-secondary');
+					}
+				}
+
+				window.location.reload();
+			});
+		}
+
+		setupPhotoRows(galleryId: string) {
+			this.querySelectorAll<HTMLFormElement>('[data-photo-alt-form]').forEach((form) => {
+				form.addEventListener('submit', async (event) => {
+					event.preventDefault();
+					const photoId = form.dataset.photoId;
+					const input = form.querySelector<HTMLInputElement>('input[name="alt"]');
+					if (!photoId || !input) return;
+
+					await fetch(`/administrator/api/galleries/${galleryId}/photos/${photoId}`, {
+						method: 'PATCH',
+						headers: { 'content-type': 'application/json' },
+						body: JSON.stringify({ alt: input.value }),
+					});
+				});
+			});
+
+			const swap = async (button: HTMLButtonElement) => {
+				const photoId = button.dataset.photoId;
+				const position = Number(button.dataset.position);
+				const swapId = button.dataset.swapId;
+				const swapPosition = Number(button.dataset.swapPosition);
+				if (!photoId || !swapId) return;
+
+				const patch = (id: string, newPosition: number) =>
+					fetch(`/administrator/api/galleries/${galleryId}/photos/${id}`, {
+						method: 'PATCH',
+						headers: { 'content-type': 'application/json' },
+						body: JSON.stringify({ position: newPosition }),
+					});
+
+				await Promise.all([patch(photoId, swapPosition), patch(swapId, position)]);
+				window.location.reload();
+			};
+
+			this.querySelectorAll<HTMLButtonElement>('[data-move-up], [data-move-down]').forEach(
+				(button) => {
+					button.addEventListener('click', () => swap(button));
+				},
+			);
+
+			this.querySelectorAll<HTMLButtonElement>('[data-delete-photo]').forEach((button) => {
+				button.addEventListener('click', async () => {
+					const photoId = button.dataset.photoId;
+					if (!photoId) return;
+					if (!window.confirm('¿Borrar esta foto? No se puede deshacer.')) return;
+
+					const response = await fetch(
+						`/administrator/api/galleries/${galleryId}/photos/${photoId}`,
+						{ method: 'DELETE' },
+					);
+					if (response.ok) {
+						window.location.reload();
+					} else {
+						window.alert('No se pudo borrar la foto.');
+					}
+				});
+			});
+		}
+	}
+
+	if (!customElements.get('gallery-editor-admin')) {
+		customElements.define('gallery-editor-admin', GalleryEditorAdmin);
+	}
+</script>

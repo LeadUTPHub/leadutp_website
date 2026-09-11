@@ -51,6 +51,66 @@ export interface NewEventPointer {
 
 export type EventPointerUpdate = Partial<NewEventPointer>;
 
+/**
+ * Galería "así se vivió el evento" (Sprint 4 — DOMAIN.md "Galería").
+ * `body` es markdown; `happenedOn` es una fecha (`YYYY-MM-DD`) o `null`.
+ */
+export interface Gallery {
+	id: string;
+	title: string;
+	slug: string;
+	body: string | null;
+	happenedOn: string | null;
+	pillarSlug: string | null;
+	areaSlug: AreaSlug;
+	ownerId: string;
+	published: boolean;
+	source: ContentSource;
+}
+
+/** `GET /administrator/api/galleries` (docs/API_CONTRACTS.md §3). */
+export interface GalleryWithPhotoCount extends Gallery {
+	photoCount: number;
+}
+
+/** `areaSlug`/`ownerId` nunca se aceptan del cliente. */
+export interface NewGallery {
+	title: string;
+	slug: string;
+	body?: string | null;
+	happenedOn?: string | null;
+	pillarSlug?: string | null;
+	published?: boolean;
+}
+
+export type GalleryUpdate = Partial<NewGallery>;
+
+/** Foto de una galería, alojada en Cloudinary (DOMAIN.md "Foto"). */
+export interface GalleryPhoto {
+	id: string;
+	galleryId: string;
+	cloudinaryPublicId: string;
+	secureUrl: string;
+	width: number | null;
+	height: number | null;
+	alt: string | null;
+	position: number;
+	source: ContentSource;
+}
+
+export interface NewGalleryPhoto {
+	cloudinaryPublicId: string;
+	secureUrl: string;
+	width?: number | null;
+	height?: number | null;
+	alt?: string | null;
+}
+
+export interface GalleryPhotoUpdate {
+	alt?: string | null;
+	position?: number;
+}
+
 export interface ContentRepository {
 	/**
 	 * Resuelve un bloque de contenido por clave, con la cadena de
@@ -76,4 +136,43 @@ export interface ContentRepository {
 	): Promise<EventPointer | null>;
 	/** `false` si la RLS rechaza el delete o la fila no existía. */
 	deletePointer(id: string): Promise<boolean>;
+
+	/**
+	 * `true` si el actor puede editar/borrar esta galería o subirle fotos
+	 * (mismo predicado que usa la RLS de `gallery_photos`, vía el RPC SQL
+	 * `can_edit_gallery` de schema.sql §8 — no se duplica la lógica en TS).
+	 * `false` también si la galería no existe.
+	 */
+	canEditGallery(galleryId: string): Promise<boolean>;
+
+	/** `null` si no existe o la RLS no la deja leer (anon + no publicada). */
+	getGallery(id: string): Promise<Gallery | null>;
+
+	/** Igual alcance que `listPointers()`: la RLS decide qué ve quien pregunta. */
+	listGalleries(): Promise<GalleryWithPhotoCount[]>;
+	/** `areaSlug` se fija a `auth_area()` del actor (o el que pase el super_admin).
+	 * Tira `GallerySlugConflictError` (ver SupabaseContentRepository.ts) si el
+	 * `slug` ya existe — el endpoint lo traduce a 409. */
+	createGallery(input: NewGallery, areaSlug: AreaSlug): Promise<Gallery>;
+	/** `null` si la RLS rechaza el update o la fila no existe. */
+	updateGallery(id: string, patch: GalleryUpdate): Promise<Gallery | null>;
+	/** `false` si la RLS rechaza el delete o la fila no existía. Cascade en
+	 * DB borra también sus `gallery_photos` — el llamador que necesite
+	 * limpiar Cloudinary debe leer `listPhotos()` **antes** de llamar esto. */
+	deleteGallery(id: string): Promise<boolean>;
+
+	/** Ordenadas por `position` ascendente. */
+	listPhotos(galleryId: string): Promise<GalleryPhoto[]>;
+	/** `position` se calcula como último + 1 (o 0 si es la primera). */
+	createPhoto(galleryId: string, input: NewGalleryPhoto): Promise<GalleryPhoto>;
+	/** `null` si la RLS rechaza el update o la fila no existe. */
+	updatePhoto(
+		galleryId: string,
+		photoId: string,
+		patch: GalleryPhotoUpdate,
+	): Promise<GalleryPhoto | null>;
+	/** Devuelve la fila borrada (no solo `boolean`): el llamador la necesita
+	 * para el borrado best-effort del asset en Cloudinary. `null` si la RLS
+	 * rechaza el delete o la fila no existía. */
+	deletePhoto(galleryId: string, photoId: string): Promise<GalleryPhoto | null>;
 }
