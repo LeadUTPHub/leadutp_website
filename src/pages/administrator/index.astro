@@ -1,0 +1,33 @@
+---
+// T2.5 — dashboard shell. Sin CRUD de contenido todavía (eso es
+// Sprint 3+); solo confirma login exitoso + saludo por rol + logout.
+export const prerender = false;
+
+import AdminShell from '../../components/admin/AdminShell.astro';
+import SectionHeader from '../../components/ui/SectionHeader.astro';
+import AdminLayout from '../../layouts/AdminLayout.astro';
+
+const { profile } = Astro.locals;
+
+// El middleware ya garantiza sesión acá (si no, hubiera hecho rewrite
+// a /administrator/login) — este chequeo es solo defensivo.
+if (!profile) {
+	return Astro.redirect('/administrator/login');
+}
+
+const ROLE_LABELS: Record<typeof profile.role, string> = {
+	director: 'Director',
+	subdirector: 'Subdirector',
+	super_admin: 'Super Admin',
+};
+---
+
+<AdminLayout title="Panel — LEAD UTP">
+	<AdminShell profile={profile}>
+		<SectionHeader
+			id="dashboard-title"
+			title={`Hola, ${ROLE_LABELS[profile.role]}`}
+			description="Este panel todavía no administra contenido — eso llega en los próximos sprints. Por ahora, esto confirma que tu login y tu rol funcionan correctamente."
+		/>
+	</AdminShell>
+</AdminLayout>

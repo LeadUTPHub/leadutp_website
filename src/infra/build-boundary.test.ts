@@ -4,8 +4,12 @@ import { describe, expect, it } from 'vitest';
 
 /**
  * Frontera de build (regla inquebrantable 9 / ARCHITECTURE.md §4.3):
- * las páginas públicas siguen 100% prerenderizadas y ninguna ruta pasa
- * a función serverless mientras no exista `/administrator/**`.
+ * las páginas públicas siguen 100% prerenderizadas, y el número de
+ * funciones serverless es un valor **fijo y conocido**, no "cero para
+ * siempre". Cada vez que un sprint aprueba nuevas rutas `prerender =
+ * false`, este archivo se actualiza a propósito — si el conteo cambia
+ * sin que alguien haya tocado `EXPECTED_FUNCTION_COUNT`, el test falla
+ * y obliga a revisar qué ruta nueva se volvió dinámica.
  *
  * Requiere que ya haya corrido `pnpm build` (genera dist/ y
  * .vercel/output/). Si no corrió, se salta en vez de fallar en falso.
@@ -20,6 +24,14 @@ const FUNCTIONS_DIR = join(ROOT, '.vercel', 'output', 'functions');
 // índice + 6 slugs de pilar). Ver CONTEXT.md y REQUISITOS_ADMIN.md §2.
 const EXPECTED_STATIC_HTML_COUNT = 15;
 
+// Sprint 2 (T2.4/T2.5): `/administrator/login`, `/administrator`,
+// `/administrator/logout` son `prerender = false`. @astrojs/vercel las
+// empaqueta TODAS en una sola función (`_render.func`) porque no se usa
+// `functionPerRoute` — por eso el número esperado es 1, no 3. Si en un
+// sprint futuro se activa `functionPerRoute` o aparece una función
+// aparte, este número debe subir a propósito, con su propio commit.
+const EXPECTED_FUNCTION_COUNT = 1;
+
 function countHtmlFiles(dir: string): number {
 	return readdirSync(dir).reduce((count, entry) => {
 		const fullPath = join(dir, entry);
@@ -30,20 +42,22 @@ function countHtmlFiles(dir: string): number {
 	}, 0);
 }
 
-function hasServerlessFunctions(): boolean {
-	if (!existsSync(FUNCTIONS_DIR)) return false;
-	return readdirSync(FUNCTIONS_DIR).length > 0;
+function countServerlessFunctions(): number {
+	if (!existsSync(FUNCTIONS_DIR)) return 0;
+	return readdirSync(FUNCTIONS_DIR, { withFileTypes: true }).filter(
+		(entry) => entry.isDirectory() && entry.name.endsWith('.func'),
+	).length;
 }
 
 describe.skipIf(!existsSync(DIST_DIR))(
-	'Frontera de build: público estático, admin on-demand (T0.6)',
+	'Frontera de build: público estático, admin on-demand (T0.6 / Sprint 2)',
 	() => {
 		it(`genera ${EXPECTED_STATIC_HTML_COUNT} páginas HTML públicas prerenderizadas`, () => {
 			expect(countHtmlFiles(DIST_DIR)).toBe(EXPECTED_STATIC_HTML_COUNT);
 		});
 
-		it('no genera funciones serverless (sin rutas /administrator todavía)', () => {
-			expect(hasServerlessFunctions()).toBe(false);
+		it(`genera exactamente ${EXPECTED_FUNCTION_COUNT} función(es) serverless — solo /administrator/**`, () => {
+			expect(countServerlessFunctions()).toBe(EXPECTED_FUNCTION_COUNT);
 		});
 	},
 );

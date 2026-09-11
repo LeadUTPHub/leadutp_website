@@ -22,3 +22,11 @@ interface ImportMetaEnv {
 interface ImportMeta {
 	readonly env: ImportMetaEnv;
 }
+
+declare namespace App {
+	// Poblado por src/middleware.ts (Sprint 2) solo bajo /administrator/**
+	// con sesión válida; null en el resto de los casos.
+	interface Locals {
+		profile: import('./domain/types').Profile | null;
+	}
+}

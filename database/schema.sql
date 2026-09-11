@@ -89,9 +89,18 @@ end $$;
 -- ─── 6. Custom Access Token Hook ───────────────────────────────────────
 --       Registrar en: Supabase Dashboard → Authentication → Hooks →
 --       "Customize Access Token" → public.custom_access_token_hook
+--
+--       SECURITY DEFINER es obligatorio acá: el hook lo ejecuta el rol
+--       interno `supabase_auth_admin`, que no tiene (ni debería tener)
+--       grant sobre `profiles`, y en pleno login todavía no hay un
+--       auth.uid() válido para que la RLS de "profiles: read scope"
+--       deje pasar la lectura. Sin SECURITY DEFINER, Postgres tira
+--       "permission denied for table profiles" y el login entero falla
+--       (visto en Sprint 2, T2.6 — ver MEMORY.md).
 create or replace function public.custom_access_token_hook(event jsonb)
   returns jsonb
   language plpgsql stable
+  security definer
   set search_path = public
 as $$
 declare
