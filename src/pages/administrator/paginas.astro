@@ -1,0 +1,561 @@
+---
+// T5.3 — edición de los bloques de subpáginas públicas (page_blocks).
+// A diferencia de Eventos y Galerías, este contenido es INSTITUCIONAL:
+// solo un super_admin puede escribirlo (MEMORY.md D-13). El resto del
+// staff entra y lo ve en modo lectura — no se le oculta la pantalla,
+// porque saber qué dice la web pública es útil para cualquiera.
+export const prerender = false;
+
+import AdminShell from '../../components/admin/AdminShell.astro';
+import Field from '../../components/admin/Field.astro';
+import Badge from '../../components/ui/Badge.astro';
+import Button from '../../components/ui/Button.astro';
+import SectionHeader from '../../components/ui/SectionHeader.astro';
+import { about } from '../../data/about';
+import type { PageBlock } from '../../domain/ports/ContentRepository';
+import { asProjectRows, asTeamRows } from '../../domain/pageBlockForms';
+import { PAGE_BLOCK_KEYS } from '../../domain/validatePageBlockData';
+import { getContentRepositoryForRequest } from '../../infra/container';
+import AdminLayout from '../../layouts/AdminLayout.astro';
+
+const { profile } = Astro.locals;
+if (!profile) {
+	return Astro.redirect('/administrator/login');
+}
+
+const canWrite = profile.role === 'super_admin';
+
+// Lectura de los 3 bloques. Si Supabase falla, la pantalla sigue
+// renderizando en modo "no se pudo cargar" en vez de tirar un 500.
+const blocks: Record<string, PageBlock | null> = {
+	'nosotros.history': null,
+	'nosotros.team': null,
+	'proyectos.list': null,
+};
+let loadError: string | null = null;
+
+try {
+	const repo = getContentRepositoryForRequest(Astro);
+	const found = await Promise.all(
+		PAGE_BLOCK_KEYS.map((key) => repo.getPageBlock(key)),
+	);
+	PAGE_BLOCK_KEYS.forEach((key, index) => {
+		blocks[key] = found[index];
+	});
+} catch {
+	loadError =
+		'No se pudieron cargar los bloques. Intenta de nuevo en unos minutos.';
+}
+
+const historyBlock = blocks['nosotros.history'];
+const teamBlock = blocks['nosotros.team'];
+const projectsBlock = blocks['proyectos.list'];
+
+// Prefill. Sin bloque en Supabase, la web pública muestra lo que hay en
+// los .data.ts (cadena de degradación de T5.4) — así que el formulario
+// arranca con eso mismo, no en blanco: lo que se ve acá es lo que está
+// publicado hoy.
+const historyValue =
+	historyBlock && typeof (historyBlock.data as { body?: unknown })?.body === 'string'
+		? ((historyBlock.data as { body: string }).body)
+		: (about.history ?? '');
+
+const teamRows = teamBlock
+	? asTeamRows(teamBlock.data)
+	: about.team.map((member) => ({ name: member.name, role: member.role }));
+
+const projectRows = projectsBlock ? asProjectRows(projectsBlock.data) : [];
+
+const STATUS_OPTIONS = [
+	{ value: 'activo', label: 'Activo' },
+	{ value: 'finalizado', label: 'Finalizado' },
+	{ value: 'planificado', label: 'Planificado' },
+];
+
+function stateLabel(block: PageBlock | null): {
+	tone: 'optional' | 'primary';
+	text: string;
+} {
+	if (!block) return { tone: 'primary', text: 'Sin guardar' };
+	return block.published
+		? { tone: 'optional', text: 'Publicado' }
+		: { tone: 'primary', text: 'Borrador' };
+}
+
+const historyState = stateLabel(historyBlock);
+const teamState = stateLabel(teamBlock);
+const projectsState = stateLabel(projectsBlock);
+---
+
+<AdminLayout title="Páginas — Panel LEAD UTP">
+	<AdminShell profile={profile}>
+		<page-blocks-admin data-can-write={String(canWrite)}>
+			<SectionHeader
+				id="paginas-title"
+				title="Páginas"
+				description="Contenido de /nosotros y /proyectos. Se publica en el sitio en el próximo despliegue."
+			/>
+
+			{
+				loadError && (
+					<p class="border-secondary/40 bg-secondary/10 text-secondary mt-6 rounded-lg border px-4 py-3 text-sm">
+						{loadError}
+					</p>
+				)
+			}
+
+			{
+				!canWrite && !loadError && (
+					<p class="mt-6 rounded-lg border border-white/12 bg-white/[0.04] px-4 py-3 text-sm text-foreground-secondary">
+						Estás viendo esta pantalla en modo lectura. El contenido de Nosotros
+						y Proyectos es institucional: lo edita la presidencia (super admin).
+					</p>
+				)
+			}
+
+			<!-- ── Historia ────────────────────────────────────────────── -->
+			<section class="mt-10" aria-labelledby="historia-title">
+				<div class="flex flex-wrap items-center justify-between gap-3">
+					<h2
+						id="historia-title"
+						class="font-display text-foreground text-xl font-bold tracking-[-0.03em]"
+					>
+						Historia
+					</h2>
+					<Badge tone={historyState.tone}>{historyState.text}</Badge>
+				</div>
+				<p class="text-foreground-muted mt-1 text-sm">
+					Sección "Cómo empezamos" de /nosotros. Si queda vacía o en borrador, la
+					sección no aparece en el sitio.
+				</p>
+
+				<form class="mt-4 flex flex-col gap-4" data-form="nosotros.history" novalidate>
+					<Field
+						label="Texto (markdown)"
+						name="body"
+						as="textarea"
+						rows={8}
+						value={historyValue}
+					/>
+					<p class="text-foreground-muted -mt-2 text-xs">
+						Acepta markdown: **negrita**, *itálica*, listas y párrafos separados
+						por una línea en blanco.
+					</p>
+
+					<label class="text-foreground-secondary flex items-center gap-2 text-sm">
+						<input
+							type="checkbox"
+							name="published"
+							class="accent-optional-3 h-4 w-4 rounded"
+							checked={historyBlock?.published ?? false}
+						/>
+						Publicado
+					</label>
+
+					<p class="text-secondary hidden text-sm" role="alert" data-error></p>
+					<p class="text-optional-3 hidden text-sm" role="status" data-ok></p>
+
+					{
+						canWrite && (
+							<div class="flex justify-end">
+								<Button type="submit">Guardar historia</Button>
+							</div>
+						)
+					}
+				</form>
+			</section>
+
+			<!-- ── Junta directiva ─────────────────────────────────────── -->
+			<section class="hairline-t mt-12 pt-10" aria-labelledby="junta-title">
+				<div class="flex flex-wrap items-center justify-between gap-3">
+					<h2
+						id="junta-title"
+						class="font-display text-foreground text-xl font-bold tracking-[-0.03em]"
+					>
+						Junta directiva
+					</h2>
+					<Badge tone={teamState.tone}>{teamState.text}</Badge>
+				</div>
+				<p class="text-foreground-muted mt-1 text-sm">
+					Se muestra al final de /nosotros. Sin miembros, la sección no aparece.
+				</p>
+
+				<form class="mt-4 flex flex-col gap-4" data-form="nosotros.team" novalidate>
+					<div class="flex flex-col gap-3" data-rows="team">
+						{
+							teamRows.map((row) => (
+								<div class="flex flex-col gap-3 rounded-lg bg-white/[0.06] p-3 ring-1 ring-white/12 sm:flex-row sm:items-end" data-row>
+									<Field label="Nombre" name="name" class="flex-1" value={row.name} />
+									<Field label="Cargo" name="role" class="flex-1" value={row.role} />
+									{canWrite && (
+										<Button
+											type="button"
+											variant="ghost"
+											size="sm"
+											class="text-secondary"
+											data-remove-row
+										>
+											Quitar
+										</Button>
+									)}
+								</div>
+							))
+						}
+					</div>
+
+					{
+						teamRows.length === 0 && (
+							<p class="text-foreground-muted text-sm" data-empty="team">
+								Todavía no hay miembros cargados.
+							</p>
+						)
+					}
+
+					{
+						canWrite && (
+							<div>
+								<Button type="button" variant="outline" size="sm" data-add-row="team">
+									Agregar miembro
+								</Button>
+							</div>
+						)
+					}
+
+					<label class="text-foreground-secondary flex items-center gap-2 text-sm">
+						<input
+							type="checkbox"
+							name="published"
+							class="accent-optional-3 h-4 w-4 rounded"
+							checked={teamBlock?.published ?? false}
+						/>
+						Publicado
+					</label>
+
+					<p class="text-secondary hidden text-sm" role="alert" data-error></p>
+					<p class="text-optional-3 hidden text-sm" role="status" data-ok></p>
+
+					{
+						canWrite && (
+							<div class="flex justify-end">
+								<Button type="submit">Guardar junta</Button>
+							</div>
+						)
+					}
+				</form>
+			</section>
+
+			<!-- ── Proyectos ───────────────────────────────────────────── -->
+			<section class="hairline-t mt-12 pt-10" aria-labelledby="proyectos-title">
+				<div class="flex flex-wrap items-center justify-between gap-3">
+					<h2
+						id="proyectos-title"
+						class="font-display text-foreground text-xl font-bold tracking-[-0.03em]"
+					>
+						Proyectos
+					</h2>
+					<Badge tone={projectsState.tone}>{projectsState.text}</Badge>
+				</div>
+				<p class="text-foreground-muted mt-1 text-sm">
+					Lista completa de /proyectos. Sin proyectos, la página muestra su
+					estado vacío.
+				</p>
+
+				<form class="mt-4 flex flex-col gap-4" data-form="proyectos.list" novalidate>
+					<div class="flex flex-col gap-3" data-rows="projects">
+						{
+							projectRows.map((row) => (
+								<div class="flex flex-col gap-3 rounded-lg bg-white/[0.06] p-4 ring-1 ring-white/12" data-row>
+									<div class="flex flex-col gap-3 sm:flex-row">
+										<Field label="Nombre" name="name" class="flex-1" value={row.name} />
+										<Field
+											label="Slug"
+											name="slug"
+											class="flex-1"
+											placeholder="cv-matcher"
+											value={row.slug}
+										/>
+									</div>
+									<Field
+										label="Descripción"
+										name="description"
+										as="textarea"
+										rows={2}
+										maxlength={600}
+										value={row.description}
+									/>
+									<div class="flex flex-col gap-3 sm:flex-row sm:items-end">
+										<Field
+											label="Estado"
+											name="status"
+											as="select"
+											required
+											options={STATUS_OPTIONS}
+											class="flex-1"
+											value={row.status}
+										/>
+										<Field
+											label="Link (opcional)"
+											name="link"
+											class="flex-1"
+											placeholder="https://…"
+											value={row.link}
+										/>
+										{canWrite && (
+											<Button
+												type="button"
+												variant="ghost"
+												size="sm"
+												class="text-secondary"
+												data-remove-row
+											>
+												Quitar
+											</Button>
+										)}
+									</div>
+								</div>
+							))
+						}
+					</div>
+
+					{
+						projectRows.length === 0 && (
+							<p class="text-foreground-muted text-sm" data-empty="projects">
+								Todavía no hay proyectos cargados.
+							</p>
+						)
+					}
+
+					{
+						canWrite && (
+							<div>
+								<Button
+									type="button"
+									variant="outline"
+									size="sm"
+									data-add-row="projects"
+								>
+									Agregar proyecto
+								</Button>
+							</div>
+						)
+					}
+
+					<label class="text-foreground-secondary flex items-center gap-2 text-sm">
+						<input
+							type="checkbox"
+							name="published"
+							class="accent-optional-3 h-4 w-4 rounded"
+							checked={projectsBlock?.published ?? false}
+						/>
+						Publicado
+					</label>
+
+					<p class="text-secondary hidden text-sm" role="alert" data-error></p>
+					<p class="text-optional-3 hidden text-sm" role="status" data-ok></p>
+
+					{
+						canWrite && (
+							<div class="flex justify-end">
+								<Button type="submit">Guardar proyectos</Button>
+							</div>
+						)
+					}
+				</form>
+			</section>
+		</page-blocks-admin>
+	</AdminShell>
+</AdminLayout>
+
+<script>
+	import {
+		parseProjectRows,
+		parseTeamRows,
+		type ProjectRow,
+		type TeamRow,
+	} from '../../domain/pageBlockForms';
+
+	class PageBlocksAdmin extends HTMLElement {
+		connectedCallback() {
+			if (this.dataset.ready === 'true') return;
+			this.dataset.ready = 'true';
+
+			// Estado publicado al cargar la pantalla, por bloque. Sirve para
+			// avisar cuando se está por despublicar algo que hoy está en vivo
+			// (D-14c: un solo `published` por bloque, así que despublicar lo
+			// saca del sitio en el próximo build).
+			const wasPublished = new Map<string, boolean>();
+
+			this.querySelectorAll<HTMLFormElement>('[data-form]').forEach((form) => {
+				const key = form.dataset.form!;
+				const publishedInput =
+					form.querySelector<HTMLInputElement>('input[name="published"]');
+				wasPublished.set(key, publishedInput?.checked ?? false);
+
+				form.addEventListener('submit', (event) => {
+					event.preventDefault();
+					void this.save(form, key, wasPublished);
+				});
+			});
+
+			this.querySelectorAll<HTMLButtonElement>('[data-add-row]').forEach(
+				(button) => {
+					button.addEventListener('click', () => {
+						const kind = button.dataset.addRow!;
+						this.addRow(kind);
+					});
+				},
+			);
+
+			this.querySelectorAll<HTMLButtonElement>('[data-remove-row]').forEach(
+				(button) => this.bindRemove(button),
+			);
+		}
+
+		private bindRemove(button: HTMLButtonElement) {
+			button.addEventListener('click', () => {
+				button.closest('[data-row]')?.remove();
+			});
+		}
+
+		/** Clona la última fila del grupo y la vacía. Si no queda ninguna,
+		 * recarga: construir el HTML de la fila a mano acá duplicaría el
+		 * markup del .astro y se desincronizaría al primer cambio. */
+		private addRow(kind: string) {
+			const container = this.querySelector<HTMLElement>(
+				`[data-rows="${kind}"]`,
+			);
+			if (!container) return;
+
+			const rows = container.querySelectorAll<HTMLElement>('[data-row]');
+			const last = rows[rows.length - 1];
+			if (!last) {
+				window.location.reload();
+				return;
+			}
+
+			const clone = last.cloneNode(true) as HTMLElement;
+			clone.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(
+				'input, textarea',
+			).forEach((field) => {
+				field.value = '';
+			});
+			clone.querySelectorAll<HTMLSelectElement>('select').forEach((select) => {
+				select.selectedIndex = 0;
+			});
+			// Los `id`/`for` de Field se repiten al clonar: se limpian para no
+			// dejar ids duplicados (rompe el click en el label).
+			clone.querySelectorAll<HTMLElement>('[id]').forEach((el) => {
+				const label = clone.querySelector(`label[for="${el.id}"]`);
+				el.removeAttribute('id');
+				label?.removeAttribute('for');
+			});
+
+			container.appendChild(clone);
+			this.querySelector<HTMLElement>(`[data-empty="${kind}"]`)?.remove();
+
+			clone
+				.querySelectorAll<HTMLButtonElement>('[data-remove-row]')
+				.forEach((button) => this.bindRemove(button));
+		}
+
+		private readRows(form: HTMLFormElement, names: string[]) {
+			return Array.from(form.querySelectorAll<HTMLElement>('[data-row]')).map(
+				(row) => {
+					const values: Record<string, string> = {};
+					for (const name of names) {
+						const field = row.querySelector<
+							HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+						>(`[name="${name}"]`);
+						values[name] = field?.value ?? '';
+					}
+					return values;
+				},
+			);
+		}
+
+		private buildData(form: HTMLFormElement, key: string): unknown {
+			if (key === 'nosotros.history') {
+				const body =
+					form.querySelector<HTMLTextAreaElement>('[name="body"]')?.value ?? '';
+				return { body };
+			}
+			if (key === 'nosotros.team') {
+				return parseTeamRows(
+					this.readRows(form, ['name', 'role']) as unknown as TeamRow[],
+				);
+			}
+			return parseProjectRows(
+				this.readRows(form, [
+					'slug',
+					'name',
+					'description',
+					'status',
+					'link',
+				]) as unknown as ProjectRow[],
+			);
+		}
+
+		private async save(
+			form: HTMLFormElement,
+			key: string,
+			wasPublished: Map<string, boolean>,
+		) {
+			const errorEl = form.querySelector<HTMLElement>('[data-error]')!;
+			const okEl = form.querySelector<HTMLElement>('[data-ok]')!;
+			const submitBtn = form.querySelector<HTMLButtonElement>(
+				'button[type="submit"]',
+			);
+			errorEl.hidden = true;
+			okEl.hidden = true;
+
+			const published =
+				form.querySelector<HTMLInputElement>('input[name="published"]')
+					?.checked ?? false;
+
+			// D-14c: no hay borrador separado — despublicar saca el contenido
+			// del sitio público en el próximo despliegue. Se avisa antes.
+			if (wasPublished.get(key) && !published) {
+				const confirmed = window.confirm(
+					'Esto está publicado en el sitio. Si lo guardas como borrador, la sección va a dejar de verse en la web pública en el próximo despliegue. ¿Continuar?',
+				);
+				if (!confirmed) return;
+			}
+
+			if (submitBtn) submitBtn.disabled = true;
+			try {
+				const response = await fetch(`/administrator/api/pages/${key}`, {
+					method: 'PUT',
+					headers: { 'content-type': 'application/json' },
+					body: JSON.stringify({
+						data: this.buildData(form, key),
+						published,
+					}),
+				});
+
+				if (response.ok) {
+					wasPublished.set(key, published);
+					okEl.textContent = 'Guardado.';
+					okEl.hidden = false;
+					return;
+				}
+
+				const payload = (await response.json().catch(() => null)) as {
+					error?: string;
+				} | null;
+				errorEl.textContent =
+					payload?.error ?? 'No se pudo guardar. Intenta de nuevo.';
+				errorEl.hidden = false;
+			} catch {
+				errorEl.textContent =
+					'No se pudo conectar. Revisa tu conexión e intenta de nuevo.';
+				errorEl.hidden = false;
+			} finally {
+				if (submitBtn) submitBtn.disabled = false;
+			}
+		}
+	}
+
+	if (!customElements.get('page-blocks-admin')) {
+		customElements.define('page-blocks-admin', PageBlocksAdmin);
+	}
+</script>
