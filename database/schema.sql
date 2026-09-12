@@ -196,7 +196,11 @@ create index if not exists gallery_photos_gallery_idx on public.gallery_photos (
 create table if not exists public.page_blocks (
   key          text primary key,             -- 'nosotros.history', 'proyectos.list', ...
   data         jsonb not null,               -- forma = src/data/**/*.types.ts
-  area_slug    text not null references public.pillars(slug),
+  -- nullable a propósito: NULL = contenido institucional (Nosotros, Proyectos),
+  -- que no pertenece a ningún pilar. Con NULL, las políticas RLS de abajo solo
+  -- dejan crear/editar a super_admin (la comparación con NULL no da TRUE).
+  -- Ver database/patches/003 y MEMORY.md D-13/L27 (incluye un caveat de UPDATE).
+  area_slug    text references public.pillars(slug),
   owner_id     uuid not null references public.profiles(id),
   source       public.content_source not null default 'supabase',
   published    boolean not null default false,
