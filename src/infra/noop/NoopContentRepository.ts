@@ -10,6 +10,8 @@ import type {
 	NewEventPointer,
 	NewGallery,
 	NewGalleryPhoto,
+	PageBlock,
+	PageBlockInput,
 	ResolvedContent,
 } from '../../domain/ports/ContentRepository';
 import type { AreaSlug } from '../../domain/types';
@@ -37,7 +39,9 @@ export class NoopContentRepository implements ContentRepository {
 	): Promise<EventPointer> {
 		void input;
 		void areaSlug;
-		throw new Error('NoopContentRepository no persiste — sin backend conectado.');
+		throw new Error(
+			'NoopContentRepository no persiste — sin backend conectado.',
+		);
 	}
 
 	async updatePointer(
@@ -71,10 +75,15 @@ export class NoopContentRepository implements ContentRepository {
 	async createGallery(input: NewGallery, areaSlug: AreaSlug): Promise<Gallery> {
 		void input;
 		void areaSlug;
-		throw new Error('NoopContentRepository no persiste — sin backend conectado.');
+		throw new Error(
+			'NoopContentRepository no persiste — sin backend conectado.',
+		);
 	}
 
-	async updateGallery(id: string, patch: GalleryUpdate): Promise<Gallery | null> {
+	async updateGallery(
+		id: string,
+		patch: GalleryUpdate,
+	): Promise<Gallery | null> {
 		void id;
 		void patch;
 		return null;
@@ -90,10 +99,15 @@ export class NoopContentRepository implements ContentRepository {
 		return [];
 	}
 
-	async createPhoto(galleryId: string, input: NewGalleryPhoto): Promise<GalleryPhoto> {
+	async createPhoto(
+		galleryId: string,
+		input: NewGalleryPhoto,
+	): Promise<GalleryPhoto> {
 		void galleryId;
 		void input;
-		throw new Error('NoopContentRepository no persiste — sin backend conectado.');
+		throw new Error(
+			'NoopContentRepository no persiste — sin backend conectado.',
+		);
 	}
 
 	async updatePhoto(
@@ -107,9 +121,26 @@ export class NoopContentRepository implements ContentRepository {
 		return null;
 	}
 
-	async deletePhoto(galleryId: string, photoId: string): Promise<GalleryPhoto | null> {
+	async deletePhoto(
+		galleryId: string,
+		photoId: string,
+	): Promise<GalleryPhoto | null> {
 		void galleryId;
 		void photoId;
+		return null;
+	}
+
+	async getPageBlock(key: string): Promise<PageBlock | null> {
+		void key;
+		return null;
+	}
+
+	async savePageBlock(
+		key: string,
+		input: PageBlockInput,
+	): Promise<PageBlock | null> {
+		void key;
+		void input;
 		return null;
 	}
 }

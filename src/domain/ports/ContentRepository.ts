@@ -111,6 +111,32 @@ export interface GalleryPhotoUpdate {
 	position?: number;
 }
 
+/**
+ * Bloque de contenido editable de una subpágina pública (Sprint 5 —
+ * DOMAIN.md "PageBlock"). `key` es la identidad (PK en Postgres), de la
+ * lista cerrada de `validatePageBlockData.ts`. `data` es jsonb sin forma
+ * fija acá: el validador de dominio decide qué forma le toca a cada key.
+ *
+ * `areaSlug` es `null` para contenido institucional (Nosotros, Proyectos),
+ * que no pertenece a ningún pilar — ver MEMORY.md D-13 y el patch 003.
+ * Con `null`, la RLS solo deja crear/editar a super_admin.
+ */
+export interface PageBlock {
+	key: string;
+	data: unknown;
+	areaSlug: AreaSlug | null;
+	ownerId: string;
+	published: boolean;
+	source: ContentSource;
+	updatedAt: string;
+}
+
+/** `key`, `areaSlug` y `ownerId` no vienen del cliente: los fija el server. */
+export interface PageBlockInput {
+	data: unknown;
+	published?: boolean;
+}
+
 export interface ContentRepository {
 	/**
 	 * Resuelve un bloque de contenido por clave, con la cadena de
@@ -175,4 +201,15 @@ export interface ContentRepository {
 	 * para el borrado best-effort del asset en Cloudinary. `null` si la RLS
 	 * rechaza el delete o la fila no existía. */
 	deletePhoto(galleryId: string, photoId: string): Promise<GalleryPhoto | null>;
+
+	/** `null` si no existe o la RLS no lo deja leer (anon + no publicado). */
+	getPageBlock(key: string): Promise<PageBlock | null>;
+	/**
+	 * Crea el bloque si no existe, o actualiza `data`/`published` si ya
+	 * existe. **No reescribe `ownerId` en un update** (contrato §5: se fija
+	 * en el primer PUT y no cambia) — eso además mantiene en pie la
+	 * precondición del caveat de RLS de MEMORY.md L27.
+	 * `null` si la RLS rechaza la escritura.
+	 */
+	savePageBlock(key: string, input: PageBlockInput): Promise<PageBlock | null>;
 }

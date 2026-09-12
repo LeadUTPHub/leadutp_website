@@ -11,6 +11,8 @@ import type {
 	NewEventPointer,
 	NewGallery,
 	NewGalleryPhoto,
+	PageBlock,
+	PageBlockInput,
 	ResolvedContent,
 } from '../../domain/ports/ContentRepository';
 import type { AreaSlug, ContentSource } from '../../domain/types';
@@ -18,6 +20,19 @@ import type { AreaSlug, ContentSource } from '../../domain/types';
 const POINTERS_TABLE = 'luma_event_pointers';
 const GALLERIES_TABLE = 'event_galleries';
 const GALLERY_PHOTOS_TABLE = 'gallery_photos';
+const PAGE_BLOCKS_TABLE = 'page_blocks';
+
+/** Postgres/PostgREST para "new row violates row-level security policy".
+ * Es la forma de distinguir "la RLS te rechazó" (→ null, 403 arriba) de
+ * un error real de red/DB (→ throw). */
+const RLS_VIOLATION_CODE = '42501';
+
+function isRlsViolation(error: { code?: string; message?: string }): boolean {
+	return (
+		error.code === RLS_VIOLATION_CODE ||
+		Boolean(error.message?.includes('row-level security'))
+	);
+}
 
 /** `slug` de `event_galleries` es `unique` — Postgres lo rechaza con el
  * código estándar de unique_violation (23505). El endpoint (T4.4) lo
@@ -99,6 +114,28 @@ function mapRowToGalleryPhoto(row: GalleryPhotoRow): GalleryPhoto {
 	};
 }
 
+interface PageBlockRow {
+	key: string;
+	data: unknown;
+	area_slug: string | null;
+	owner_id: string;
+	published: boolean;
+	source: string;
+	updated_at: string;
+}
+
+function mapRowToPageBlock(row: PageBlockRow): PageBlock {
+	return {
+		key: row.key,
+		data: row.data,
+		areaSlug: (row.area_slug as AreaSlug | null) ?? null,
+		ownerId: row.owner_id,
+		published: row.published,
+		source: row.source as ContentSource,
+		updatedAt: row.updated_at,
+	};
+}
+
 function mapRowToPointer(row: EventPointerRow): EventPointer {
 	return {
 		id: row.id,
@@ -140,12 +177,88 @@ export class SupabaseContentRepository implements ContentRepository {
 		return data.session.user.id;
 	}
 
+	/**
+	 * Lectura de un page_block con su procedencia. `null` cuando la key no
+	 * existe o la RLS no la deja leer (anon + borrador) — en ambos casos el
+	 * llamador sigue a fallback/static/vacío sin romper el build (T5.4).
+	 */
 	async resolve<T>(key: string): Promise<ResolvedContent<T> | null> {
-		void key;
-		// Sprint 5 implementa la lectura de page_blocks acá. Hasta entonces,
-		// degrada a null — el CompositeContentRepository sigue a
-		// fallback/static/vacío sin romper el build.
-		return null;
+		const block = await this.getPageBlock(key);
+		if (!block) return null;
+		return { data: block.data as T, source: block.source };
+	}
+
+	async getPageBlock(key: string): Promise<PageBlock | null> {
+		const { data, error } = await this.client
+			.from(PAGE_BLOCKS_TABLE)
+			.select('*')
+			.eq('key', key)
+			.maybeSingle();
+
+		if (error) {
+			throw new Error(`No se pudo leer el bloque "${key}": ${error.message}`);
+		}
+		if (!data) return null;
+		return mapRowToPageBlock(data as PageBlockRow);
+	}
+
+	/**
+	 * Upsert explícito en dos pasos (leer → insert o update) en vez de
+	 * `.upsert()`: un upsert manda `owner_id` en cada escritura y se lo
+	 * pisaría al bloque existente. El contrato §5 dice que `ownerId` se
+	 * fija en el primer PUT y no cambia — y mantenerlo fijo es además la
+	 * precondición que hace inalcanzable el caveat de RLS de MEMORY.md L27.
+	 *
+	 * `areaSlug` se fija siempre en `null` (contenido institucional, D-13):
+	 * no se acepta del cliente. Si alguna vez se delega un bloque a un área
+	 * concreta, este es el único punto que cambia.
+	 */
+	async savePageBlock(
+		key: string,
+		input: PageBlockInput,
+	): Promise<PageBlock | null> {
+		const existing = await this.getPageBlock(key);
+
+		if (existing) {
+			const row: Record<string, unknown> = { data: input.data };
+			if (input.published !== undefined) row.published = input.published;
+
+			const { data, error } = await this.client
+				.from(PAGE_BLOCKS_TABLE)
+				.update(row)
+				.eq('key', key)
+				.select('*');
+
+			if (error) {
+				if (isRlsViolation(error)) return null;
+				throw new Error(
+					`No se pudo actualizar el bloque "${key}": ${error.message}`,
+				);
+			}
+			// Igual que en updatePointer: la RLS no tira error en un update
+			// sin filas afectadas, simplemente no devuelve nada.
+			if (!data || data.length === 0) return null;
+			return mapRowToPageBlock(data[0] as PageBlockRow);
+		}
+
+		const ownerId = await this.getSessionUserId();
+		const { data, error } = await this.client
+			.from(PAGE_BLOCKS_TABLE)
+			.insert({
+				key,
+				data: input.data,
+				area_slug: null,
+				owner_id: ownerId,
+				published: input.published ?? false,
+			})
+			.select('*')
+			.single();
+
+		if (error) {
+			if (isRlsViolation(error)) return null;
+			throw new Error(`No se pudo crear el bloque "${key}": ${error.message}`);
+		}
+		return mapRowToPageBlock(data as PageBlockRow);
 	}
 
 	async listPointers(): Promise<EventPointer[]> {
@@ -308,13 +421,17 @@ export class SupabaseContentRepository implements ContentRepository {
 			.single();
 
 		if (error) {
-			if (error.code === '23505') throw new GallerySlugConflictError(input.slug);
+			if (error.code === '23505')
+				throw new GallerySlugConflictError(input.slug);
 			throw new Error(`No se pudo crear la galería: ${error.message}`);
 		}
 		return mapRowToGallery(data as GalleryRow);
 	}
 
-	async updateGallery(id: string, patch: GalleryUpdate): Promise<Gallery | null> {
+	async updateGallery(
+		id: string,
+		patch: GalleryUpdate,
+	): Promise<Gallery | null> {
 		const row: Record<string, unknown> = {};
 		if (patch.title !== undefined) row.title = patch.title;
 		if (patch.slug !== undefined) row.slug = patch.slug;
@@ -362,10 +479,15 @@ export class SupabaseContentRepository implements ContentRepository {
 		if (error) {
 			throw new Error(`No se pudieron listar las fotos: ${error.message}`);
 		}
-		return (data ?? []).map((row) => mapRowToGalleryPhoto(row as GalleryPhotoRow));
+		return (data ?? []).map((row) =>
+			mapRowToGalleryPhoto(row as GalleryPhotoRow),
+		);
 	}
 
-	async createPhoto(galleryId: string, input: NewGalleryPhoto): Promise<GalleryPhoto> {
+	async createPhoto(
+		galleryId: string,
+		input: NewGalleryPhoto,
+	): Promise<GalleryPhoto> {
 		const { data: lastPhoto, error: lastPhotoError } = await this.client
 			.from(GALLERY_PHOTOS_TABLE)
 			.select('position')
@@ -374,7 +496,9 @@ export class SupabaseContentRepository implements ContentRepository {
 			.limit(1)
 			.maybeSingle();
 		if (lastPhotoError) {
-			throw new Error(`No se pudo calcular la posición: ${lastPhotoError.message}`);
+			throw new Error(
+				`No se pudo calcular la posición: ${lastPhotoError.message}`,
+			);
 		}
 		const position = lastPhoto ? lastPhoto.position + 1 : 0;
 
@@ -421,7 +545,10 @@ export class SupabaseContentRepository implements ContentRepository {
 		return mapRowToGalleryPhoto(data[0] as GalleryPhotoRow);
 	}
 
-	async deletePhoto(galleryId: string, photoId: string): Promise<GalleryPhoto | null> {
+	async deletePhoto(
+		galleryId: string,
+		photoId: string,
+	): Promise<GalleryPhoto | null> {
 		const { data, error } = await this.client
 			.from(GALLERY_PHOTOS_TABLE)
 			.delete()
