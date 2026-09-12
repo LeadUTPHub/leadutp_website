@@ -1,7 +1,8 @@
 ---
 import { Lightbulb, Star, Target, Users } from '@lucide/astro';
 import Container from '../components/ui/Container.astro';
-import { about } from '../data/about';
+import { loadAboutContent } from '../infra/content/loadPageContent';
+import { renderMarkdown } from '../infra/markdown/renderMarkdown';
 import Layout from '../layouts/Layout.astro';
 
 const valueIcons = {
@@ -10,6 +11,16 @@ const valueIcons = {
 	users: Users,
 	star: Star,
 };
+
+// T5.4 — cadena Supabase → snapshot → about.data.ts → vacío. Solo historia
+// y junta directiva son editables desde el panel; intro, acrónimo, misión,
+// visión y valores siguen viniendo del .data.ts (D-14b).
+const { content: about } = await loadAboutContent();
+
+// D-14d: la historia se escribe en markdown (mismo tratamiento que el
+// `body` de las galerías desde Sprint 4), ya sanitizado por renderMarkdown.
+// Sin esto, la directiva no podría meter ni un salto de párrafo.
+const historyHtml = about.history ? renderMarkdown(about.history) : '';
 ---
 
 <Layout
@@ -161,9 +172,10 @@ const valueIcons = {
 								Cómo empezamos
 							</h2>
 						</div>
-						<p class="text-foreground-secondary max-w-3xl text-base leading-8 sm:text-lg sm:leading-9">
-							{about.history}
-						</p>
+						<div
+							class="text-foreground-secondary [&_a]:text-foreground [&_a]:underline [&_a]:decoration-white/30 [&_a]:underline-offset-4 hover:[&_a]:decoration-white/60 [&_p+p]:mt-5 [&_ul]:mt-5 [&_ul]:list-disc [&_ul]:pl-5 max-w-3xl text-base leading-8 sm:text-lg sm:leading-9"
+							set:html={historyHtml}
+						/>
 					</div>
 				</Container>
 			</section>
