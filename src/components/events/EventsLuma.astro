@@ -68,6 +68,11 @@ const links = buildLumaLinks({ calendarUrl, embedUrl });
 <script>
 	const LOAD_TIMEOUT_MS = 8000;
 
+	// El iframe empieza a cargar un poco antes de entrar al viewport (no
+	// justo al borde), para que no haya un salto perceptible de "en blanco"
+	// a "cargando" apenas el usuario llega scrolleando a la sección.
+	const NEAR_VIEWPORT_ROOT_MARGIN = '200px';
+
 	class EventsLumaEmbed extends HTMLElement {
 		connectedCallback() {
 			if (this.dataset.ready === 'true') return;
@@ -100,28 +105,60 @@ const links = buildLumaLinks({ calendarUrl, embedUrl });
 				this.hidden = true;
 			};
 
-			const timeoutId = window.setTimeout(hideEmbed, LOAD_TIMEOUT_MS);
+			// El timeout/load/error de siempre, pero recién arrancan cuando
+			// se decide empezar a cargar de verdad (ver más abajo) — no en
+			// cuanto el elemento se conecta al DOM. Mismo comportamiento de
+			// fallback que ya existía, solo que su punto de partida se movió.
+			const startLoading = () => {
+				const timeoutId = window.setTimeout(hideEmbed, LOAD_TIMEOUT_MS);
 
-			iframe.addEventListener(
-				'load',
-				() => {
-					window.clearTimeout(timeoutId);
-					showFrame();
-				},
-				{ once: true },
-			);
-			iframe.addEventListener(
-				'error',
-				() => {
-					window.clearTimeout(timeoutId);
-					hideEmbed();
-				},
-				{ once: true },
-			);
+				iframe.addEventListener(
+					'load',
+					() => {
+						window.clearTimeout(timeoutId);
+						showFrame();
+					},
+					{ once: true },
+				);
+				iframe.addEventListener(
+					'error',
+					() => {
+						window.clearTimeout(timeoutId);
+						hideEmbed();
+					},
+					{ once: true },
+				);
 
-			// El src se asigna después de enganchar los listeners de arriba,
-			// para no perder un load/error que dispare muy rápido.
-			iframe.src = embedUrl;
+				// El src se asigna después de enganchar los listeners de
+				// arriba, para no perder un load/error que dispare muy rápido.
+				iframe.src = embedUrl;
+			};
+
+			// Sin IntersectionObserver (navegador muy viejo): cargar de
+			// inmediato, igual que antes — degradación elegante, nunca dejar
+			// el calendario sin cargar por falta de soporte del navegador.
+			if (!('IntersectionObserver' in window)) {
+				startLoading();
+				return;
+			}
+
+			// OJO — esto NO es el bug de L17 (loading="lazy" + contenedor
+			// hidden): acá se observa `this` (el custom element), que tiene
+			// contenido visible ("Cargando calendario…") con layout real
+			// desde que se conecta. `wrapper` (el que sí empieza `hidden`)
+			// nunca es el observado, así que no hay candado circular: el
+			// IntersectionObserver puede medir la posición de `this` sin
+			// depender de que el iframe ya haya cargado.
+			const observer = new IntersectionObserver(
+				(entries) => {
+					if (entries.some((entry) => entry.isIntersecting)) {
+						observer.disconnect();
+						startLoading();
+					}
+				},
+				{ rootMargin: NEAR_VIEWPORT_ROOT_MARGIN },
+			);
+			observer.observe(this);
 		}
 	}
 
