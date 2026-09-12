@@ -99,6 +99,13 @@ export class NoopContentRepository implements ContentRepository {
 		return [];
 	}
 
+	async listPhotosForGalleries(
+		galleryIds: string[],
+	): Promise<Record<string, GalleryPhoto[]>> {
+		void galleryIds;
+		return {};
+	}
+
 	async createPhoto(
 		galleryId: string,
 		input: NewGalleryPhoto,

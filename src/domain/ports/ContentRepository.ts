@@ -189,6 +189,18 @@ export interface ContentRepository {
 
 	/** Ordenadas por `position` ascendente. */
 	listPhotos(galleryId: string): Promise<GalleryPhoto[]>;
+	/**
+	 * Fotos de VARIAS galerías en una sola consulta (`IN (gallery_id)`),
+	 * agrupadas en memoria por `galleryId` — evita el N+1 de llamar
+	 * `listPhotos()` una vez por galería (ver `/eventos`, sección "Eventos
+	 * realizados"). Cada array interno queda ordenado por `position`
+	 * ascendente, igual que `listPhotos()`. Una `galleryId` sin fotos
+	 * simplemente no aparece como key en el resultado. `[]` de entrada no
+	 * dispara ninguna consulta y devuelve `{}`.
+	 */
+	listPhotosForGalleries(
+		galleryIds: string[],
+	): Promise<Record<string, GalleryPhoto[]>>;
 	/** `position` se calcula como último + 1 (o 0 si es la primera). */
 	createPhoto(galleryId: string, input: NewGalleryPhoto): Promise<GalleryPhoto>;
 	/** `null` si la RLS rechaza el update o la fila no existe. */

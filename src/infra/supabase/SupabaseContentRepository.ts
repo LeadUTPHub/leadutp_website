@@ -484,6 +484,41 @@ export class SupabaseContentRepository implements ContentRepository {
 		);
 	}
 
+	/**
+	 * Batch de `listPhotos()` para varias galerías a la vez — evita el N+1
+	 * que tenía `/eventos` (una llamada a `listPhotos(gallery.id)` por cada
+	 * galería dentro de un `Promise.all`). Una sola consulta con
+	 * `.in('gallery_id', galleryIds)`, agrupada en memoria después.
+	 *
+	 * Ordenar por `position` a nivel de toda la tabla (no por galería) y
+	 * agrupar después preserva el orden ascendente DENTRO de cada galería:
+	 * una partición estable de una lista ya ordenada conserva el orden
+	 * relativo original de cada subconjunto — no hace falta un
+	 * `.order('gallery_id').order('position')` explícito para lograrlo.
+	 */
+	async listPhotosForGalleries(
+		galleryIds: string[],
+	): Promise<Record<string, GalleryPhoto[]>> {
+		if (galleryIds.length === 0) return {};
+
+		const { data, error } = await this.client
+			.from(GALLERY_PHOTOS_TABLE)
+			.select('*')
+			.in('gallery_id', galleryIds)
+			.order('position', { ascending: true });
+
+		if (error) {
+			throw new Error(`No se pudieron listar las fotos: ${error.message}`);
+		}
+
+		const byGallery: Record<string, GalleryPhoto[]> = {};
+		for (const row of (data ?? []) as GalleryPhotoRow[]) {
+			const photo = mapRowToGalleryPhoto(row);
+			(byGallery[photo.galleryId] ??= []).push(photo);
+		}
+		return byGallery;
+	}
+
 	async createPhoto(
 		galleryId: string,
 		input: NewGalleryPhoto,

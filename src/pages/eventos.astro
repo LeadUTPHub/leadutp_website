@@ -57,16 +57,27 @@ try {
 	// recientes primero) — mismo criterio que lifeEvents.slice() en
 	// vida-lead.astro.
 	const galleries = (await repo.listGalleries()).slice(0, MAX_GALLERIES);
-	recentGalleries = await Promise.all(
-		galleries.map(async (gallery) => {
-			const { body, ...rest } = gallery;
-			return {
-				...rest,
-				bodyHtml: body ? renderMarkdown(body) : null,
-				photos: (await repo.listPhotos(gallery.id)).slice(0, MAX_PHOTOS_PER_GALLERY),
-			};
-		}),
+	// Fix de perf (diagnóstico en la conversación): esto llamaba
+	// `repo.listPhotos(gallery.id)` una vez POR galería (N+1) — con las
+	// hasta MAX_GALLERIES=4 galerías permitidas, hasta 4 consultas
+	// separadas a Supabase, sumadas a listGalleries() y listPointers().
+	// listPhotosForGalleries() reemplaza eso por UNA sola consulta con
+	// `IN (gallery_id)`, agrupada en memoria (ver
+	// SupabaseContentRepository.listPhotosForGalleries.test.ts).
+	const photosByGallery = await repo.listPhotosForGalleries(
+		galleries.map((gallery) => gallery.id),
 	);
+	recentGalleries = galleries.map((gallery) => {
+		const { body, ...rest } = gallery;
+		return {
+			...rest,
+			bodyHtml: body ? renderMarkdown(body) : null,
+			photos: (photosByGallery[gallery.id] ?? []).slice(
+				0,
+				MAX_PHOTOS_PER_GALLERY,
+			),
+		};
+	});
 } catch {
 	// Degradación elegante: cae al estado vacío curado que ya existía
 	// (link a /vida-lead) — nunca un error.
