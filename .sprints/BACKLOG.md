@@ -12,7 +12,7 @@
 | 2 | Autenticación y roles | ✅ DONE (8/8) | — |
 | 3 | CRUD de eventos propios | ✅ DONE (6/6) | — |
 | 4 | Galería "así se vivió el evento" | ✅ DONE (7/7) | — |
-| 5 | Extensión a Nosotros y Proyectos | ✅ DONE (6/6) — reportado, esperando aprobación explícita del PO | — |
+| 5 | Extensión a Nosotros y Proyectos | ✅ DONE (6/6) — aprobado por el PO | — |
 | 6 | Pulido UX/UI | TODO | — |
 
 Regla de secuencia: el Sprint 2 (auth) no arranca hasta que el Sprint 1 esté validado en local — así, si Supabase se complica, Eventos ya quedó entregado de forma independiente.
@@ -151,5 +151,5 @@ Regla de secuencia: el Sprint 2 (auth) no arranca hasta que el Sprint 1 esté va
 | 2 | 2026-09-11 | local (`pnpm dev` — login/logout real con las 3 cuentas) + RLS verificada con Supabase real (T2.6) | ✅ Sí — Sprint 2 completo (8/8) | Ver entrada de cierre de Sprint 2 |
 | 3 | 2026-09-11 | local (`pnpm dev` — CRUD real de punteros con las 3 cuentas) + `pnpm build`/`pnpm lint` limpios (167/167 tests) | ✅ Sí — Sprint 3 completo (6/6) | Ver entrada de cierre de Sprint 3 |
 | 4 | 2026-09-11 | local (`pnpm dev` — flujo real de galerías/fotos con las 3 cuentas, subida real a Cloudinary) + `pnpm build`/`pnpm lint` limpios (285/285 tests) | ✅ Sí — Sprint 4 completo (7/7), 5 bugs encontrados en la validación y corregidos antes del cierre | Ver entrada de cierre de Sprint 4 |
-| 5 | 2026-09-14 | local (`pnpm dev` — login/PUT real como `super_admin`, 403 real como `director`) + `pnpm build` con contenido real publicado y con una caída de Supabase simulada, ambos verificados en el HTML generado + `pnpm build`/`pnpm lint`/`tsc --noEmit` limpios (398/398 tests); 1 bug encontrado y corregido en validación (L31, ver MEMORY.md) | Pendiente — reportado, esperando aprobación explícita del PO | Ver entrada de cierre de Sprint 5 |
+| 5 | 2026-09-14 | local (`pnpm dev` — login/PUT real como `super_admin`, 403 real como `director`) + `pnpm build` con contenido real publicado y con una caída de Supabase simulada, ambos verificados en el HTML generado + `pnpm build`/`pnpm lint`/`tsc --noEmit` limpios (398/398 tests); 1 bug encontrado y corregido en validación (L31, ver MEMORY.md); PO confirmó además que la sensación de lag reportada era `pnpm dev` (SSR por request), no un problema real — `pnpm build && serve` fluido sin lag entre páginas | ✅ Sí — Sprint 5 completo (6/6) | Ver entrada de cierre de Sprint 5 |
 | 6 | — | — | — | — |
