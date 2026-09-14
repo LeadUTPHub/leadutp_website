@@ -1,6 +1,6 @@
 # Pendientes — LEAD UTP Website
 
-> Última actualización: 2026-09-10
+> Última actualización: 2026-09-14
 
 Lista de tareas abiertas para seguir avanzando en el sitio. Para contexto general del stack y la estructura del proyecto, ver [`CONTEXT.md`](./CONTEXT.md).
 
@@ -82,6 +82,10 @@ La página anterior de LEAD UTP le aplica a cada logo del marquee un filtro `bri
 - Layout actual (2026-09-08): el texto (título, resumen, requisitos, fecha límite) va en una tarjeta a la izquierda y el formulario a la derecha, en un grid `lg:grid-cols-[minmax(0,1fr)_minmax(0,380px)]` — en mobile se apilan (texto arriba, form abajo). La tarjeta de texto usa `lg:flex lg:h-full lg:flex-col` + `lg:mt-auto` en la fecha límite para estirarse y calzar con la altura del form automáticamente, sin números fijos que haya que reajustar a mano.
 - La altura del iframe está fija (520px / 600px en `sm:`) con scroll interno propio de Google Forms; si el formulario real crece o se acorta mucho, ajustar esos valores en `convocatorias.astro`.
 - Cuando se cierre esta convocatoria o cambie el link, actualizar `applyUrl` (y `role`/`summary`/`requirements` si corresponde) en `openings.data.ts`, o volver a dejar el array vacío si no hay ninguna abierta.
+
+### 15. Contraste de `--color-secondary` (rojo) por debajo de AA para texto normal
+
+Calculado en la auditoría de accesibilidad del panel de administración (T6.4, Sprint 6, `MEMORY.md` L34): `--color-secondary` (`#d93340`, texto de error/borrar) sobre `--color-canvas` (`#060b24`) da ~4.16:1 de contraste — WCAG AA exige 4.5:1 para texto normal (sí pasa el 3:1 de texto grande). Es un token compartido con **todo el sitio público**, no algo introducido por el panel — cambiarlo afecta badges de error, mensajes de validación, etc. en todas las páginas, no solo `/administrator`. Verificar con un contraste-checker real (el cálculo fue manual, con la fórmula de luminancia de WCAG) y decidir si vale la pena ajustar el tono — es una decisión de paleta/marca, no un bug puntual.
 
 ## Dónde preguntar
 

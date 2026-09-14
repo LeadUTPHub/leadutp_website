@@ -147,9 +147,12 @@ try {
 
 			<dialog
 				id="gallery-dialog"
+				aria-labelledby="gallery-dialog-title"
 				class="text-foreground bg-canvas-navy w-full max-w-lg rounded-2xl p-6 ring-1 ring-white/12 backdrop:bg-black/60"
 			>
-				<h3 class="font-display text-xl font-bold tracking-[-0.03em]">Nuevo evento pasado</h3>
+				<h3 id="gallery-dialog-title" class="font-display text-xl font-bold tracking-[-0.03em]">
+					Nuevo evento pasado
+				</h3>
 
 				<form id="gallery-form" class="mt-5 flex flex-col gap-4" novalidate>
 					<Field label="Título" name="title" required maxlength={140} />

@@ -15,7 +15,10 @@ import Button from '../../../components/ui/Button.astro';
 import SectionHeader from '../../../components/ui/SectionHeader.astro';
 import { pillars } from '../../../data/pillars';
 import AdminLayout from '../../../layouts/AdminLayout.astro';
-import { getContentRepositoryForRequest, getPhotoStorage } from '../../../infra/container';
+import {
+	getContentRepositoryForRequest,
+	getPhotoStorage,
+} from '../../../infra/container';
 
 const { profile } = Astro.locals;
 if (!profile) {
@@ -30,17 +33,30 @@ const gallery = await repo.getGallery(id);
 if (!gallery) return Astro.redirect('/administrator/eventos-pasados');
 
 const photos = await repo.listPhotos(id);
-const editable = canEdit(profile, { ownerId: gallery.ownerId, areaSlug: gallery.areaSlug });
+const editable = canEdit(profile, {
+	ownerId: gallery.ownerId,
+	areaSlug: gallery.areaSlug,
+});
 
-const pillarOptions = pillars.map((pillar) => ({ value: pillar.slug, label: pillar.name }));
+const pillarOptions = pillars.map((pillar) => ({
+	value: pillar.slug,
+	label: pillar.name,
+}));
 const photoStorage = getPhotoStorage();
 ---
 
 <AdminLayout title={`${gallery.title} — Panel LEAD UTP`}>
 	<AdminShell profile={profile}>
-		<gallery-editor-admin data-gallery-id={gallery.id} data-editable={String(editable)}>
+		<gallery-editor-admin
+			data-gallery-id={gallery.id}
+			data-editable={String(editable)}
+		>
 			<SectionHeader id="gallery-editor-title" title={gallery.title}>
-				<Button slot="action" href="/administrator/eventos-pasados" variant="outline">
+				<Button
+					slot="action"
+					href="/administrator/eventos-pasados"
+					variant="outline"
+				>
 					Volver a eventos pasados
 				</Button>
 			</SectionHeader>
@@ -59,8 +75,18 @@ const photoStorage = getPhotoStorage();
 
 					{
 						editable ? (
-							<form id="gallery-meta-form" class="mt-4 flex flex-col gap-4" novalidate>
-								<Field label="Título" name="title" required maxlength={140} value={gallery.title} />
+							<form
+								id="gallery-meta-form"
+								class="mt-4 flex flex-col gap-4"
+								novalidate
+							>
+								<Field
+									label="Título"
+									name="title"
+									required
+									maxlength={140}
+									value={gallery.title}
+								/>
 								<Field
 									label="Fecha del evento"
 									name="happenedOn"
@@ -98,12 +124,21 @@ const photoStorage = getPhotoStorage();
 									role="alert"
 									hidden
 								/>
-								<p id="gallery-meta-saved" class="text-optional-3 text-sm" hidden>
+								<p
+									id="gallery-meta-saved"
+									class="text-optional-3 text-sm"
+									hidden
+								>
 									Guardado.
 								</p>
 
 								<div class="mt-2 flex justify-between gap-3">
-									<Button type="button" variant="ghost" class="text-secondary" data-delete-gallery>
+									<Button
+										type="button"
+										variant="ghost"
+										class="text-secondary"
+										data-delete-gallery
+									>
 										Borrar evento pasado
 									</Button>
 									<Button type="submit">Guardar</Button>
@@ -127,7 +162,13 @@ const photoStorage = getPhotoStorage();
 
 					{
 						editable && (
-							<form id="photo-upload-form" class="mt-4 flex flex-wrap items-center gap-3">
+							<form
+								id="photo-upload-form"
+								class="mt-4 flex flex-wrap items-center gap-3"
+							>
+								<label for="photo-file-input" class="sr-only">
+									Elegir fotos para subir
+								</label>
 								<input
 									id="photo-file-input"
 									type="file"
@@ -142,7 +183,7 @@ const photoStorage = getPhotoStorage();
 							</form>
 						)
 					}
-					<div id="upload-queue" class="mt-3 flex flex-col gap-2" />
+					<div id="upload-queue" class="mt-3 flex flex-col gap-2"></div>
 
 					{
 						photos.length === 0 ? (
@@ -154,7 +195,10 @@ const photoStorage = getPhotoStorage();
 								{photos.map((photo, index) => {
 									const prev = photos[index - 1];
 									const next = photos[index + 1];
-									const thumbUrl = photoStorage.deliveryUrl(photo.cloudinaryPublicId, 200);
+									const thumbUrl = photoStorage.deliveryUrl(
+										photo.cloudinaryPublicId,
+										200,
+									);
 									return (
 										<li
 											class="flex gap-3 rounded-lg bg-white/[0.06] p-3 ring-1 ring-white/12"
@@ -177,7 +221,11 @@ const photoStorage = getPhotoStorage();
 														data-photo-id={photo.id}
 														class="flex flex-wrap items-center gap-2"
 													>
+														<label for={`alt-${photo.id}`} class="sr-only">
+															Descripción de la foto (alt)
+														</label>
 														<input
+															id={`alt-${photo.id}`}
 															type="text"
 															name="alt"
 															value={photo.alt ?? ''}
@@ -305,7 +353,10 @@ const photoStorage = getPhotoStorage();
 			form.append('allowed_formats', signed.allowedFormats);
 
 			const xhr = new XMLHttpRequest();
-			xhr.open('POST', `https://api.cloudinary.com/v1_1/${signed.cloudName}/image/upload`);
+			xhr.open(
+				'POST',
+				`https://api.cloudinary.com/v1_1/${signed.cloudName}/image/upload`,
+			);
 			xhr.upload.addEventListener('progress', (event) => {
 				if (event.lengthComputable) {
 					onProgress(Math.round((event.loaded / event.total) * 100));
@@ -328,7 +379,11 @@ const photoStorage = getPhotoStorage();
 				} catch {
 					// Respuesta no-JSON (raro en Cloudinary) — se usa el HTTP status.
 				}
-				console.error('Cloudinary rechazó la subida:', xhr.status, xhr.responseText);
+				console.error(
+					'Cloudinary rechazó la subida:',
+					xhr.status,
+					xhr.responseText,
+				);
 				reject(new Error(`Cloudinary rechazó la subida: ${detail}`));
 			});
 			xhr.addEventListener('error', () =>
@@ -356,7 +411,9 @@ const photoStorage = getPhotoStorage();
 			const form = this.querySelector<HTMLFormElement>('#gallery-meta-form');
 			const errorEl = this.querySelector<HTMLElement>('#gallery-meta-error');
 			const savedEl = this.querySelector<HTMLElement>('#gallery-meta-saved');
-			const submitBtn = form?.querySelector<HTMLButtonElement>('button[type="submit"]');
+			const submitBtn = form?.querySelector<HTMLButtonElement>(
+				'button[type="submit"]',
+			);
 			if (!form || !errorEl || !savedEl || !submitBtn) return;
 
 			form.addEventListener('submit', async (event) => {
@@ -375,11 +432,14 @@ const photoStorage = getPhotoStorage();
 
 				submitBtn.disabled = true;
 				try {
-					const response = await fetch(`/administrator/api/galleries/${galleryId}`, {
-						method: 'PATCH',
-						headers: { 'content-type': 'application/json' },
-						body: JSON.stringify(payload),
-					});
+					const response = await fetch(
+						`/administrator/api/galleries/${galleryId}`,
+						{
+							method: 'PATCH',
+							headers: { 'content-type': 'application/json' },
+							body: JSON.stringify(payload),
+						},
+					);
 
 					if (response.ok) {
 						savedEl.hidden = false;
@@ -389,7 +449,8 @@ const photoStorage = getPhotoStorage();
 					errorEl.textContent = body?.error ?? 'No se pudo guardar.';
 					errorEl.hidden = false;
 				} catch {
-					errorEl.textContent = 'No se pudo conectar. Revisa tu conexión e intenta de nuevo.';
+					errorEl.textContent =
+						'No se pudo conectar. Revisa tu conexión e intenta de nuevo.';
 					errorEl.hidden = false;
 				} finally {
 					submitBtn.disabled = false;
@@ -398,7 +459,9 @@ const photoStorage = getPhotoStorage();
 		}
 
 		setupDeleteGallery(galleryId: string) {
-			const button = this.querySelector<HTMLButtonElement>('[data-delete-gallery]');
+			const button = this.querySelector<HTMLButtonElement>(
+				'[data-delete-gallery]',
+			);
 			button?.addEventListener('click', async () => {
 				if (
 					!window.confirm(
@@ -408,23 +471,29 @@ const photoStorage = getPhotoStorage();
 					return;
 				}
 				try {
-					const response = await fetch(`/administrator/api/galleries/${galleryId}`, {
-						method: 'DELETE',
-					});
+					const response = await fetch(
+						`/administrator/api/galleries/${galleryId}`,
+						{
+							method: 'DELETE',
+						},
+					);
 					if (response.ok) {
 						window.location.href = '/administrator/eventos-pasados';
 					} else {
 						window.alert('No se pudo borrar.');
 					}
 				} catch {
-					window.alert('No se pudo conectar. Revisa tu conexión e intenta de nuevo.');
+					window.alert(
+						'No se pudo conectar. Revisa tu conexión e intenta de nuevo.',
+					);
 				}
 			});
 		}
 
 		setupUpload(galleryId: string) {
 			const form = this.querySelector<HTMLFormElement>('#photo-upload-form');
-			const fileInput = this.querySelector<HTMLInputElement>('#photo-file-input');
+			const fileInput =
+				this.querySelector<HTMLInputElement>('#photo-file-input');
 			const queue = this.querySelector<HTMLElement>('#upload-queue');
 			if (!form || !fileInput || !queue) return;
 
@@ -440,20 +509,27 @@ const photoStorage = getPhotoStorage();
 					queue.appendChild(row);
 
 					try {
-						const signResponse = await fetch('/administrator/api/uploads/sign', {
-							method: 'POST',
-							headers: { 'content-type': 'application/json' },
-							body: JSON.stringify({ galleryId }),
-						});
+						const signResponse = await fetch(
+							'/administrator/api/uploads/sign',
+							{
+								method: 'POST',
+								headers: { 'content-type': 'application/json' },
+								body: JSON.stringify({ galleryId }),
+							},
+						);
 						if (!signResponse.ok) {
 							const body = await signResponse.json().catch(() => null);
 							throw new Error(body?.error ?? 'No se pudo firmar la subida.');
 						}
 						const signed: SignedUpload = await signResponse.json();
 
-						const uploaded = await uploadToCloudinary(file, signed, (percent) => {
-							row.textContent = `${file.name}: ${percent}%`;
-						});
+						const uploaded = await uploadToCloudinary(
+							file,
+							signed,
+							(percent) => {
+								row.textContent = `${file.name}: ${percent}%`;
+							},
+						);
 
 						const registerResponse = await fetch(
 							`/administrator/api/galleries/${galleryId}/photos`,
@@ -469,7 +545,9 @@ const photoStorage = getPhotoStorage();
 							},
 						);
 						if (!registerResponse.ok) {
-							throw new Error('Se subió a Cloudinary pero no se pudo registrar.');
+							throw new Error(
+								'Se subió a Cloudinary pero no se pudo registrar.',
+							);
 						}
 						row.textContent = `${file.name}: listo.`;
 					} catch (error) {
@@ -483,30 +561,37 @@ const photoStorage = getPhotoStorage();
 		}
 
 		setupPhotoRows(galleryId: string) {
-			this.querySelectorAll<HTMLFormElement>('[data-photo-alt-form]').forEach((form) => {
-				form.addEventListener('submit', async (event) => {
-					event.preventDefault();
-					const photoId = form.dataset.photoId;
-					const input = form.querySelector<HTMLInputElement>('input[name="alt"]');
-					if (!photoId || !input) return;
+			this.querySelectorAll<HTMLFormElement>('[data-photo-alt-form]').forEach(
+				(form) => {
+					form.addEventListener('submit', async (event) => {
+						event.preventDefault();
+						const photoId = form.dataset.photoId;
+						const input =
+							form.querySelector<HTMLInputElement>('input[name="alt"]');
+						if (!photoId || !input) return;
 
-					try {
-						const response = await fetch(
-							`/administrator/api/galleries/${galleryId}/photos/${photoId}`,
-							{
-								method: 'PATCH',
-								headers: { 'content-type': 'application/json' },
-								body: JSON.stringify({ alt: input.value }),
-							},
-						);
-						if (!response.ok) {
-							window.alert('No se pudo guardar la descripción. Intenta de nuevo.');
+						try {
+							const response = await fetch(
+								`/administrator/api/galleries/${galleryId}/photos/${photoId}`,
+								{
+									method: 'PATCH',
+									headers: { 'content-type': 'application/json' },
+									body: JSON.stringify({ alt: input.value }),
+								},
+							);
+							if (!response.ok) {
+								window.alert(
+									'No se pudo guardar la descripción. Intenta de nuevo.',
+								);
+							}
+						} catch {
+							window.alert(
+								'No se pudo conectar. Revisa tu conexión e intenta de nuevo.',
+							);
 						}
-					} catch {
-						window.alert('No se pudo conectar. Revisa tu conexión e intenta de nuevo.');
-					}
-				});
-			});
+					});
+				},
+			);
 
 			const swap = async (button: HTMLButtonElement) => {
 				const photoId = button.dataset.photoId;
@@ -533,37 +618,44 @@ const photoStorage = getPhotoStorage();
 					}
 					window.location.reload();
 				} catch {
-					window.alert('No se pudo conectar. Revisa tu conexión e intenta de nuevo.');
+					window.alert(
+						'No se pudo conectar. Revisa tu conexión e intenta de nuevo.',
+					);
 				}
 			};
 
-			this.querySelectorAll<HTMLButtonElement>('[data-move-up], [data-move-down]').forEach(
+			this.querySelectorAll<HTMLButtonElement>(
+				'[data-move-up], [data-move-down]',
+			).forEach((button) => {
+				button.addEventListener('click', () => swap(button));
+			});
+
+			this.querySelectorAll<HTMLButtonElement>('[data-delete-photo]').forEach(
 				(button) => {
-					button.addEventListener('click', () => swap(button));
+					button.addEventListener('click', async () => {
+						const photoId = button.dataset.photoId;
+						if (!photoId) return;
+						if (!window.confirm('¿Borrar esta foto? No se puede deshacer.'))
+							return;
+
+						try {
+							const response = await fetch(
+								`/administrator/api/galleries/${galleryId}/photos/${photoId}`,
+								{ method: 'DELETE' },
+							);
+							if (response.ok) {
+								window.location.reload();
+							} else {
+								window.alert('No se pudo borrar la foto.');
+							}
+						} catch {
+							window.alert(
+								'No se pudo conectar. Revisa tu conexión e intenta de nuevo.',
+							);
+						}
+					});
 				},
 			);
-
-			this.querySelectorAll<HTMLButtonElement>('[data-delete-photo]').forEach((button) => {
-				button.addEventListener('click', async () => {
-					const photoId = button.dataset.photoId;
-					if (!photoId) return;
-					if (!window.confirm('¿Borrar esta foto? No se puede deshacer.')) return;
-
-					try {
-						const response = await fetch(
-							`/administrator/api/galleries/${galleryId}/photos/${photoId}`,
-							{ method: 'DELETE' },
-						);
-						if (response.ok) {
-							window.location.reload();
-						} else {
-							window.alert('No se pudo borrar la foto.');
-						}
-					} catch {
-						window.alert('No se pudo conectar. Revisa tu conexión e intenta de nuevo.');
-					}
-				});
-			});
 		}
 	}
 
