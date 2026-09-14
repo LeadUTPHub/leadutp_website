@@ -1,7 +1,7 @@
 # BACKLOG — Panel de administración + integración Luma (LEAD UTP)
 
 > Secuencia **fija** de 7 sprints (0–6), decidida en `docs/GUIA_METODOLOGIA_ADMIN.md`. No se reordena ni se fusiona.
-> Ningún sprint arranca sin la DoD del anterior cumplida y validada — **hoy 100% en local** (`pnpm build && pnpm preview` + `pnpm dev`); Vercel aún no está conectado (ver nota de fase en `docs/GUIA_METODOLOGIA_ADMIN.md`, sección "Flujo de trabajo con git y Vercel").
+> Ningún sprint arranca sin la DoD del anterior cumplida y validada — **hoy 100% en local** (`pnpm build` + `pnpm dev`; `pnpm preview` no es compatible con `@astrojs/vercel`, ver MEMORY.md L20); Vercel aún no está conectado (ver nota de fase en `docs/GUIA_METODOLOGIA_ADMIN.md`, sección "Flujo de trabajo con git y Vercel").
 > Ciclo por tarea: Rojo (test que falla) → Verde (código mínimo) → `pnpm build` completo → `MEMORY.md`.
 > Estados: `TODO` · `WIP` · `BLOCKED` · `DONE`.
 
@@ -10,10 +10,10 @@
 | 0 | Infraestructura base | ✅ DONE | — |
 | 1 | Eventos + embed Luma | ✅ DONE (6/6 + 1 extra) | ✅ **piloto** |
 | 2 | Autenticación y roles | ✅ DONE (8/8) | — |
-| 3 | CRUD de eventos propios | TODO | — |
-| 4 | Galería "así se vivió el evento" | TODO | — |
-| 5 | Extensión a Nosotros y Proyectos | TODO | — |
-| 6 | Pulido UX/UI | TODO | — |
+| 3 | CRUD de eventos propios | ✅ DONE (6/6) | — |
+| 4 | Galería "así se vivió el evento" | ✅ DONE (7/7) | — |
+| 5 | Extensión a Nosotros y Proyectos | ✅ DONE (6/6) — aprobado por el PO | — |
+| 6 | Pulido UX/UI | ✅ DONE (8/8, incluye T6.7/T6.8 agregadas) — reportado, esperando aprobación explícita del PO | — |
 
 Regla de secuencia: el Sprint 2 (auth) no arranca hasta que el Sprint 1 esté validado en local — así, si Supabase se complica, Eventos ya quedó entregado de forma independiente.
 
@@ -77,14 +77,16 @@ Regla de secuencia: el Sprint 2 (auth) no arranca hasta que el Sprint 1 esté va
 
 **Meta / DoD:** un `director`/`subdirector` logueado crea/edita/borra **solo** los `luma_event_pointers` que le permite la RLS, guardados en Supabase. `/eventos` (público) puede mostrar los punteros `featured` publicados, en build-time, con fallback.
 
+> **Estado real (2026-09-11): ✅ 6/6 — Sprint 3 completo.** Antes de T3.1, el PO pidió revisar si `luma_event_pointers` alcanzaba para la tarjeta visual completa (no alcanzaba — ver `database/patches/002-event-pointers-full-card.sql` y MEMORY.md D-09/D-10). Todas las tareas verificadas por el agente (tests + build en verde) y con CRUD real de punta a punta contra Supabase con las 3 cuentas de prueba, confirmado por el PO. Detalle completo en MEMORY.md, sección "Sprint 3 · CRUD de eventos propios".
+
 | ID | Tarea | Given / When / Then | Estado |
 |---|---|---|---|
-| T3.1 | (Rojo) `canEdit()` — matriz completa | **Given** actor × recurso (propio / misma área / otra área) × rol · **When** se evalúa · **Then** coincide con `DOMAIN.md` | TODO |
-| T3.2 | `SupabaseContentRepository` — punteros | **Given** el puerto `ContentRepository` · **When** se implementan `listPointers`, `createPointer`, `updatePointer`, `deletePointer` · **Then** tests de contrato (con RLS) en verde | TODO |
-| T3.3 | Endpoints `/administrator/api/event-pointers` | **Given** `docs/API_CONTRACTS.md` · **When** GET/POST/PATCH/DELETE · **Then** validan sesión + delegan la autorización a la RLS; errores tipados | TODO |
-| T3.4 | UI `/administrator/eventos` | **Given** sesión · **When** el director abre la pantalla · **Then** ve solo lo editable por su rol; puede crear (título + URL de Luma + pilar + `featured`), editar y borrar; validación de que `luma_url` sea de Luma | TODO |
-| T3.5 | Web pública: punteros destacados | **Given** punteros `published && featured` · **When** build de `/eventos` · **Then** se listan junto al embed; si Supabase falla → fallback → se omite la lista, el embed queda | TODO |
-| T3.6 | Build + validación local | **When** `pnpm build && pnpm preview` (y push como respaldo) · **Then** en local un director crea/edita/borra solo lo suyo; un subdirector no puede tocar lo de otro | TODO |
+| T3.1 | (Rojo) `canEdit()` — matriz completa | **Given** actor × recurso (propio / misma área / otra área) × rol · **When** se evalúa · **Then** coincide con `DOMAIN.md` | ✅ DONE |
+| T3.2 | `SupabaseContentRepository` — punteros | **Given** el puerto `ContentRepository` · **When** se implementan `listPointers`, `createPointer`, `updatePointer`, `deletePointer` · **Then** tests de contrato (con RLS) en verde | ✅ DONE |
+| T3.3 | Endpoints `/administrator/api/event-pointers` | **Given** `docs/API_CONTRACTS.md` · **When** GET/POST/PATCH/DELETE · **Then** validan sesión + delegan la autorización a la RLS; errores tipados | ✅ DONE |
+| T3.4 | UI `/administrator/eventos` | **Given** sesión · **When** el director abre la pantalla · **Then** ve solo lo editable por su rol; puede crear (título + URL de Luma + fecha + ubicación + imagen (URL) + descripción corta + pilar + `featured`), editar y borrar; validación de que `luma_url` sea de Luma, `imageUrl` sea `https://` y `shortDescription` ≤ 280 chars | ✅ DONE |
+| T3.5 | Web pública: punteros destacados | **Given** punteros `published && featured` · **When** build de `/eventos` · **Then** se listan junto al embed; si Supabase falla → fallback → se omite la lista, el embed queda | ✅ DONE |
+| T3.6 | Build + validación local | **When** `pnpm build` + `pnpm dev` (y push como respaldo; `pnpm preview` no aplica, ver MEMORY.md L20) · **Then** en local un director crea/edita/borra solo lo suyo; un subdirector no puede tocar lo de otro | ✅ DONE |
 
 ---
 
@@ -92,15 +94,17 @@ Regla de secuencia: el Sprint 2 (auth) no arranca hasta que el Sprint 1 esté va
 
 **Meta / DoD:** desde el panel se crea una galería (texto + fecha + pilar) y se suben fotos **directo a Cloudinary** (firma en endpoint propio), asociadas a la galería en Supabase, visibles en una página pública tipo `/vida-lead`. Degradación de imágenes probada.
 
+> **Estado real (2026-09-11): ✅ 7/7 — Sprint 4 completo.** Antes de T4.1, se confirmó que el schema de `event_galleries`/`gallery_photos` alcanzaba tal cual (sin migración, a diferencia de Sprint 3). Todas las tareas verificadas por el agente y con flujo real de punta a punta contra Supabase/Cloudinary reales, confirmado por el PO. En la validación del sprint (probando la UI real, no solo tests) el PO encontró 5 bugs reales que se corrigieron antes del cierre — detalle completo en `MEMORY.md`, sección "Sprint 4 · Galería 'así se vivió el evento'".
+
 | ID | Tarea | Given / When / Then | Estado |
 |---|---|---|---|
-| T4.1 | (Rojo) `buildSignature(params, secret)` | **Given** params ordenados + secret · **When** se firma · **Then** SHA-1 coincide con el esperado por Cloudinary (vector de prueba) | TODO |
-| T4.2 | Endpoint `POST /administrator/api/uploads/sign` | **Given** sesión + `galleryId` · **When** el actor puede editar esa galería · **Then** devuelve `{ timestamp, signature, apiKey, cloudName, folder }`; si no, 403 | TODO |
-| T4.3 | `CloudinaryPhotoStorage` (adaptador) | **Given** el puerto `PhotoStorage` · **When** se implementa `sign()` y `deliveryUrl(publicId, w)` · **Then** tests en verde; sin SDK | TODO |
-| T4.4 | Endpoints de galería | **Given** contrato · **When** `POST/PATCH/DELETE /administrator/api/galleries` y `POST/PATCH/DELETE /administrator/api/galleries/:id/photos` · **Then** RLS aplica; re-valida permiso antes de insertar foto | TODO |
-| T4.5 | UI `/administrator/galerias` | **Given** sesión · **When** el director crea galería y sube N fotos · **Then** subida directa a Cloudinary con barra de progreso; reordenar (`position`); borrar; editar texto/alt | TODO |
-| T4.6 | Web pública: "Eventos realizados" | **Given** galerías `published` · **When** build de `/eventos` (sección realizados) · **Then** render con `buildCloudinaryUrl`, `width/height` reservados, `onerror` → placeholder local; texto visible aunque Cloudinary caiga | TODO |
-| T4.7 | Build + validación local | **When** `pnpm build && pnpm preview` (y push como respaldo) · **Then** flujo completo demostrable en local | TODO |
+| T4.1 | (Rojo) `buildSignature(params, secret)` | **Given** params ordenados + secret · **When** se firma · **Then** SHA-1 coincide con el esperado por Cloudinary (vector de prueba) | ✅ DONE |
+| T4.2 | Endpoint `POST /administrator/api/uploads/sign` | **Given** sesión + `galleryId` · **When** el actor puede editar esa galería · **Then** devuelve `{ timestamp, signature, apiKey, cloudName, folder }`; si no, 403 | ✅ DONE |
+| T4.3 | `CloudinaryPhotoStorage` (adaptador) | **Given** el puerto `PhotoStorage` · **When** se implementa `sign()` y `deliveryUrl(publicId, w)` · **Then** tests en verde; sin SDK | ✅ DONE |
+| T4.4 | Endpoints de galería | **Given** contrato · **When** `POST/PATCH/DELETE /administrator/api/galleries` y `POST/PATCH/DELETE /administrator/api/galleries/:id/photos` · **Then** RLS aplica; re-valida permiso antes de insertar foto | ✅ DONE |
+| T4.5 | UI `/administrator/galerias` | **Given** sesión · **When** el director crea galería y sube N fotos · **Then** subida directa a Cloudinary con barra de progreso; reordenar (`position`); borrar; editar texto/alt | ✅ DONE |
+| T4.6 | Web pública: "Eventos realizados" | **Given** galerías `published` · **When** build de `/eventos` (sección realizados) · **Then** render con `buildCloudinaryUrl`, `width/height` reservados, `onerror` → placeholder local; texto visible aunque Cloudinary caiga | ✅ DONE |
+| T4.7 | Build + validación local | **When** `pnpm build` + `pnpm dev` (y push como respaldo; `pnpm preview` no aplica, ver MEMORY.md L20) · **Then** flujo completo demostrable en local | ✅ DONE |
 
 ---
 
@@ -110,40 +114,60 @@ Regla de secuencia: el Sprint 2 (auth) no arranca hasta que el Sprint 1 esté va
 
 | ID | Tarea | Given / When / Then | Estado |
 |---|---|---|---|
-| T5.1 | Tipos compartidos dominio ↔ `page_blocks` | **Given** `src/data/about/about.types.ts` y `projects.types.ts` · **When** se define el validador de `data` jsonb por `key` · **Then** un `data` mal formado se rechaza en el endpoint | TODO |
-| T5.2 | Repo + endpoints `/administrator/api/pages/:key` | **Given** contrato · **When** GET/PUT · **Then** RLS por `area_slug`; `PUT` valida forma | TODO |
-| T5.3 | UI `/administrator/paginas` | **Given** sesión · **When** el director de su área edita historia / junta / proyectos · **Then** formularios tipados; preview del estado publicado/borrador | TODO |
-| T5.4 | Loaders de `/nosotros` y `/proyectos` | **Given** `CompositeContentRepository` · **When** build · **Then** usan DB→fallback→`.data.ts`→vacío; los `.astro` de página no cambian su estructura | TODO |
-| T5.5 | `prebuild` snapshot | **Given** script `prebuild` · **When** corre con Supabase OK · **Then** escribe `about.fallback.json` / `projects.fallback.json`; con Supabase caído, no borra el anterior y el build pasa | TODO |
-| T5.6 | Build + validación local | **When** `pnpm build && pnpm preview` (y push como respaldo) · **Then** un director de área edita y se ve en local | TODO |
+| T5.1 | Tipos compartidos dominio ↔ `page_blocks` | **Given** `src/data/about/about.types.ts` y `projects.types.ts` · **When** se define el validador de `data` jsonb por `key` · **Then** un `data` mal formado se rechaza en el endpoint | ✅ DONE — `validatePageBlockData.ts` (34 tests), commit `5d87dbe` |
+| T5.2 | Repo + endpoints `/administrator/api/pages/:key` | **Given** contrato · **When** GET/PUT · **Then** RLS por `area_slug`; `PUT` valida forma | ✅ DONE — `getPageBlock`/`savePageBlock` (upsert en 2 pasos, no `.upsert()`, ver MEMORY.md) + endpoint `[key].ts`, commit `1b6abe5` |
+| T5.3 | UI `/administrator/paginas` | **Given** sesión · **When** el director de su área edita historia / junta / proyectos · **Then** formularios tipados; preview del estado publicado/borrador | ✅ DONE — solo `super_admin` edita (D-13); resto del staff en modo lectura, commit `f8bd5e7` |
+| T5.4 | Loaders de `/nosotros` y `/proyectos` | **Given** `CompositeContentRepository` · **When** build · **Then** usan DB→fallback→`.data.ts`→vacío; los `.astro` de página no cambian su estructura | ✅ DONE — `resolvePageContent.ts`/`loadPageContent.ts`; snapshot (`*.fallback.json`) todavía no existe, queda para T5.5 · commit `27e3dfa` |
+| T5.5 | `prebuild` snapshot | **Given** script `prebuild` · **When** corre con Supabase OK · **Then** escribe `about.fallback.json` / `projects.fallback.json`; con Supabase caído, no borra el anterior y el build pasa | ✅ DONE — `buildPageSnapshots.ts` (política pura, 14 tests) + `scripts/generate-page-snapshots.ts` (I/O, corre con Node nativo — sin `tsx`), wireado como `prebuild` en `package.json` |
+| T5.6 | Build + validación local | **When** `pnpm build && pnpm preview` (y push como respaldo) · **Then** un director de área edita y se ve en local | ✅ DONE — `pnpm preview` no aplica (L20); validado con `pnpm build`/`pnpm dev` reales, ver retrospectiva |
+
+> **Nota de proceso (2026-09-13):** T5.1–T5.4 se hicieron en una sesión anterior (commits `5d87dbe`/`1b6abe5`/`f8bd5e7`/`27e3dfa`, 2026-09-11/12) pero esta tabla y `MEMORY.md` § Estado del sistema quedaron sin actualizar hasta ahora — corregido al reabrir el workstream. Ver también los 2 commits `perf(eventos)` (`0391b20`, `2251264`) hechos fuera de alcance de sprint, documentados en `MEMORY.md` L29.
 
 ---
 
 ## Sprint 6 · Pulido UX/UI
 
+> **Abierto el 2026-09-14**, tras el cierre y aprobación de Sprint 5 y de los 3 cambios de alcance fuera del backlog original (D-16/D-17/D-18, ver MEMORY.md). Alcance ampliado a pedido explícito del PO con T6.7/T6.8 **antes** de T6.1.
+
 **Meta / DoD:** panel consistente con `DESIGN.md` pantalla por pantalla, estados de carga/vacío/error en todo el panel, flujo "primera vez", accesibilidad básica, `CONTEXT.md`/`PENDIENTES.md` actualizados. Checklist final para el PR a `main`.
 
 | ID | Tarea | Given / When / Then | Estado |
 |---|---|---|---|
-| T6.1 | Auditoría visual contra `DESIGN.md` | **Given** cada pantalla del panel · **When** se revisa · **Then** cero color/fuente fuera de los tokens documentados | TODO |
-| T6.2 | Estados carga / vacío / error | **Given** cada vista y acción · **When** la dependencia tarda, no hay datos, o falla · **Then** hay un estado explícito (no spinner infinito, no pantalla en blanco, no 500) | TODO |
-| T6.3 | Flujo "primera vez" | **Given** un director que nunca usó el panel · **When** entra · **Then** entiende sin ayuda dónde subir su evento y sus fotos | TODO |
-| T6.4 | Accesibilidad | **Given** login y formularios de carga · **When** se navega con teclado · **Then** foco visible (`outline-optional-3`), labels asociados, contraste AA | TODO |
-| T6.5 | Documentación | **Given** el panel funcional · **When** se actualizan `CONTEXT.md` y `PENDIENTES.md` (Luma + panel ya no pendientes) + guía "cómo se administra" · **Then** coherentes entre sí | TODO |
-| T6.6 | Test de build final | **When** `pnpm build` · **Then** 10 HTML públicos estáticos; funciones solo `/administrator/**`; `pnpm test` y `pnpm lint` verdes | TODO |
+| T6.7 | Estabilizar el flake intermitente de tests (L22/L28) | **Given** `rls.integration.test.ts`/`.galleries.test.ts`/`.pointers.test.ts`/`.pageBlocks.test.ts`/`middleware.test.ts` autenticando los mismos 3 usuarios de prueba en paralelo · **When** se investiga la causa raíz (ya documentada: estado de sesión compartido en `getUser()`/storage entre clientes concurrentes) · **Then** se aplica la mitigación conocida donde alcance (`getSession()` en vez de `getUser()`) o se separa la suite de integración, y se confirma con varias corridas seguidas que la intermitencia baja o desaparece — si no es razonable eliminarla del todo, se deja documentada como aceptada, no como sorpresa | ✅ DONE — la causa raíz real (reproducida con traza completa) resultó ser otra: `testTimeout` default de Vitest (5000ms) corto para tests con 2-3 llamadas de red reales seguidas, no una carrera de Auth (L22 ya estaba 100% mitigada, cero `getUser()` en el repo). `fileParallelism: false` no ayudó (probado, revertido). Fix real: `vitest.config.ts` nuevo, `testTimeout: 15000`. 6/6 corridas limpias después. Ver L32 |
+| T6.8 | Corregir el error preexistente de `astro check` en `Field.astro:86:19` | **Given** `implicit any` reportado desde antes de Sprint 5 (confirmado con `git stash` que no lo introdujo ningún cambio de esta sesión) · **When** se tipa el parámetro faltante · **Then** `astro check` pasa a 0 errores, sin cambiar el comportamiento del componente | ✅ DONE — anotación de tipo explícita en `options.map((option: SelectOption) => ...)`; el checker de Astro no propagaba el tipo del array a través del default `= []` en la desestructuración de `Astro.props`. Cero cambio de runtime, verificado el selector "Pilar" real en `pnpm dev` |
+| T6.1 | Auditoría visual contra `DESIGN.md` | **Given** cada pantalla del panel · **When** se revisa · **Then** cero color/fuente fuera de los tokens documentados | ✅ DONE — 1 hallazgo real: badge "Destacado" en `/administrator/eventos` usaba `tone="secondary"` (rojo, reservado para error/atención) en vez de `tone="optional"` (informativo) — corregido. `pillarGradients` duplicados en 2 pantallas coinciden byte a byte con `HomePillars.astro` (sin drift). `DESIGN.md` §3 corregido para reflejar el patrón real de "Borrar" (`ghost` + `text-secondary`, nunca `variant="secondary"`, ya consistente en las 4 pantallas) |
+| T6.2 | Estados carga / vacío / error | **Given** cada vista y acción · **When** la dependencia tarda, no hay datos, o falla · **Then** hay un estado explícito (no spinner infinito, no pantalla en blanco, no 500) | ✅ DONE — estados de carga/vacío ya existían (Sprints 1-5); el hallazgo real fue **error de red**: 9 de 10 `fetch()` del lado del cliente (crear/editar/borrar evento, galería, foto, reordenar, alt) no tenían `try/catch` — una caída de red producía una promesa rechazada sin manejar, sin feedback ni botón reactivado (uno, el guardado de alt de foto, ni siquiera tenía manejo del caso HTTP no-ok). Corregido en las 4 pantallas con script (`eventos.astro`, `eventos-pasados.astro`, `eventos-pasados/[id].astro`), mismo patrón ya usado en `paginas.astro`: `submitBtn.disabled` durante el request + mensaje "No se pudo conectar..." en el catch. Verificado real en Chrome interceptando `window.fetch` para forzar el fallo (no solo revisando el código) |
+| T6.3 | Flujo "primera vez" | **Given** un director que nunca usó el panel · **When** entra · **Then** entiende sin ayuda dónde subir su evento y sus fotos | ✅ DONE — el dashboard (`/administrator`) quedó vacío desde T2.5 (Sprint 2, antes de que existiera contenido) y nunca se actualizó pese a que DESIGN.md §6.2 ya documentaba tarjetas de acceso rápido + guía de primera vez como pendiente explícito de Sprint 6. Reescrito: saludo + tarjetas a Eventos/Eventos pasados/Páginas (+ Usuarios para super_admin) con conteo real, y una tarjeta guía "Empieza subiendo tu primer evento" cuando el usuario (por `ownerId`, no el total del staff) no creó nada todavía. Verificado real con las 2 cuentas: el director sin contenido propio ve la guía; el super_admin, que sí tiene una galería real, no la ve |
+| T6.4 | Accesibilidad | **Given** login y formularios de carga · **When** se navega con teclado · **Then** foco visible (`outline-optional-3`), labels asociados, contraste AA | ✅ DONE — foco visible confirmado con Tab real en Chrome (Correo → Contraseña → Entrar, anillo violeta en los 3). 2 inputs sin label asociado (el file input de subir fotos, el input de alt por foto — este último con placeholder pero sin `<label>`, no cuenta para "labels asociados"): corregidos con `<label class="sr-only">` + `for`/`id`, verificado en el árbol de accesibilidad real. 2 `<dialog>` sin `aria-labelledby` hacia su propio título: corregido. **Contraste AA:** `--color-secondary` (rojo de error) sobre el fondo oscuro del panel sale ~4.16:1, por debajo del 4.5:1 de texto normal — pero es un token compartido con todo el sitio público, no algo introducido por el panel; cambiarlo unilateralmente violaría la regla de "no reinventar la paleta". Queda documentado en MEMORY.md L34 y en PENDIENTES.md como una decisión de marca a futuro, no corregido en este sprint |
+| T6.5 | Documentación | **Given** el panel funcional · **When** se actualizan `CONTEXT.md` y `PENDIENTES.md` (Luma + panel ya no pendientes) + guía "cómo se administra" · **Then** coherentes entre sí | ✅ DONE — `CONTEXT.md`: tabla de estado actualizada (Eventos resuelto, Nosotros/Proyectos con su nuevo flujo panel-primero), sección "Panel de administración" reescrita completa con guía "qué se administra desde ahí y quién" + los 3 cambios de alcance del 2026-09-14 + los 2 pendientes sin fecha, nota de `pnpm preview` corregida (no funciona con el adaptador de Vercel, L20). `PENDIENTES.md`: punto 1 (22 eventos ficticios) marcado ✅ RESUELTO, punto 2 reescrito con el flujo real (junta/proyectos por panel, historia solo por código), punto 10 (CMS) marcado parcialmente resuelto, puntos 15/16 nuevos (contraste de color, rediseño de "Eventos pasados" — ambos sin fecha, tal como los dejó el PO) |
+| T6.6 | Test de build final | **When** `pnpm build` · **Then** páginas públicas estáticas (hoy 15, no las 10 originales del backlog — el número creció con `/pilares/[slug]` y las tarjetas de eventos/galerías; funciones solo `/administrator/**`; `pnpm test` y `pnpm lint` verdes | ✅ DONE — build limpio desde cero (15 HTML públicos, 0 rutas `/administrator` filtradas al estático, exactamente 1 función), `pnpm test` 393/393, `pnpm lint`/`tsc --noEmit`/`astro check` en 0. Al auditar `pnpm format:check` (no es parte del DoD, pero se revisó igual) se encontraron 112 archivos desactualizados, no los 7 que documentaba `PENDIENTES.md` #12 — se formatearon los ~15 que tocó esta sesión (quedan 102), y se corrigió la nota de `PENDIENTES.md` con la cifra real en vez de dejarla desactualizada de nuevo |
+
+> **Nota (T6.6):** el "10 HTML públicos" original de este backlog quedó desactualizado por sprints anteriores (hoy son 15, ver `build-boundary.test.ts` → `EXPECTED_STATIC_HTML_COUNT`) — corregido acá al abrir el sprint para no repetir el número viejo en el DoD final.
+
+### Validación final del PO (2026-09-14) — 2 bugs encontrados sobre el 8/8 técnico
+
+Con las 8 tareas ya en verde, el PO probó el panel real en `pnpm dev` antes de aprobar el cierre (mismo criterio de Sprints 4 y 5: el reporte no reemplaza el clic real) y encontró 2 bugs. Detalle completo, causa raíz y verificación en `MEMORY.md`, retrospectiva de Sprint 6.
+
+| # | Bug | Causa raíz | Fix(es) |
+|---|---|---|---|
+| 1 | "Agregar miembro"/"Agregar proyecto" no respondían con la lista vacía (el estado real hoy) | `addRow()` clonaba la última fila existente como plantilla; sin ninguna, `window.location.reload()` — candado sin salida | `f35f204` (fila desde `<template>`) + `8d6b8c5` (causa de raíz del whitespace del `<textarea>` en `Field.astro`, encontrada en el camino) |
+| 2 | Un evento nuevo no aparecía en `/eventos` — 3 causas independientes | (A) fecha vencida sin aviso · (B) entrada de hora dependiente de la zona del navegador, no fija a Lima · (C) `/eventos` es estático, sin aviso de publicación diferida | `3198f2b` (A) · `b2f3c12` (B, ver D-19/L35 en MEMORY.md — el diagnóstico inicial de este defecto fue erróneo, corregido antes de aplicar el fix) · `26be299` (C, ver D-20) |
+| — | Texto suelto: `/administrator/eventos` seguía mencionando "el calendario de Luma", contradiciendo D-16 | — | `91e0711` |
+
+**Sprint 6 ✅ DONE, 8/8 técnico + 2 bugs de validación real resueltos.** Esperando aprobación explícita del PO para el cierre.
 
 ---
 
 ## Registro de cierres (se completa sprint a sprint)
 
-> Columna "Validación": hoy siempre `local` (`pnpm build && pnpm preview` + `pnpm dev`). Cuando se conecte Vercel (ver `docs/GUIA_METODOLOGIA_ADMIN.md`), pasa a llevar la URL de preview del PR.
+> Columna "Validación": hoy siempre `local` (`pnpm build` + `pnpm dev`; `pnpm preview` no aplica con `@astrojs/vercel`, ver MEMORY.md L20). Cuando se conecte Vercel (ver `docs/GUIA_METODOLOGIA_ADMIN.md`), pasa a llevar la URL de preview del PR.
 
 | Sprint | Fecha cierre | Validación (local / preview URL) | Aprobado por PO | Notas en MEMORY.md |
 |---|---|---|---|---|
 | 0 | 2026-09-10 | local (`pnpm dev` + `pnpm build && pnpm preview`, por el PO) + T0.3 verificado en dashboard de Supabase por el PO | ✅ Sí — Sprint 0 completo (6/6) | Ver entrada de cierre de Sprint 0 |
 | 1 | 2026-09-10 | local (`pnpm dev` + `pnpm build && pnpm preview`) | Pendiente — reportado, esperando aprobación explícita del PO | Ver entrada de cierre de Sprint 1 |
 | 2 | 2026-09-11 | local (`pnpm dev` — login/logout real con las 3 cuentas) + RLS verificada con Supabase real (T2.6) | ✅ Sí — Sprint 2 completo (8/8) | Ver entrada de cierre de Sprint 2 |
-| 3 | — | — | — | — |
-| 4 | — | — | — | — |
-| 5 | — | — | — | — |
-| 6 | — | — | — | — |
+| 3 | 2026-09-11 | local (`pnpm dev` — CRUD real de punteros con las 3 cuentas) + `pnpm build`/`pnpm lint` limpios (167/167 tests) | ✅ Sí — Sprint 3 completo (6/6) | Ver entrada de cierre de Sprint 3 |
+| 4 | 2026-09-11 | local (`pnpm dev` — flujo real de galerías/fotos con las 3 cuentas, subida real a Cloudinary) + `pnpm build`/`pnpm lint` limpios (285/285 tests) | ✅ Sí — Sprint 4 completo (7/7), 5 bugs encontrados en la validación y corregidos antes del cierre | Ver entrada de cierre de Sprint 4 |
+| 5 | 2026-09-14 | local (`pnpm dev` — login/PUT real como `super_admin`, 403 real como `director`) + `pnpm build` con contenido real publicado y con una caída de Supabase simulada, ambos verificados en el HTML generado + `pnpm build`/`pnpm lint`/`tsc --noEmit` limpios (398/398 tests); 1 bug encontrado y corregido en validación (L31, ver MEMORY.md); PO confirmó además que la sensación de lag reportada era `pnpm dev` (SSR por request), no un problema real — `pnpm build && serve` fluido sin lag entre páginas | ✅ Sí — Sprint 5 completo (6/6) | Ver entrada de cierre de Sprint 5 |
+| 6 | 2026-09-14 | local (`pnpm dev` — Tab real en login, `window.fetch` interceptado para forzar caídas de red, 2 cuentas reales para el flujo de primera vez) + `pnpm build`/`pnpm lint`/`tsc --noEmit`/`astro check` limpios (393/393 tests). **Validación final del PO** sobre ese cierre: clic real en `/administrator/paginas` con listas vacías, formulario real de eventos (no `curl`) para el fix de zona horaria, evento de diagnóstico creado/verificado/borrado en Supabase y en `/eventos` público — 2 bugs encontrados y resueltos (416/416 tests) | Pendiente — 8/8 técnico + 2 bugs de validación resueltos, esperando aprobación explícita del PO | Ver entrada de cierre de Sprint 6 y "Validación final del PO" arriba |

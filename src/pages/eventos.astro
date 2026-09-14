@@ -1,20 +1,82 @@
 ---
-// Sprint 1 (piloto): los eventos próximos viven en Luma (fuente única
-// de verdad, sin sync). "Eventos pasados" queda vacío hasta Sprint 4
-// (galerías "así se vivió el evento"). Ver .sprints/BACKLOG.md Sprint 1
-// y MEMORY.md D-P4/D-P5.
-import EventsLuma from '../components/events/EventsLuma.astro';
+// Cambio de alcance (2026-09-14, post-Sprint 5, ver MEMORY.md D-16):
+// se quita el embed/link genérico a Luma de "Próximos eventos". Ya no
+// hay botón "Ver eventos en Luma" ni iframe — la sección es SOLO la
+// lista de punteros published && no vencidos (selectUpcomingPointers.ts;
+// ya no exige `featured`, a diferencia de la regla T3.5 anterior). Cada
+// tarjeta (EventPointerCard) conserva su propio link de inscripción a
+// `lumaUrl`. Build-time, con cliente anon (RLS ya limita a
+// published=true) — si Supabase falla, degrada a lista vacía (regla
+// inquebrantable 4).
+//
+// T4.6: "Eventos realizados" muestra las galerías `published` (más
+// recientes primero) con sus fotos, mismo criterio de degradación:
+// si Supabase falla, degrada al estado vacío curado que ya existía
+// (link a /vida-lead), nunca un error.
+import EventPointerCard from '../components/events/EventPointerCard.astro';
+import GalleryEventCard from '../components/events/GalleryEventCard.astro';
 import Container from '../components/ui/Container.astro';
 import SectionHeader from '../components/ui/SectionHeader.astro';
+import type {
+	GalleryPhoto,
+	GalleryWithPhotoCount,
+} from '../domain/ports/ContentRepository';
+import { selectUpcomingPointers } from '../domain/selectUpcomingPointers';
+import { getContentRepository } from '../infra/container';
+import { renderMarkdown } from '../infra/markdown/renderMarkdown';
 import Layout from '../layouts/Layout.astro';
 
-// PUBLIC_LUMA_CALENDAR_URL no es secreto (es una URL pública); se
-// resuelve por env var con este valor como default para no depender
-// de que el .env local la tenga cargada. PUBLIC_LUMA_EMBED_URL sí
-// requiere el snippet real del panel de Luma — sin ella, solo botón.
-const calendarUrl =
-	import.meta.env.PUBLIC_LUMA_CALENDAR_URL || 'https://luma.com/leadutp_';
-const embedUrl = import.meta.env.PUBLIC_LUMA_EMBED_URL;
+interface GalleryWithPhotos extends Omit<GalleryWithPhotoCount, 'body'> {
+	bodyHtml: string | null;
+	photos: GalleryPhoto[];
+}
+
+const MAX_GALLERIES = 4;
+const MAX_PHOTOS_PER_GALLERY = 5;
+
+let upcomingPointers: Awaited<ReturnType<typeof selectUpcomingPointers>> = [];
+try {
+	const pointers = await getContentRepository().listPointers();
+	upcomingPointers = selectUpcomingPointers(pointers);
+} catch {
+	// Degradación elegante: la sección cae al estado vacío curado, nunca
+	// un error (regla inquebrantable 4).
+	upcomingPointers = [];
+}
+
+let recentGalleries: GalleryWithPhotos[] = [];
+try {
+	const repo = getContentRepository();
+	// listGalleries() ya ordena por happened_on descendente (más
+	// recientes primero) — mismo criterio que lifeEvents.slice() en
+	// vida-lead.astro.
+	const galleries = (await repo.listGalleries()).slice(0, MAX_GALLERIES);
+	// Fix de perf (diagnóstico en la conversación): esto llamaba
+	// `repo.listPhotos(gallery.id)` una vez POR galería (N+1) — con las
+	// hasta MAX_GALLERIES=4 galerías permitidas, hasta 4 consultas
+	// separadas a Supabase, sumadas a listGalleries() y listPointers().
+	// listPhotosForGalleries() reemplaza eso por UNA sola consulta con
+	// `IN (gallery_id)`, agrupada en memoria (ver
+	// SupabaseContentRepository.listPhotosForGalleries.test.ts).
+	const photosByGallery = await repo.listPhotosForGalleries(
+		galleries.map((gallery) => gallery.id),
+	);
+	recentGalleries = galleries.map((gallery) => {
+		const { body, ...rest } = gallery;
+		return {
+			...rest,
+			bodyHtml: body ? renderMarkdown(body) : null,
+			photos: (photosByGallery[gallery.id] ?? []).slice(
+				0,
+				MAX_PHOTOS_PER_GALLERY,
+			),
+		};
+	});
+} catch {
+	// Degradación elegante: cae al estado vacío curado que ya existía
+	// (link a /vida-lead) — nunca un error.
+	recentGalleries = [];
+}
 ---
 
 <Layout
@@ -51,17 +113,31 @@ const embedUrl = import.meta.env.PUBLIC_LUMA_EMBED_URL;
 			<SectionHeader
 				id="proximos-eventos-title"
 				title="Próximos eventos"
-				description="Centralizamos nuestro calendario en Luma — ahí ves fecha, cupos y te inscribes."
+				description="Descubre nuestras próximas experiencias y regístrate directamente en Luma."
 			/>
-			<div class="mt-7 sm:mt-8">
-				<EventsLuma calendarUrl={calendarUrl} embedUrl={embedUrl} />
-			</div>
+			{
+				upcomingPointers.length > 0 ? (
+					<ul class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+						{upcomingPointers.map((pointer) => (
+							<li>
+								<EventPointerCard pointer={pointer} />
+							</li>
+						))}
+					</ul>
+				) : (
+					<div class="mt-7 text-center sm:mt-8">
+						<p class="text-foreground-secondary mx-auto max-w-lg text-sm leading-6 sm:text-base">
+							Todavía no publicamos eventos próximos. Vuelve pronto.
+						</p>
+					</div>
+				)
+			}
 		</Container>
 	</section>
 
 	<section
 		id="eventos-pasados"
-		class="mt-16 hairline-t pt-8 pb-24 sm:mt-20 sm:pt-10 lg:mt-22 lg:pb-28"
+		class="hairline-t mt-16 pt-8 pb-24 sm:mt-20 sm:pt-10 lg:mt-22 lg:pb-28"
 		aria-labelledby="eventos-pasados-title"
 	>
 		<Container>
@@ -70,16 +146,29 @@ const embedUrl = import.meta.env.PUBLIC_LUMA_EMBED_URL;
 				title="Eventos pasados"
 				description="Una mirada a los momentos que hemos compartido como comunidad."
 			/>
-			<div class="mt-7 sm:mt-8 text-center">
-				<p class="text-foreground-secondary mx-auto max-w-lg text-sm leading-6 sm:text-base">
-					Todavía no publicamos acá el resumen de eventos pasados. Mientras
-					tanto, mira las fotos de nuestros encuentros anteriores en <a
-						href="/vida-lead"
-						class="text-foreground focus-visible:outline-optional-3 font-semibold underline decoration-white/30 underline-offset-4 transition-colors hover:text-white hover:decoration-white/60 focus-visible:outline-3 focus-visible:outline-offset-3 motion-reduce:transition-none"
-						>Vida LEAD</a
-					>.
-				</p>
-			</div>
+			{
+				recentGalleries.length > 0 ? (
+					<div class="mt-10 flex flex-col gap-16 sm:gap-20">
+						{recentGalleries.map((gallery, index) => (
+							<GalleryEventCard gallery={gallery} index={index} />
+						))}
+					</div>
+				) : (
+					<div class="mt-7 text-center sm:mt-8">
+						<p class="text-foreground-secondary mx-auto max-w-lg text-sm leading-6 sm:text-base">
+							Todavía no publicamos acá el resumen de eventos pasados. Mientras
+							tanto, mira las fotos de nuestros encuentros anteriores en{' '}
+							<a
+								href="/vida-lead"
+								class="text-foreground focus-visible:outline-optional-3 font-semibold underline decoration-white/30 underline-offset-4 transition-colors hover:text-white hover:decoration-white/60 focus-visible:outline-3 focus-visible:outline-offset-3 motion-reduce:transition-none"
+							>
+								Vida LEAD
+							</a>
+							.
+						</p>
+					</div>
+				)
+			}
 		</Container>
 	</section>
 </Layout>

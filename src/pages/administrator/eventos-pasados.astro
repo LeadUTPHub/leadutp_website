@@ -1,0 +1,354 @@
+---
+// T4.5 — lista de galerías + creación (pantalla renombrada a "Eventos
+// pasados" el 2026-09-14, MEMORY.md D-17 — solo nombre/ruta, la lógica y
+// el schema siguen hablando de "galería"). La edición (metadata + fotos)
+// vive en /administrator/eventos-pasados/[id].astro — crear acá solo
+// pide los datos mínimos y redirige ahí para subir fotos (el folder de
+// Cloudinary necesita que la galería ya exista, ver T4.2).
+export const prerender = false;
+
+import { canEdit } from '../../domain/canEdit';
+import type { GalleryWithPhotoCount } from '../../domain/ports/ContentRepository';
+import AdminShell from '../../components/admin/AdminShell.astro';
+import Field from '../../components/admin/Field.astro';
+import Badge from '../../components/ui/Badge.astro';
+import Button from '../../components/ui/Button.astro';
+import SectionHeader from '../../components/ui/SectionHeader.astro';
+import { pillars } from '../../data/pillars';
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { getContentRepositoryForRequest } from '../../infra/container';
+
+const { profile } = Astro.locals;
+if (!profile) {
+	return Astro.redirect('/administrator/login');
+}
+
+// Mismos placeholders que HomePillars.astro/eventos.astro admin — ver
+// el comentario de eventos.astro sobre por qué está duplicado.
+const pillarGradients: Record<string, string> = {
+	'desarrollo-profesional': 'from-[#f2545c] to-[#a81021]',
+	liderazgo: 'from-[#8f6ff7] to-[#4a2bb0]',
+	'excelencia-femenina': 'from-[#d946c9] to-[#7c1687]',
+	'desarrollo-del-capitulo': 'from-[#3e82f7] to-[#0f2f9e]',
+	'excelencia-academica': 'from-[#f8ac3c] to-[#c1540a]',
+	'lead-academia': 'from-[#22d189] to-[#0a7350]',
+};
+
+const pillarOptions = pillars.map((pillar) => ({
+	value: pillar.slug,
+	label: pillar.name,
+}));
+
+function areaName(slug: string): string {
+	return pillars.find((pillar) => pillar.slug === slug)?.name ?? slug;
+}
+
+let galleries: GalleryWithPhotoCount[] = [];
+let loadError: string | null = null;
+try {
+	galleries = await getContentRepositoryForRequest(Astro).listGalleries();
+} catch {
+	loadError =
+		'No se pudieron cargar los eventos pasados. Intenta de nuevo en unos minutos.';
+}
+---
+
+<AdminLayout title="Eventos pasados — Panel LEAD UTP">
+	<AdminShell profile={profile}>
+		<gallery-list-admin data-role={profile.role}>
+			<SectionHeader
+				id="eventos-pasados-title"
+				title="Eventos pasados"
+				description={'"Así se vivió el evento" — fotos de eventos ya realizados. Se publican en /eventos en el próximo despliegue.'}
+			>
+				<Button slot="action" type="button" data-open-create>
+					Nuevo evento pasado
+				</Button>
+			</SectionHeader>
+
+			{
+				loadError && (
+					<p class="border-secondary/40 bg-secondary/10 text-secondary mt-6 rounded-lg border px-4 py-3 text-sm">
+						{loadError}
+					</p>
+				)
+			}
+
+			{
+				!loadError && galleries.length === 0 && (
+					<div class="mt-8 rounded-2xl border border-white/10 bg-white/[0.04] px-6 py-10 text-center">
+						<p class="text-foreground-secondary text-sm">
+							Todavía no hay eventos pasados. Empieza creando el primero con
+							"Nuevo evento pasado" — después de crearlo vas a poder subir sus
+							fotos.
+						</p>
+					</div>
+				)
+			}
+
+			{
+				!loadError && galleries.length > 0 && (
+					<ul class="mt-8 flex flex-col gap-3">
+						{galleries.map((gallery) => {
+							const editable = canEdit(profile, {
+								ownerId: gallery.ownerId,
+								areaSlug: gallery.areaSlug,
+							});
+							const photoLabel =
+								gallery.photoCount === 1
+									? '1 foto'
+									: `${gallery.photoCount} fotos`;
+							return (
+								<li class="flex flex-col gap-3 rounded-lg bg-white/[0.06] p-4 ring-1 ring-white/12 sm:flex-row sm:items-center sm:justify-between">
+									<div class="min-w-0">
+										<p class="text-foreground truncate text-sm font-semibold">
+											{gallery.title}
+										</p>
+										<div class="mt-1 flex flex-wrap items-center gap-2">
+											<span class="text-foreground-secondary inline-flex items-center gap-1.5 text-xs">
+												<span
+													class:list={[
+														'h-2 w-2 shrink-0 rounded-full bg-gradient-to-br',
+														pillarGradients[gallery.areaSlug],
+													]}
+												/>
+												{areaName(gallery.areaSlug)}
+											</span>
+											<Badge tone={gallery.published ? 'optional' : 'primary'}>
+												{gallery.published ? 'Publicado' : 'Borrador'}
+											</Badge>
+											<span class="text-foreground-muted text-xs">
+												{photoLabel}
+											</span>
+										</div>
+									</div>
+
+									<div class="flex shrink-0 flex-wrap gap-2">
+										<Button
+											href={`/administrator/eventos-pasados/${gallery.id}`}
+											variant="ghost"
+											size="sm"
+										>
+											{editable ? 'Editar' : 'Ver'}
+										</Button>
+										{editable && (
+											<Button
+												type="button"
+												variant="ghost"
+												size="sm"
+												class="text-secondary"
+												data-delete
+												data-gallery-id={gallery.id}
+												data-gallery-title={gallery.title}
+											>
+												Borrar
+											</Button>
+										)}
+									</div>
+								</li>
+							);
+						})}
+					</ul>
+				)
+			}
+
+			<dialog
+				id="gallery-dialog"
+				aria-labelledby="gallery-dialog-title"
+				class="text-foreground bg-canvas-navy w-full max-w-lg rounded-2xl p-6 ring-1 ring-white/12 backdrop:bg-black/60"
+			>
+				<h3
+					id="gallery-dialog-title"
+					class="font-display text-xl font-bold tracking-[-0.03em]"
+				>
+					Nuevo evento pasado
+				</h3>
+
+				<form id="gallery-form" class="mt-5 flex flex-col gap-4" novalidate>
+					<Field label="Título" name="title" required maxlength={140} />
+					<Field
+						label="Slug"
+						name="slug"
+						required
+						placeholder="talent-room-2026-05"
+					/>
+					<p class="text-foreground-muted -mt-2 text-xs">
+						Solo minúsculas, números y guiones — se usa en la carpeta de
+						Cloudinary y no se puede editar después.
+					</p>
+					<Field
+						label="Fecha del evento"
+						name="happenedOn"
+						type="text"
+						placeholder="2026-05-10"
+					/>
+					{
+						// UN solo selector "Pilar" para todos los roles — no dos. Para
+						// super_admin (sin área propia) este mismo valor fija también
+						// areaSlug al guardar (ver el submit handler más abajo): no hay
+						// un caso de uso real hoy donde area_slug y pillar_slug deban
+						// diferir, así que exponer dos selectores con la misma lista de
+						// opciones era confuso sin aportar nada. Para director/
+						// subdirector, pillarSlug sigue siendo una etiqueta de
+						// contenido opcional independiente de su área (ya fija por su
+						// perfil) — ese campo no cambia.
+					}
+					<Field
+						label="Pilar"
+						name="pillarSlug"
+						as="select"
+						options={pillarOptions}
+						required={profile.role === 'super_admin'}
+					/>
+					<Field label="Texto (markdown)" name="body" as="textarea" rows={4} />
+
+					<label
+						class="text-foreground-secondary flex items-center gap-2 text-sm"
+					>
+						<input
+							type="checkbox"
+							name="published"
+							class="accent-optional-3 h-4 w-4 rounded"
+						/>
+						Publicado
+					</label>
+
+					<p
+						id="gallery-form-error"
+						class="text-secondary text-sm"
+						role="alert"
+						hidden
+					>
+					</p>
+
+					<div class="mt-2 flex justify-end gap-3">
+						<Button type="button" variant="outline" data-close-dialog>
+							Cancelar
+						</Button>
+						<Button type="submit">Crear y subir fotos</Button>
+					</div>
+				</form>
+			</dialog>
+		</gallery-list-admin>
+	</AdminShell>
+</AdminLayout>
+
+<script>
+	class GalleryListAdmin extends HTMLElement {
+		connectedCallback() {
+			if (this.dataset.ready === 'true') return;
+			this.dataset.ready = 'true';
+
+			const dialog = this.querySelector<HTMLDialogElement>('#gallery-dialog');
+			const form = this.querySelector<HTMLFormElement>('#gallery-form');
+			const errorEl = this.querySelector<HTMLElement>('#gallery-form-error');
+			const openCreateBtn =
+				this.querySelector<HTMLButtonElement>('[data-open-create]');
+			const submitBtn = form?.querySelector<HTMLButtonElement>(
+				'button[type="submit"]',
+			);
+			if (!dialog || !form || !errorEl || !openCreateBtn || !submitBtn) return;
+
+			openCreateBtn.addEventListener('click', () => {
+				form.reset();
+				errorEl.hidden = true;
+				dialog.showModal();
+			});
+
+			this.querySelectorAll<HTMLButtonElement>('[data-close-dialog]').forEach(
+				(button) => {
+					button.addEventListener('click', () => dialog.close());
+				},
+			);
+
+			this.querySelectorAll<HTMLButtonElement>('[data-delete]').forEach(
+				(button) => {
+					button.addEventListener('click', async () => {
+						const id = button.dataset.galleryId;
+						const title = button.dataset.galleryTitle;
+						if (!id) return;
+						if (
+							!window.confirm(
+								`¿Borrar "${title}"? Se borran también sus fotos. No se puede deshacer.`,
+							)
+						) {
+							return;
+						}
+
+						try {
+							const response = await fetch(
+								`/administrator/api/galleries/${id}`,
+								{
+									method: 'DELETE',
+								},
+							);
+							if (response.ok) {
+								window.location.reload();
+							} else {
+								window.alert('No se pudo borrar. Intenta de nuevo.');
+							}
+						} catch {
+							window.alert(
+								'No se pudo conectar. Revisa tu conexión e intenta de nuevo.',
+							);
+						}
+					});
+				},
+			);
+
+			form.addEventListener('submit', async (event) => {
+				event.preventDefault();
+				errorEl.hidden = true;
+
+				const data = new FormData(form);
+				const pillarSlug = String(data.get('pillarSlug') ?? '').trim() || null;
+				const isSuperAdmin = this.dataset.role === 'super_admin';
+				const payload = {
+					title: String(data.get('title') ?? '').trim(),
+					slug: String(data.get('slug') ?? '').trim(),
+					body: String(data.get('body') ?? '').trim() || null,
+					happenedOn: String(data.get('happenedOn') ?? '').trim() || null,
+					pillarSlug,
+					published: data.get('published') === 'on',
+					// Un solo selector "Pilar" para todos los roles (ver el form
+					// arriba) — para super_admin (sin área propia) ese mismo valor
+					// también fija areaSlug al crear; director/subdirector usan su
+					// propia área automáticamente, el server la ignora si se manda.
+					...(isSuperAdmin && pillarSlug && { areaSlug: pillarSlug }),
+				};
+
+				submitBtn.disabled = true;
+				try {
+					const response = await fetch('/administrator/api/galleries', {
+						method: 'POST',
+						headers: { 'content-type': 'application/json' },
+						body: JSON.stringify(payload),
+					});
+
+					if (response.ok) {
+						const created = await response.json();
+						// Redirige directo al editor: ahí es donde se suben las fotos.
+						window.location.href = `/administrator/eventos-pasados/${created.gallery.id}`;
+						return;
+					}
+
+					const body = await response.json().catch(() => null);
+					errorEl.textContent =
+						body?.error ??
+						'No se pudo crear. Revisa los datos e intenta de nuevo.';
+					errorEl.hidden = false;
+				} catch {
+					errorEl.textContent =
+						'No se pudo conectar. Revisa tu conexión e intenta de nuevo.';
+					errorEl.hidden = false;
+				} finally {
+					submitBtn.disabled = false;
+				}
+			});
+		}
+	}
+
+	if (!customElements.get('gallery-list-admin')) {
+		customElements.define('gallery-list-admin', GalleryListAdmin);
+	}
+</script>

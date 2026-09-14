@@ -29,8 +29,3 @@ pnpm-debug.log*
 .claude/
 .junie/
 skills/
-
-# Notas internas de estado del proyecto (no necesarias para correr o
-# desplegar el sitio) — se mantienen locales, fuera del repo.
-CONTEXT.md
-PENDIENTES.md

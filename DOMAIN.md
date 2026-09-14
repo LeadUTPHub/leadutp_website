@@ -26,12 +26,12 @@
 
 | Término | Definición |
 |---|---|
-| **Evento** | Una actividad de LEAD UTP. Su **verdad única está en Luma** (fecha, hora, lugar, cupos, inscripción). La web nunca la copia. |
-| **Evento próximo** | Evento que aún no ocurre. Se muestra en `/eventos` **vía embed/link a Luma**. La web no almacena sus datos. |
+| **Evento** | Una actividad de LEAD UTP. La **inscripción** ocurre en Luma; el **cupo** lo gestiona Luma. La web no sincroniza estos datos vía API (se descartó por costo) — quien cura el **Puntero a Luma** carga a mano la fecha/ubicación que quiere mostrar. |
+| **Evento próximo** | Evento que aún no ocurre. Desde el cambio de alcance del 2026-09-14 (MEMORY.md D-16), `/eventos` muestra **solo** las tarjetas de **Puntero a Luma** publicadas y no vencidas — ya no hay embed/iframe ni botón genérico a Luma en esa página, y ya no se exige `featured` (ese campo sigue existiendo en el schema/panel, pero no filtra la vista pública). |
 | **Evento realizado** | Evento que ya ocurrió y del que se publica un recuerdo ("así se vivió…"). Se modela como **Galería** en Supabase + Cloudinary. No es un registro de Luma. |
-| **Puntero a Luma** (`luma_event_pointers`) | Referencia curada por un director a un evento próximo concreto de Luma: solo `title` + `luma_url` (+ `pillar_slug`, `featured`, `sort_hint` para ordenar). **No** contiene fecha/lugar/cupos autoritativos. Opcional; el embed del calendario ya cubre el caso general. |
-| **Inscripción** | Se hace **100 % en Luma**. La web **no** tiene ningún formulario ni área de inscripción. |
-| **Calendario de Luma** | `https://luma.com/leadutp_`. Único origen. Se embebe (iframe, snippet del panel de Luma) o se enlaza (botón). |
+| **Puntero a Luma** (`luma_event_pointers`) | Tarjeta de evento curada por un director/subdirector: `title`, `luma_url` (URL de registro, único lugar donde se inscribe), `event_date`, `location`, `image_url`, `short_description` (+ `pillar_slug`, `featured`). Todos estos datos —salvo `luma_url`— los carga el staff a mano; no se sincronizan desde Luma. Desde el 2026-09-14 es la **única** forma en que un evento próximo aparece en `/eventos` (ver Evento próximo). |
+| **Inscripción** | Se hace **100 % en Luma**, a través del link de `luma_url` de cada Puntero (tarjeta individual) — ya no hay un botón/link genérico al calendario completo en `/eventos`. La web **no** tiene ningún formulario ni área de inscripción propia. |
+| **Calendario de Luma** | `https://luma.com/leadutp_`. Único origen. Ya no se usa en `/eventos` (ver Evento próximo); la Home todavía puede mostrar un CTA genérico a este calendario mientras no haya un evento local destacado (`HomeEventsCta.astro`, fuera del alcance del cambio del 2026-09-14). |
 
 ## Contenido
 
@@ -39,7 +39,7 @@
 |---|---|
 | **Galería** (`event_galleries`) | Un recuerdo de un evento realizado: `title`, `body` (markdown), `happened_on`, `pillar_slug`, y N **Fotos**. Estilo `/vida-lead`. |
 | **Foto** (`gallery_photos`) | Una imagen de una galería, alojada en **Cloudinary**. Fuente de verdad = `cloudinary_public_id`. Guarda también `secure_url` (fallback), `width`, `height`, `alt`, `position`. |
-| **PageBlock** (`page_blocks`) | Un bloque de contenido editable de una subpágina pública, identificado por `key` (p. ej. `nosotros.history`, `nosotros.team`, `proyectos.list`). `data` es `jsonb` con la **misma forma** que los tipos de `src/data/**/*.types.ts`. |
+| **PageBlock** (`page_blocks`) | Un bloque de contenido editable de una subpágina pública, identificado por `key` (`nosotros.team`, `proyectos.list` — `nosotros.history` se sacó de la lista cerrada el 2026-09-14, D-18: la historia se quedó fija en `about.data.ts`, editable solo por desarrollador en código). `data` es `jsonb` con la **misma forma** que los tipos de `src/data/**/*.types.ts`. |
 | **Publicado** (`published`) | Booleano. `true` = la web pública lo muestra. `false` = borrador, solo visible para el staff. La web pública (rol `anon`) solo lee filas `published = true`. |
 | **Procedencia** (`source`) | `content_source`: `supabase` \| `cloudinary` \| `static`. Toda fila y toda foto lo llevan (regla de trazabilidad). |
 

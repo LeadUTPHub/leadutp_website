@@ -1,7 +1,8 @@
 ---
 import { Lightbulb, Star, Target, Users } from '@lucide/astro';
 import Container from '../components/ui/Container.astro';
-import { about } from '../data/about';
+import { loadAboutContent } from '../infra/content/loadPageContent';
+import { renderMarkdown } from '../infra/markdown/renderMarkdown';
 import Layout from '../layouts/Layout.astro';
 
 const valueIcons = {
@@ -10,6 +11,20 @@ const valueIcons = {
 	users: Users,
 	star: Star,
 };
+
+// T5.4 — cadena Supabase → snapshot → about.data.ts → vacío, para la
+// junta directiva. La historia (Cambio 3, 2026-09-14, D-18) se sacó de
+// esa cadena: nosotros.history ya no es una key válida
+// (validatePageBlockData.ts), así que loadAboutContent() siempre la
+// resuelve desde about.data.ts — editable solo por desarrollador en
+// código. Igual que antes, intro/acrónimo/misión/visión/valores nunca
+// salieron del .data.ts (D-14b).
+const { content: about } = await loadAboutContent();
+
+// D-14d: la historia se escribe en markdown (mismo tratamiento que el
+// `body` de las galerías desde Sprint 4), ya sanitizado por renderMarkdown.
+// Sin esto, la directiva no podría meter ni un salto de párrafo.
+const historyHtml = about.history ? renderMarkdown(about.history) : '';
 ---
 
 <Layout
@@ -161,9 +176,10 @@ const valueIcons = {
 								Cómo empezamos
 							</h2>
 						</div>
-						<p class="text-foreground-secondary max-w-3xl text-base leading-8 sm:text-lg sm:leading-9">
-							{about.history}
-						</p>
+						<div
+							class="text-foreground-secondary [&_a]:text-foreground max-w-3xl text-base leading-8 sm:text-lg sm:leading-9 [&_a]:underline [&_a]:decoration-white/30 [&_a]:underline-offset-4 hover:[&_a]:decoration-white/60 [&_p+p]:mt-5 [&_ul]:mt-5 [&_ul]:list-disc [&_ul]:pl-5"
+							set:html={historyHtml}
+						/>
 					</div>
 				</Container>
 			</section>
