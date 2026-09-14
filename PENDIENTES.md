@@ -6,18 +6,20 @@ Lista de tareas abiertas para seguir avanzando en el sitio. Para contexto genera
 
 ## Alta prioridad
 
-### 1. `events.data.ts` son 22 eventos de ejemplo, no reales
+### 1. ✅ RESUELTO — `events.data.ts` con 22 eventos de ejemplo
 
-**Sigue sin resolverse a propósito**: la directiva todavía no confirmó los eventos reales (fecha, hora, ubicación, link de registro), así que por ahora se decidió no tocar este archivo — ni vaciarlo ni reemplazarlo — para no perder la estructura de referencia mientras se espera esa información. Ninguno de los eventos en `src/data/events/events.data.ts` es real: fechas inventadas, `registrationUrl` apuntando a `https://example.com/registro-lead/...`, y varios marcados `imageIsTemporary: true`. Sirvió para construir la UI de `/eventos`, pero **no se puede desplegar tal cual a producción**: le mostraría a un visitante una agenda y links de registro ficticios. En cuanto la directiva confirme los eventos reales, reemplazar cada entrada (o vaciar el array y dejar que `/eventos` muestre su estado vacío, igual que ya hacen `/proyectos` y `/convocatorias` — ver punto 2).
+**Resuelto desde Sprint 1** (2026-09-10), y reforzado por el panel de administración desde entonces. `events.data.ts` está vacío a propósito (`events.utils.ts` se conserva porque lo sigue usando `/pilares/[slug]`) — los eventos reales de `/eventos` ya no viven en un `.data.ts` en absoluto: cada director/subdirector los carga desde `/administrator/eventos` (tarjeta con link de inscripción propio a Luma) y `/administrator/eventos-pasados` (fotos de eventos ya realizados). Ver `CONTEXT.md` § Panel de administración y `MEMORY.md` D-16 (el embed genérico de Luma que reemplazó esto en Sprint 1 también se quitó el 2026-09-14 — ahora es solo las tarjetas curadas). Este punto se deja documentado por historial, no porque siga abierto.
 
 ### 2. Contenido real para `/nosotros` y `/proyectos`
 
-La directiva todavía no confirmó este contenido. A diferencia del punto 1, acá **ya no hay marcadores `[Contenido pendiente]` ni nombres falsos visibles en producción** — se optó por dejar los datos vacíos y que cada página muestre un estado vacío cuidado hasta tener la información real:
+La directiva todavía no confirmó este contenido — pero desde el 2026-09-14 el *cómo* se completa cambió:
 
-- `src/data/about/about.data.ts` — misión, visión y valores ya son reales. `history` quedó sin definir (opcional) y `team: []`; `/nosotros` oculta las secciones "Historia" y "Junta directiva" mientras estén vacías.
-- `src/data/projects/projects.data.ts` — `projects: []`; `/proyectos` muestra un mensaje de "todavía no publicamos proyectos" en vez de una lista vacía.
+- **Junta directiva** (`/nosotros`) y **lista de proyectos** (`/proyectos`) — la presidencia (`super_admin`) las publica desde `/administrator/paginas` cuando la directiva confirme los datos. `src/data/about/about.data.ts` (`team: []`) y `src/data/projects/projects.data.ts` (`projects: []`) quedan solo como *fallback* mientras no se haya publicado nada desde el panel — no hace falta editarlos a mano si se va a usar el panel.
+- **Historia** (`/nosotros`) — decisión explícita: se queda **fija en código**, editable solo por quien toque `src/data/about/about.data.ts` (`history` sin definir hoy). No hay ni va a haber una UI de panel para esto — es la única de las tres piezas que NO sigue el patrón "panel primero, `.data.ts` de respaldo".
 
-Apenas la directiva confirme la información real, solo hace falta completar esos 2 archivos `.data.ts` (historia + junta directiva, lista de proyectos) — no hace falta tocar los `.astro` de `src/pages/` ni los componentes visuales.
+Misión, visión, valores y acrónimo ya son reales y siguen viniendo siempre de `about.data.ts` — nunca del panel, no están en esta lista de pendientes.
+
+`/nosotros` y `/proyectos` ocultan sus secciones vacías (Historia, Junta directiva, lista de proyectos) mientras no haya contenido, igual que antes.
 
 `/convocatorias` **ya no está en esta lista**: tiene una convocatoria real ("Voluntarios 2026 - 2") con su Google Form embebido — ver `src/data/openings/openings.data.ts` y el punto 14.
 
@@ -25,12 +27,7 @@ Apenas la directiva confirme la información real, solo hace falta completar eso
 
 ### 3. Imágenes placeholder en pilares y eventos
 
-Buscar el flag `imageIsTemporary: true` en:
-
-- `src/data/pillars/pillars.data.ts` (los 6 pilares)
-- `src/data/events/events.data.ts` (dentro de los eventos de ejemplo del punto 1)
-
-Reemplazar por fotos reales y quitar el flag (se usa para mostrar un aviso visual de que la imagen es temporal — ver `imageIsTemporary` en los componentes de media). Si alguno de esos eventos de ejemplo termina correspondiendo a un evento real de `public/images/`, se puede reutilizar esa foto (ver punto 1).
+Buscar el flag `imageIsTemporary: true` en `src/data/pillars/pillars.data.ts` (los 6 pilares) y reemplazar por fotos reales cuando la directiva las confirme (se usa para mostrar un aviso visual de que la imagen es temporal — ver `imageIsTemporary` en los componentes de media). `events.data.ts` ya no aplica acá — está vacío desde que se resolvió el punto 1; las imágenes de eventos reales ahora se cargan por evento desde `/administrator/eventos`, no tienen este flag.
 
 ### 4. Colores placeholder en los cuadros de "Nuestros pilares" del home
 
@@ -38,7 +35,7 @@ Los 6 cuadros de pilares en la home (`src/components/home/HomePillars.astro`) ah
 
 ### 5. Imagen social (OG) por página
 
-Parcialmente resuelto: `Layout.astro` acepta un `image` por página, y `/pilares/[slug]` ya la pasa automáticamente cuando el pilar tiene una foto real (`!pillar.imageIsTemporary`) — mientras tanto sigue usando el `og-image.png` global, sin necesitar más cambios cuando lleguen las fotos reales (ver punto 3). Queda pendiente aplicar el mismo patrón en `/eventos` (usando la imagen del evento destacado) — se armó una vez en sesión pero se revirtió a pedido para no tocar la estructura de esa página por ahora.
+Parcialmente resuelto: `Layout.astro` acepta un `image` por página, y `/pilares/[slug]` ya la pasa automáticamente cuando el pilar tiene una foto real (`!pillar.imageIsTemporary`) — mientras tanto sigue usando el `og-image.png` global, sin necesitar más cambios cuando lleguen las fotos reales (ver punto 3). Queda pendiente aplicar el mismo patrón en `/eventos` (usando la imagen de algún puntero publicado) — se armó una vez en sesión pero se revirtió a pedido para no tocar la estructura de esa página por ahora. Nota: desde el cambio de alcance del 2026-09-14 (`MEMORY.md` D-16), "eventos destacado" ya no es un concepto de esa página — habría que elegir otro criterio (¿el más próximo?, ¿el primero publicado?).
 
 ### 6. Carpeta internacional sin país confirmado
 
@@ -58,9 +55,9 @@ La Home tenía un link "Conoce nuestras alianzas" apuntando a `/alianzas`, ruta 
 
 ## Baja prioridad / decisiones a futuro
 
-### 10. ¿CMS o seguir con archivos `.data.ts`?
+### 10. ¿CMS o seguir con archivos `.data.ts`? — parcialmente resuelto
 
-Todo el contenido (pilares, eventos, home, nosotros, proyectos, convocatorias, internacional, vida LEAD) vive como datos tipados en `src/data/`, no en un CMS. Funciona bien mientras el equipo sea técnico y los cambios sean poco frecuentes. Si alguien no-dev va a cargar contenido seguido (sobre todo convocatorias, que cambian por temporada), evaluar migrar a un CMS headless.
+**Resuelto para eventos, junta directiva y proyectos**: desde el panel de administración (`/administrator`, ver `CONTEXT.md`), directores/subdirectores y la presidencia cargan ese contenido sin tocar código — un backend custom sobre Supabase, no un CMS headless de terceros (decisión ya tomada, ver `docs/GUIA_METODOLOGIA_ADMIN.md`). **Sigue sin CMS** el resto: pilares, home, convocatorias, internacional, vida LEAD — viven como datos tipados en `src/data/`. Funciona bien mientras esos cambios sean poco frecuentes y alguien técnico los edite; si algún no-dev necesita cargar seguido alguno de estos (sobre todo convocatorias, que cambian por temporada), evaluar extenderles el mismo patrón del panel en vez de un CMS headless aparte.
 
 ### 11. Dominio propio
 
@@ -86,6 +83,10 @@ La página anterior de LEAD UTP le aplica a cada logo del marquee un filtro `bri
 ### 15. Contraste de `--color-secondary` (rojo) por debajo de AA para texto normal
 
 Calculado en la auditoría de accesibilidad del panel de administración (T6.4, Sprint 6, `MEMORY.md` L34): `--color-secondary` (`#d93340`, texto de error/borrar) sobre `--color-canvas` (`#060b24`) da ~4.16:1 de contraste — WCAG AA exige 4.5:1 para texto normal (sí pasa el 3:1 de texto grande). Es un token compartido con **todo el sitio público**, no algo introducido por el panel — cambiarlo afecta badges de error, mensajes de validación, etc. en todas las páginas, no solo `/administrator`. Verificar con un contraste-checker real (el cálculo fue manual, con la fórmula de luminancia de WCAG) y decidir si vale la pena ajustar el tono — es una decisión de paleta/marca, no un bug puntual.
+
+### 16. Rediseño visual de la tarjeta de "Eventos pasados"
+
+Anotado explícitamente por el PO al cerrar el cambio de alcance que renombró "Galerías" a "Eventos pasados" en el panel (2026-09-14, `MEMORY.md` D-17) — **sin fecha definida, no es urgente**. Aplica tanto a la tarjeta de lista en `/administrator/eventos-pasados` como, potencialmente, a `GalleryEventCard.astro` en `/eventos` público (que muestra estas galerías como "Eventos realizados"). No se tocó nada de esto en el cambio de alcance ni en el Sprint 6 — quedó deliberadamente fuera de esos alcances hasta que el PO defina qué cambiar.
 
 ## Dónde preguntar
 
