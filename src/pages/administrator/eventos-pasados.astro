@@ -213,7 +213,8 @@ try {
 			const form = this.querySelector<HTMLFormElement>('#gallery-form');
 			const errorEl = this.querySelector<HTMLElement>('#gallery-form-error');
 			const openCreateBtn = this.querySelector<HTMLButtonElement>('[data-open-create]');
-			if (!dialog || !form || !errorEl || !openCreateBtn) return;
+			const submitBtn = form?.querySelector<HTMLButtonElement>('button[type="submit"]');
+			if (!dialog || !form || !errorEl || !openCreateBtn || !submitBtn) return;
 
 			openCreateBtn.addEventListener('click', () => {
 				form.reset();
@@ -234,13 +235,17 @@ try {
 						return;
 					}
 
-					const response = await fetch(`/administrator/api/galleries/${id}`, {
-						method: 'DELETE',
-					});
-					if (response.ok) {
-						window.location.reload();
-					} else {
-						window.alert('No se pudo borrar. Intenta de nuevo.');
+					try {
+						const response = await fetch(`/administrator/api/galleries/${id}`, {
+							method: 'DELETE',
+						});
+						if (response.ok) {
+							window.location.reload();
+						} else {
+							window.alert('No se pudo borrar. Intenta de nuevo.');
+						}
+					} catch {
+						window.alert('No se pudo conectar. Revisa tu conexión e intenta de nuevo.');
 					}
 				});
 			});
@@ -266,23 +271,31 @@ try {
 					...(isSuperAdmin && pillarSlug && { areaSlug: pillarSlug }),
 				};
 
-				const response = await fetch('/administrator/api/galleries', {
-					method: 'POST',
-					headers: { 'content-type': 'application/json' },
-					body: JSON.stringify(payload),
-				});
+				submitBtn.disabled = true;
+				try {
+					const response = await fetch('/administrator/api/galleries', {
+						method: 'POST',
+						headers: { 'content-type': 'application/json' },
+						body: JSON.stringify(payload),
+					});
 
-				if (response.ok) {
-					const created = await response.json();
-					// Redirige directo al editor: ahí es donde se suben las fotos.
-					window.location.href = `/administrator/eventos-pasados/${created.gallery.id}`;
-					return;
+					if (response.ok) {
+						const created = await response.json();
+						// Redirige directo al editor: ahí es donde se suben las fotos.
+						window.location.href = `/administrator/eventos-pasados/${created.gallery.id}`;
+						return;
+					}
+
+					const body = await response.json().catch(() => null);
+					errorEl.textContent =
+						body?.error ?? 'No se pudo crear. Revisa los datos e intenta de nuevo.';
+					errorEl.hidden = false;
+				} catch {
+					errorEl.textContent = 'No se pudo conectar. Revisa tu conexión e intenta de nuevo.';
+					errorEl.hidden = false;
+				} finally {
+					submitBtn.disabled = false;
 				}
-
-				const body = await response.json().catch(() => null);
-				errorEl.textContent =
-					body?.error ?? 'No se pudo crear. Revisa los datos e intenta de nuevo.';
-				errorEl.hidden = false;
 			});
 		}
 	}

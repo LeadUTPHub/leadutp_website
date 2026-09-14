@@ -356,7 +356,8 @@ const photoStorage = getPhotoStorage();
 			const form = this.querySelector<HTMLFormElement>('#gallery-meta-form');
 			const errorEl = this.querySelector<HTMLElement>('#gallery-meta-error');
 			const savedEl = this.querySelector<HTMLElement>('#gallery-meta-saved');
-			if (!form || !errorEl || !savedEl) return;
+			const submitBtn = form?.querySelector<HTMLButtonElement>('button[type="submit"]');
+			if (!form || !errorEl || !savedEl || !submitBtn) return;
 
 			form.addEventListener('submit', async (event) => {
 				event.preventDefault();
@@ -372,19 +373,27 @@ const photoStorage = getPhotoStorage();
 					published: data.get('published') === 'on',
 				};
 
-				const response = await fetch(`/administrator/api/galleries/${galleryId}`, {
-					method: 'PATCH',
-					headers: { 'content-type': 'application/json' },
-					body: JSON.stringify(payload),
-				});
+				submitBtn.disabled = true;
+				try {
+					const response = await fetch(`/administrator/api/galleries/${galleryId}`, {
+						method: 'PATCH',
+						headers: { 'content-type': 'application/json' },
+						body: JSON.stringify(payload),
+					});
 
-				if (response.ok) {
-					savedEl.hidden = false;
-					return;
+					if (response.ok) {
+						savedEl.hidden = false;
+						return;
+					}
+					const body = await response.json().catch(() => null);
+					errorEl.textContent = body?.error ?? 'No se pudo guardar.';
+					errorEl.hidden = false;
+				} catch {
+					errorEl.textContent = 'No se pudo conectar. Revisa tu conexión e intenta de nuevo.';
+					errorEl.hidden = false;
+				} finally {
+					submitBtn.disabled = false;
 				}
-				const body = await response.json().catch(() => null);
-				errorEl.textContent = body?.error ?? 'No se pudo guardar.';
-				errorEl.hidden = false;
 			});
 		}
 
@@ -398,13 +407,17 @@ const photoStorage = getPhotoStorage();
 				) {
 					return;
 				}
-				const response = await fetch(`/administrator/api/galleries/${galleryId}`, {
-					method: 'DELETE',
-				});
-				if (response.ok) {
-					window.location.href = '/administrator/eventos-pasados';
-				} else {
-					window.alert('No se pudo borrar.');
+				try {
+					const response = await fetch(`/administrator/api/galleries/${galleryId}`, {
+						method: 'DELETE',
+					});
+					if (response.ok) {
+						window.location.href = '/administrator/eventos-pasados';
+					} else {
+						window.alert('No se pudo borrar.');
+					}
+				} catch {
+					window.alert('No se pudo conectar. Revisa tu conexión e intenta de nuevo.');
 				}
 			});
 		}
@@ -477,11 +490,21 @@ const photoStorage = getPhotoStorage();
 					const input = form.querySelector<HTMLInputElement>('input[name="alt"]');
 					if (!photoId || !input) return;
 
-					await fetch(`/administrator/api/galleries/${galleryId}/photos/${photoId}`, {
-						method: 'PATCH',
-						headers: { 'content-type': 'application/json' },
-						body: JSON.stringify({ alt: input.value }),
-					});
+					try {
+						const response = await fetch(
+							`/administrator/api/galleries/${galleryId}/photos/${photoId}`,
+							{
+								method: 'PATCH',
+								headers: { 'content-type': 'application/json' },
+								body: JSON.stringify({ alt: input.value }),
+							},
+						);
+						if (!response.ok) {
+							window.alert('No se pudo guardar la descripción. Intenta de nuevo.');
+						}
+					} catch {
+						window.alert('No se pudo conectar. Revisa tu conexión e intenta de nuevo.');
+					}
 				});
 			});
 
@@ -499,8 +522,19 @@ const photoStorage = getPhotoStorage();
 						body: JSON.stringify({ position: newPosition }),
 					});
 
-				await Promise.all([patch(photoId, swapPosition), patch(swapId, position)]);
-				window.location.reload();
+				try {
+					const [first, second] = await Promise.all([
+						patch(photoId, swapPosition),
+						patch(swapId, position),
+					]);
+					if (!first.ok || !second.ok) {
+						window.alert('No se pudo reordenar. Intenta de nuevo.');
+						return;
+					}
+					window.location.reload();
+				} catch {
+					window.alert('No se pudo conectar. Revisa tu conexión e intenta de nuevo.');
+				}
 			};
 
 			this.querySelectorAll<HTMLButtonElement>('[data-move-up], [data-move-down]').forEach(
@@ -515,14 +549,18 @@ const photoStorage = getPhotoStorage();
 					if (!photoId) return;
 					if (!window.confirm('¿Borrar esta foto? No se puede deshacer.')) return;
 
-					const response = await fetch(
-						`/administrator/api/galleries/${galleryId}/photos/${photoId}`,
-						{ method: 'DELETE' },
-					);
-					if (response.ok) {
-						window.location.reload();
-					} else {
-						window.alert('No se pudo borrar la foto.');
+					try {
+						const response = await fetch(
+							`/administrator/api/galleries/${galleryId}/photos/${photoId}`,
+							{ method: 'DELETE' },
+						);
+						if (response.ok) {
+							window.location.reload();
+						} else {
+							window.alert('No se pudo borrar la foto.');
+						}
+					} catch {
+						window.alert('No se pudo conectar. Revisa tu conexión e intenta de nuevo.');
 					}
 				});
 			});

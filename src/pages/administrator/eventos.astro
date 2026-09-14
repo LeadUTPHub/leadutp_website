@@ -132,7 +132,7 @@ try {
 											<Badge tone={pointer.published ? 'optional' : 'primary'}>
 												{pointer.published ? 'Publicado' : 'Borrador'}
 											</Badge>
-											{pointer.featured && <Badge tone="secondary">Destacado</Badge>}
+											{pointer.featured && <Badge tone="optional">Destacado</Badge>}
 										</div>
 									</div>
 
@@ -295,7 +295,8 @@ try {
 			const form = this.querySelector<HTMLFormElement>('#pointer-form');
 			const errorEl = this.querySelector<HTMLElement>('#pointer-form-error');
 			const openCreateBtn = this.querySelector<HTMLButtonElement>('[data-open-create]');
-			if (!dialog || !dialogTitle || !form || !errorEl || !openCreateBtn) return;
+			const submitBtn = form?.querySelector<HTMLButtonElement>('button[type="submit"]');
+			if (!dialog || !dialogTitle || !form || !errorEl || !openCreateBtn || !submitBtn) return;
 
 			let mode: 'create' | 'edit' = 'create';
 			let editingId: string | null = null;
@@ -375,13 +376,17 @@ try {
 						return;
 					}
 
-					const response = await fetch(`/administrator/api/event-pointers/${id}`, {
-						method: 'DELETE',
-					});
-					if (response.ok) {
-						window.location.reload();
-					} else {
-						window.alert('No se pudo borrar el evento. Intenta de nuevo.');
+					try {
+						const response = await fetch(`/administrator/api/event-pointers/${id}`, {
+							method: 'DELETE',
+						});
+						if (response.ok) {
+							window.location.reload();
+						} else {
+							window.alert('No se pudo borrar el evento. Intenta de nuevo.');
+						}
+					} catch {
+						window.alert('No se pudo conectar. Revisa tu conexión e intenta de nuevo.');
 					}
 				});
 			});
@@ -418,19 +423,26 @@ try {
 						: `/administrator/api/event-pointers/${editingId}`;
 				const method = mode === 'create' ? 'POST' : 'PATCH';
 
-				const response = await fetch(url, {
-					method,
-					headers: { 'content-type': 'application/json' },
-					body: JSON.stringify(payload),
-				});
+				submitBtn.disabled = true;
+				try {
+					const response = await fetch(url, {
+						method,
+						headers: { 'content-type': 'application/json' },
+						body: JSON.stringify(payload),
+					});
 
-				if (response.ok) {
-					window.location.reload();
-					return;
+					if (response.ok) {
+						window.location.reload();
+						return;
+					}
+
+					const body = await response.json().catch(() => null);
+					showError(body?.error ?? 'No se pudo guardar. Revisa los datos e intenta de nuevo.');
+				} catch {
+					showError('No se pudo conectar. Revisa tu conexión e intenta de nuevo.');
+				} finally {
+					submitBtn.disabled = false;
 				}
-
-				const body = await response.json().catch(() => null);
-				showError(body?.error ?? 'No se pudo guardar. Revisa los datos e intenta de nuevo.');
 			});
 		}
 	}

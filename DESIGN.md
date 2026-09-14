@@ -43,7 +43,7 @@
 
 | Componente | Ruta | Uso en el panel |
 |---|---|---|
-| `Button.astro` | `src/components/ui/` | Todas las acciones. `variant="primary"` guardar/crear/login · `variant="secondary"` borrar · `variant="outline"` cancelar/secundario · `variant="ghost"` acciones de fila · `size` `sm`/`md`/`lg` |
+| `Button.astro` | `src/components/ui/` | Todas las acciones. `variant="primary"` guardar/crear/login · `variant="outline"` cancelar/secundario · `variant="ghost"` acciones de fila **y borrar** (`class="text-secondary"` encima, nunca `variant="secondary"` — así quedó implementado en las 4 pantallas de contenido, T6.1 corrigió esta fila para que coincida) · `size` `sm`/`md`/`lg` |
 | `Badge.astro` | `src/components/ui/` | `tone="primary"` Borrador · `tone="optional"` Publicado · `tone="secondary"` Error/Atención |
 | `Container.astro` | `src/components/ui/` | Ancho y gutters de cada vista (`max-w-7xl px-5 md:px-8 lg:px-10`) |
 | `SectionHeader.astro` | `src/components/ui/` | Cabecera de cada sección del panel, con slot `action` para el botón "Nuevo" |
