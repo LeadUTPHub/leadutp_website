@@ -4,6 +4,12 @@
 // solo un super_admin puede escribirlo (MEMORY.md D-13). El resto del
 // staff entra y lo ve en modo lectura — no se le oculta la pantalla,
 // porque saber qué dice la web pública es útil para cualquiera.
+//
+// Cambio 3 (2026-09-14, D-18): la sección "Historia" se sacó de este
+// panel. La historia de /nosotros se quedó fija en about.data.ts,
+// editable solo por desarrollador en código — nosotros.history ya no es
+// una key válida (ver validatePageBlockData.ts). Solo quedan Junta
+// directiva y Proyectos.
 export const prerender = false;
 
 import AdminShell from '../../components/admin/AdminShell.astro';
@@ -25,10 +31,12 @@ if (!profile) {
 
 const canWrite = profile.role === 'super_admin';
 
-// Lectura de los 3 bloques. Si Supabase falla, la pantalla sigue
-// renderizando en modo "no se pudo cargar" en vez de tirar un 500.
+// Lectura de los 2 bloques (Cambio 3, 2026-09-14, D-18: la historia se
+// sacó del panel — se quedó fija en about.data.ts, editable solo por
+// desarrollador en código, ver /nosotros.astro sin cambios). Si Supabase
+// falla, la pantalla sigue renderizando en modo "no se pudo cargar" en
+// vez de tirar un 500.
 const blocks: Record<string, PageBlock | null> = {
-	'nosotros.history': null,
 	'nosotros.team': null,
 	'proyectos.list': null,
 };
@@ -47,7 +55,6 @@ try {
 		'No se pudieron cargar los bloques. Intenta de nuevo en unos minutos.';
 }
 
-const historyBlock = blocks['nosotros.history'];
 const teamBlock = blocks['nosotros.team'];
 const projectsBlock = blocks['proyectos.list'];
 
@@ -55,11 +62,6 @@ const projectsBlock = blocks['proyectos.list'];
 // los .data.ts (cadena de degradación de T5.4) — así que el formulario
 // arranca con eso mismo, no en blanco: lo que se ve acá es lo que está
 // publicado hoy.
-const historyValue =
-	historyBlock && typeof (historyBlock.data as { body?: unknown })?.body === 'string'
-		? ((historyBlock.data as { body: string }).body)
-		: (about.history ?? '');
-
 const teamRows = teamBlock
 	? asTeamRows(teamBlock.data)
 	: about.team.map((member) => ({ name: member.name, role: member.role }));
@@ -82,7 +84,6 @@ function stateLabel(block: PageBlock | null): {
 		: { tone: 'primary', text: 'Borrador' };
 }
 
-const historyState = stateLabel(historyBlock);
 const teamState = stateLabel(teamBlock);
 const projectsState = stateLabel(projectsBlock);
 ---
@@ -113,60 +114,8 @@ const projectsState = stateLabel(projectsBlock);
 				)
 			}
 
-			<!-- ── Historia ────────────────────────────────────────────── -->
-			<section class="mt-10" aria-labelledby="historia-title">
-				<div class="flex flex-wrap items-center justify-between gap-3">
-					<h2
-						id="historia-title"
-						class="font-display text-foreground text-xl font-bold tracking-[-0.03em]"
-					>
-						Historia
-					</h2>
-					<Badge tone={historyState.tone}>{historyState.text}</Badge>
-				</div>
-				<p class="text-foreground-muted mt-1 text-sm">
-					Sección "Cómo empezamos" de /nosotros. Si queda vacía o en borrador, la
-					sección no aparece en el sitio.
-				</p>
-
-				<form class="mt-4 flex flex-col gap-4" data-form="nosotros.history" novalidate>
-					<Field
-						label="Texto (markdown)"
-						name="body"
-						as="textarea"
-						rows={8}
-						value={historyValue}
-					/>
-					<p class="text-foreground-muted -mt-2 text-xs">
-						Acepta markdown: **negrita**, *itálica*, listas y párrafos separados
-						por una línea en blanco.
-					</p>
-
-					<label class="text-foreground-secondary flex items-center gap-2 text-sm">
-						<input
-							type="checkbox"
-							name="published"
-							class="accent-optional-3 h-4 w-4 rounded"
-							checked={historyBlock?.published ?? false}
-						/>
-						Publicado
-					</label>
-
-					<p class="text-secondary text-sm" role="alert" data-error hidden></p>
-					<p class="text-optional-3 text-sm" role="status" data-ok hidden></p>
-
-					{
-						canWrite && (
-							<div class="flex justify-end">
-								<Button type="submit">Guardar historia</Button>
-							</div>
-						)
-					}
-				</form>
-			</section>
-
 			<!-- ── Junta directiva ─────────────────────────────────────── -->
-			<section class="hairline-t mt-12 pt-10" aria-labelledby="junta-title">
+			<section class="mt-10" aria-labelledby="junta-title">
 				<div class="flex flex-wrap items-center justify-between gap-3">
 					<h2
 						id="junta-title"
@@ -474,11 +423,6 @@ const projectsState = stateLabel(projectsBlock);
 		}
 
 		private buildData(form: HTMLFormElement, key: string): unknown {
-			if (key === 'nosotros.history') {
-				const body =
-					form.querySelector<HTMLTextAreaElement>('[name="body"]')?.value ?? '';
-				return { body };
-			}
 			if (key === 'nosotros.team') {
 				return parseTeamRows(
 					this.readRows(form, ['name', 'role']) as unknown as TeamRow[],

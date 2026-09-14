@@ -4,9 +4,18 @@
  *
  * La forma espeja los tipos de src/data/**\/*.types.ts, que son la fuente
  * de verdad de lo que las páginas públicas saben renderizar:
- *   nosotros.history → { body: string }   markdown (D-14d)
- *   nosotros.team    → TeamMember[]       src/data/about/about.types.ts
- *   proyectos.list   → Project[]          src/data/projects/projects.types.ts
+ *   nosotros.team  → TeamMember[]  src/data/about/about.types.ts
+ *   proyectos.list → Project[]     src/data/projects/projects.types.ts
+ *
+ * `nosotros.history` NO está en la lista (Cambio 3, 2026-09-14, MEMORY.md
+ * D-18): la historia se quedó fija en `about.data.ts`, editable solo por
+ * desarrollador en código. Se sacó a propósito de la lista cerrada, no
+ * solo de la UI del panel — así ni el endpoint ni este validador pueden
+ * aceptarla nunca, y `resolveAbout()` (resolvePageContent.ts) siempre cae
+ * a `about.data.ts` para la historia sin que haya que tocar ese archivo:
+ * `validatePageBlockData('nosotros.history', ...)` rechaza cualquier cosa
+ * por key inválida antes de mirar la forma, así que ni un bloque viejo
+ * que quedara publicado en Supabase puede volver a aparecer.
  *
  * Este archivo NO importa esos tipos: el dominio es puro y no depende de
  * la capa de contenido del sitio público (misma regla que `isAreaSlug` en
@@ -19,11 +28,7 @@
 export type ValidationResult = { ok: true } | { ok: false; error: string };
 
 /** Lista cerrada del contrato §5. Una key fuera de acá se rechaza. */
-export const PAGE_BLOCK_KEYS = [
-	'nosotros.history',
-	'nosotros.team',
-	'proyectos.list',
-] as const;
+export const PAGE_BLOCK_KEYS = ['nosotros.team', 'proyectos.list'] as const;
 
 export type PageBlockKey = (typeof PAGE_BLOCK_KEYS)[number];
 
@@ -76,13 +81,6 @@ function validateLink(value: unknown, path: string): ValidationResult {
 	return fail(
 		`${path} debe empezar con https:// o ser una ruta interna (/...).`,
 	);
-}
-
-function validateHistory(data: unknown): ValidationResult {
-	if (!isPlainObject(data)) {
-		return fail('data debe ser un objeto { body }.');
-	}
-	return validateText(data.body, 'data.body', Number.MAX_SAFE_INTEGER);
 }
 
 function validateTeam(data: unknown): ValidationResult {
@@ -162,8 +160,6 @@ export function validatePageBlockData(
 	}
 
 	switch (key) {
-		case 'nosotros.history':
-			return validateHistory(data);
 		case 'nosotros.team':
 			return validateTeam(data);
 		case 'proyectos.list':

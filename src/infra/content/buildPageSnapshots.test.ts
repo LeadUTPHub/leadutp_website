@@ -12,6 +12,12 @@ import { buildAboutSnapshot, buildProjectsSnapshot } from './buildPageSnapshots'
 // publicada, el snapshot se limpia (no se queda con contenido viejo que ya
 // no es la verdad actual — D-14c). El script (no este archivo) es quien
 // decide si "limpiar" significa borrar el archivo.
+//
+// `about.fallback.json` ya NO cubre la historia (Cambio 3, 2026-09-14,
+// D-18): `nosotros.history` se sacó de la lista cerrada de
+// validatePageBlockData.ts, así que nunca puede volver a ser un
+// `FetchOutcome` válido — snapshotearla sería perseguir algo que nunca
+// va a pasar. Solo queda la junta.
 
 const TEAM: TeamMember[] = [{ name: 'Ana Pérez', role: 'Presidenta' }];
 const OTHER_TEAM: TeamMember[] = [{ name: 'Luis Gómez', role: 'Vicepresidente' }];
@@ -27,7 +33,6 @@ describe('buildAboutSnapshot', () => {
 	it('sin snapshot previo y Supabase no respondió, no hay nada que persistir', () => {
 		const result = buildAboutSnapshot({
 			current: null,
-			history: { ok: false },
 			team: { ok: false },
 		});
 
@@ -36,48 +41,25 @@ describe('buildAboutSnapshot', () => {
 
 	it('Supabase no respondió: preserva el snapshot existente tal cual (no lo borra)', () => {
 		const result = buildAboutSnapshot({
-			current: { history: 'Historia vieja.', team: TEAM },
-			history: { ok: false },
+			current: { team: TEAM },
 			team: { ok: false },
 		});
 
-		expect(result).toEqual({ history: 'Historia vieja.', team: TEAM });
+		expect(result).toEqual({ team: TEAM });
 	});
 
-	it('Supabase respondió con historia nueva: la reemplaza', () => {
+	it('Supabase respondió con junta nueva: la reemplaza', () => {
 		const result = buildAboutSnapshot({
-			current: { history: 'Historia vieja.', team: TEAM },
-			history: { ok: true, value: 'Historia nueva.' },
-			team: { ok: false },
-		});
-
-		expect(result).toEqual({ history: 'Historia nueva.', team: TEAM });
-	});
-
-	it('solo la historia falló al leerse: la junta se actualiza igual', () => {
-		const result = buildAboutSnapshot({
-			current: { history: 'Historia vieja.', team: TEAM },
-			history: { ok: false },
+			current: { team: TEAM },
 			team: { ok: true, value: OTHER_TEAM },
 		});
 
-		expect(result).toEqual({ history: 'Historia vieja.', team: OTHER_TEAM });
+		expect(result).toEqual({ team: OTHER_TEAM });
 	});
 
-	it('la historia se despublicó (ok:true, value:null): se limpia del snapshot', () => {
+	it('la junta se despublicó (ok:true, value:null): no queda nada que persistir', () => {
 		const result = buildAboutSnapshot({
-			current: { history: 'Historia vieja.', team: TEAM },
-			history: { ok: true, value: null },
-			team: { ok: false },
-		});
-
-		expect(result).toEqual({ history: undefined, team: TEAM });
-	});
-
-	it('ambas keys se despublicaron: no queda nada que persistir (null → borrar archivo)', () => {
-		const result = buildAboutSnapshot({
-			current: { history: 'Historia vieja.', team: TEAM },
-			history: { ok: true, value: null },
+			current: { team: TEAM },
 			team: { ok: true, value: null },
 		});
 
@@ -87,21 +69,10 @@ describe('buildAboutSnapshot', () => {
 	it('primera publicación, sin snapshot previo: arma uno desde cero', () => {
 		const result = buildAboutSnapshot({
 			current: null,
-			history: { ok: true, value: 'LEAD UTP nació en 2023.' },
 			team: { ok: true, value: TEAM },
 		});
 
-		expect(result).toEqual({ history: 'LEAD UTP nació en 2023.', team: TEAM });
-	});
-
-	it('sin snapshot previo y solo la junta está publicada', () => {
-		const result = buildAboutSnapshot({
-			current: null,
-			history: { ok: true, value: null },
-			team: { ok: true, value: TEAM },
-		});
-
-		expect(result).toEqual({ history: undefined, team: TEAM });
+		expect(result).toEqual({ team: TEAM });
 	});
 });
 

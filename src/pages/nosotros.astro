@@ -12,9 +12,13 @@ const valueIcons = {
 	star: Star,
 };
 
-// T5.4 — cadena Supabase → snapshot → about.data.ts → vacío. Solo historia
-// y junta directiva son editables desde el panel; intro, acrónimo, misión,
-// visión y valores siguen viniendo del .data.ts (D-14b).
+// T5.4 — cadena Supabase → snapshot → about.data.ts → vacío, para la
+// junta directiva. La historia (Cambio 3, 2026-09-14, D-18) se sacó de
+// esa cadena: nosotros.history ya no es una key válida
+// (validatePageBlockData.ts), así que loadAboutContent() siempre la
+// resuelve desde about.data.ts — editable solo por desarrollador en
+// código. Igual que antes, intro/acrónimo/misión/visión/valores nunca
+// salieron del .data.ts (D-14b).
 const { content: about } = await loadAboutContent();
 
 // D-14d: la historia se escribe en markdown (mismo tratamiento que el

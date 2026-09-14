@@ -39,7 +39,7 @@
 |---|---|
 | **Galería** (`event_galleries`) | Un recuerdo de un evento realizado: `title`, `body` (markdown), `happened_on`, `pillar_slug`, y N **Fotos**. Estilo `/vida-lead`. |
 | **Foto** (`gallery_photos`) | Una imagen de una galería, alojada en **Cloudinary**. Fuente de verdad = `cloudinary_public_id`. Guarda también `secure_url` (fallback), `width`, `height`, `alt`, `position`. |
-| **PageBlock** (`page_blocks`) | Un bloque de contenido editable de una subpágina pública, identificado por `key` (p. ej. `nosotros.history`, `nosotros.team`, `proyectos.list`). `data` es `jsonb` con la **misma forma** que los tipos de `src/data/**/*.types.ts`. |
+| **PageBlock** (`page_blocks`) | Un bloque de contenido editable de una subpágina pública, identificado por `key` (`nosotros.team`, `proyectos.list` — `nosotros.history` se sacó de la lista cerrada el 2026-09-14, D-18: la historia se quedó fija en `about.data.ts`, editable solo por desarrollador en código). `data` es `jsonb` con la **misma forma** que los tipos de `src/data/**/*.types.ts`. |
 | **Publicado** (`published`) | Booleano. `true` = la web pública lo muestra. `false` = borrador, solo visible para el staff. La web pública (rol `anon`) solo lee filas `published = true`. |
 | **Procedencia** (`source`) | `content_source`: `supabase` \| `cloudinary` \| `static`. Toda fila y toda foto lo llevan (regla de trazabilidad). |
 

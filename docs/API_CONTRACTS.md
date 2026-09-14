@@ -194,7 +194,7 @@ Borra la fila y el asset en Cloudinary (best-effort). **204/403/404**.
 ## 5. Bloques de subpáginas — `page_blocks`
 
 ### `GET /administrator/api/pages/:key`
-`:key` ∈ `nosotros.history` \| `nosotros.team` \| `proyectos.list` (lista cerrada).
+`:key` ∈ `nosotros.team` \| `proyectos.list` (lista cerrada). `nosotros.history` se sacó de la lista el 2026-09-14 (Cambio 3, MEMORY.md D-18): la historia de `/nosotros` se quedó fija en `about.data.ts`, editable solo por desarrollador en código — cualquier `:key` distinto de las dos de arriba, incluida `nosotros.history`, devuelve **404**.
 
 **200**
 ```json

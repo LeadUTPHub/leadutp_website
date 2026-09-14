@@ -2,7 +2,9 @@
 /**
  * Script `prebuild` (T5.5) — corre automáticamente antes de `pnpm build`
  * (hook de ciclo de vida de pnpm/npm, ver package.json). Lee `page_blocks`
- * en vivo de Supabase (cliente anon, mismas 3 keys de T5.1) y actualiza
+ * en vivo de Supabase (cliente anon, mismas keys de PAGE_BLOCK_KEYS —
+ * 2 desde el Cambio 3, 2026-09-14, D-18: `nosotros.history` ya no es una
+ * key válida, la historia se quedó fija en `about.data.ts`) y actualiza
  * `about.fallback.json` / `projects.fallback.json` — el escalón 2 de la
  * cadena de degradación de DOMAIN.md que `loadPageContent.ts` (T5.4) ya
  * sabe leer.
@@ -165,7 +167,6 @@ async function main(): Promise<void> {
 	const currentAbout = readJsonIfExists<AboutSnapshotContent>(ABOUT_SNAPSHOT_PATH);
 	const nextAbout = buildAboutSnapshot({
 		current: currentAbout,
-		history: outcomeFor(rows, 'nosotros.history', (raw) => (raw as { body: string }).body),
 		team: outcomeFor(rows, 'nosotros.team', (raw) => raw as TeamMember[]),
 	});
 	applySnapshot(ABOUT_SNAPSHOT_PATH, nextAbout);

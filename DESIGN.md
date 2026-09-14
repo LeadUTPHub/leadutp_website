@@ -110,8 +110,7 @@ No hay componente de input en `src/components/ui/` todavía. Se crea `src/compon
 ### 6.5 `/administrator/paginas` (Nosotros / Proyectos)
 | Aspecto | Aplicación |
 |---|---|
-| Navegación | Tabs (`hairline-b`) por `key`: Historia · Junta directiva · Proyectos |
-| Historia | `textarea` largo (markdown), contador |
+| Navegación | Tabs (`hairline-b`) por `key`: Junta directiva · Proyectos (Historia se sacó el 2026-09-14, D-18 — queda fija en `about.data.ts`, sin UI) |
 | Junta | lista repetible de `{ name, role }` con `Field` × 2 y botón añadir/quitar fila |
 | Proyectos | lista repetible de `{ name, description, status, link? }`; `status` = `select` (`activo`/`finalizado`/`planificado`) |
 | Publicar | switch `published` por bloque + aviso "Borrador no se ve en la web" |

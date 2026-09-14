@@ -26,13 +26,17 @@ const SUPER_ADMIN: Profile = {
 	isActive: true,
 };
 
+// Key de ejemplo para los tests genéricos (auth, 400/422/403, etc.) que no
+// prueban una key específica: `nosotros.team` — desde el Cambio 3
+// (2026-09-14, D-18) ya no puede ser `nosotros.history`, que se sacó de la
+// lista cerrada (ver el describe dedicado a esa key más abajo).
 function fakeContext(opts: {
 	key?: string;
 	profile?: Profile | null;
 	body?: unknown;
 	rawBody?: string;
 }) {
-	const url = `http://localhost/administrator/api/pages/${opts.key ?? 'nosotros.history'}`;
+	const url = `http://localhost/administrator/api/pages/${opts.key ?? 'nosotros.team'}`;
 	const request =
 		opts.rawBody !== undefined
 			? new Request(url, { method: 'PUT', body: opts.rawBody })
@@ -42,7 +46,7 @@ function fakeContext(opts: {
 				});
 
 	return {
-		params: { key: opts.key ?? 'nosotros.history' },
+		params: { key: opts.key ?? 'nosotros.team' },
 		locals: { profile: opts.profile ?? null },
 		request,
 		cookies: { set: vi.fn() },
@@ -50,8 +54,8 @@ function fakeContext(opts: {
 }
 
 const BLOCK: PageBlock = {
-	key: 'nosotros.history',
-	data: { body: 'LEAD UTP nació en 2023.' },
+	key: 'nosotros.team',
+	data: [{ name: 'Ana Pérez', role: 'Presidenta' }],
 	areaSlug: null,
 	ownerId: 'super-admin-id',
 	published: true,
@@ -71,8 +75,8 @@ describe('GET /administrator/api/pages/:key', () => {
 		expect(response.status).toBe(200);
 		expect(await response.json()).toEqual({
 			block: {
-				key: 'nosotros.history',
-				data: { body: 'LEAD UTP nació en 2023.' },
+				key: 'nosotros.team',
+				data: [{ name: 'Ana Pérez', role: 'Presidenta' }],
 				areaSlug: null,
 				published: true,
 				updatedAt: '2026-09-11T00:00:00.000Z',
@@ -94,6 +98,14 @@ describe('GET /administrator/api/pages/:key', () => {
 		expect(response.status).toBe(404);
 		expect(getPageBlock).not.toHaveBeenCalled();
 	});
+
+	it('devuelve 404 para nosotros.history (Cambio 3, D-18: se sacó de la lista cerrada)', async () => {
+		const response = await GET(
+			fakeContext({ key: 'nosotros.history', profile: SUPER_ADMIN }),
+		);
+		expect(response.status).toBe(404);
+		expect(getPageBlock).not.toHaveBeenCalled();
+	});
 });
 
 describe('PUT /administrator/api/pages/:key', () => {
@@ -103,13 +115,16 @@ describe('PUT /administrator/api/pages/:key', () => {
 		const response = await PUT(
 			fakeContext({
 				profile: SUPER_ADMIN,
-				body: { data: { body: 'LEAD UTP nació en 2023.' }, published: true },
+				body: {
+					data: [{ name: 'Ana Pérez', role: 'Presidenta' }],
+					published: true,
+				},
 			}),
 		);
 
 		expect(response.status).toBe(200);
-		expect(savePageBlock).toHaveBeenCalledWith('nosotros.history', {
-			data: { body: 'LEAD UTP nació en 2023.' },
+		expect(savePageBlock).toHaveBeenCalledWith('nosotros.team', {
+			data: [{ name: 'Ana Pérez', role: 'Presidenta' }],
 			published: true,
 		});
 	});
@@ -128,6 +143,18 @@ describe('PUT /administrator/api/pages/:key', () => {
 				key: 'proyectos.destacados',
 				profile: SUPER_ADMIN,
 				body: { data: [] },
+			}),
+		);
+		expect(response.status).toBe(404);
+		expect(savePageBlock).not.toHaveBeenCalled();
+	});
+
+	it('devuelve 404 para nosotros.history (Cambio 3, D-18: se sacó de la lista cerrada, aunque el body tenga forma válida)', async () => {
+		const response = await PUT(
+			fakeContext({
+				key: 'nosotros.history',
+				profile: SUPER_ADMIN,
+				body: { data: { body: 'Intento de reescribir la historia.' } },
 			}),
 		);
 		expect(response.status).toBe(404);
@@ -181,7 +208,10 @@ describe('PUT /administrator/api/pages/:key', () => {
 		savePageBlock.mockResolvedValue(null);
 
 		const response = await PUT(
-			fakeContext({ profile: SUPER_ADMIN, body: { data: { body: 'x' } } }),
+			fakeContext({
+				profile: SUPER_ADMIN,
+				body: { data: [{ name: 'Ana', role: 'Presidenta' }] },
+			}),
 		);
 		expect(response.status).toBe(403);
 	});
@@ -193,15 +223,15 @@ describe('PUT /administrator/api/pages/:key', () => {
 			fakeContext({
 				profile: SUPER_ADMIN,
 				body: {
-					data: { body: 'x' },
+					data: [{ name: 'Ana', role: 'Presidenta' }],
 					areaSlug: 'liderazgo',
 					ownerId: 'otro-usuario',
 				},
 			}),
 		);
 
-		expect(savePageBlock).toHaveBeenCalledWith('nosotros.history', {
-			data: { body: 'x' },
+		expect(savePageBlock).toHaveBeenCalledWith('nosotros.team', {
+			data: [{ name: 'Ana', role: 'Presidenta' }],
 			published: undefined,
 		});
 	});

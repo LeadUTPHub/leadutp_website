@@ -36,14 +36,20 @@ function resolveField<T>(current: T | undefined, fetch: FetchOutcome<T>): T | un
 	return fetch.value ?? undefined;
 }
 
+/**
+ * Solo `team` — `about.fallback.json` cubría también `history` hasta el
+ * Cambio 3 (2026-09-14, MEMORY.md D-18): `nosotros.history` se sacó de la
+ * lista cerrada de `validatePageBlockData.ts`, así que nunca puede volver
+ * a llegar un `FetchOutcome` válido para ella — snapshotearla sería
+ * perseguir algo que nunca va a pasar. La historia se quedó fija en
+ * `about.data.ts`, editable solo por desarrollador en código.
+ */
 export interface AboutSnapshotContent {
-	history?: string;
 	team?: TeamMember[];
 }
 
 export interface BuildAboutSnapshotInput {
 	current: AboutSnapshotContent | null;
-	history: FetchOutcome<string>;
 	team: FetchOutcome<TeamMember[]>;
 }
 
@@ -54,10 +60,9 @@ export interface BuildAboutSnapshotInput {
 export function buildAboutSnapshot(
 	input: BuildAboutSnapshotInput,
 ): AboutSnapshotContent | null {
-	const history = resolveField(input.current?.history, input.history);
 	const team = resolveField(input.current?.team, input.team);
-	if (history === undefined && team === undefined) return null;
-	return { history, team };
+	if (team === undefined) return null;
+	return { team };
 }
 
 /** Mismo contrato que `buildAboutSnapshot`, para `projects.fallback.json`

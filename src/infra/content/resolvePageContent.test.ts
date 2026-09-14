@@ -35,7 +35,7 @@ describe('resolveAbout', () => {
 		expect(result.teamSource).toBe('static');
 	});
 
-	it('usa la historia de Supabase cuando existe', () => {
+	it('la historia SIEMPRE viene de about.data.ts, ignora Supabase (Cambio 3, D-18: nosotros.history ya no es una key válida)', () => {
 		const result = resolveAbout({
 			historyBlock: {
 				data: { body: 'LEAD UTP nació en 2023.' },
@@ -46,8 +46,11 @@ describe('resolveAbout', () => {
 			staticAbout: about,
 		});
 
-		expect(result.content.history).toBe('LEAD UTP nació en 2023.');
-		expect(result.historySource).toBe('supabase');
+		// validatePageBlockData('nosotros.history', ...) rechaza por key
+		// inválida antes de mirar la forma — este historyBlock, aunque tenga
+		// forma perfectamente válida, nunca llega a usarse.
+		expect(result.content.history).toBe(about.history);
+		expect(result.historySource).toBe('static');
 	});
 
 	it('usa la junta de Supabase cuando existe', () => {
@@ -97,7 +100,7 @@ describe('resolveAbout', () => {
 		expect(result.teamSource).toBe('static');
 	});
 
-	it('usa el snapshot cuando Supabase no respondió', () => {
+	it('usa el snapshot de junta cuando Supabase no respondió (la historia sigue ignorando el snapshot, mismo motivo)', () => {
 		const result = resolveAbout({
 			historyBlock: null,
 			teamBlock: null,
@@ -108,21 +111,22 @@ describe('resolveAbout', () => {
 			staticAbout: about,
 		});
 
-		expect(result.content.history).toBe('Historia del snapshot');
+		expect(result.content.history).toBe(about.history);
 		expect(result.content.team).toEqual([{ name: 'Ana', role: 'Presidenta' }]);
 		expect(result.historySource).toBe('static');
 		expect(result.teamSource).toBe('static');
 	});
 
-	it('Supabase gana sobre el snapshot', () => {
+	it('Supabase gana sobre el snapshot (junta — la historia ya no tiene este camino)', () => {
 		const result = resolveAbout({
-			historyBlock: { data: { body: 'De Supabase' }, source: 'supabase' },
-			teamBlock: null,
-			snapshot: { history: 'Del snapshot' },
+			historyBlock: null,
+			teamBlock: { data: [{ name: 'Ana', role: 'Presidenta' }], source: 'supabase' },
+			snapshot: { team: [{ name: 'Otra', role: 'Vicepresidenta' }] },
 			staticAbout: about,
 		});
 
-		expect(result.content.history).toBe('De Supabase');
+		expect(result.content.team).toEqual([{ name: 'Ana', role: 'Presidenta' }]);
+		expect(result.teamSource).toBe('supabase');
 	});
 
 	it('una junta vacía en Supabase es un valor válido (oculta la sección)', () => {

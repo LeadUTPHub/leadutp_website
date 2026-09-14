@@ -7,25 +7,27 @@ import {
 
 // Contrato: docs/API_CONTRACTS.md §5 (PUT /administrator/api/pages/:key).
 // La forma de `data` espeja los tipos de src/data/**/*.types.ts:
-//   nosotros.history → { body: string }   (markdown, D-14d)
-//   nosotros.team    → TeamMember[]       ({ name, role }, D-14e)
-//   proyectos.list   → Project[]          (bloque único, D-14f)
+//   nosotros.team  → TeamMember[]  ({ name, role }, D-14e)
+//   proyectos.list → Project[]     (bloque único, D-14f)
+//
+// `nosotros.history` NO es una key válida (Cambio 3, 2026-09-14, D-18):
+// la historia se quedó fija en about.data.ts, editable solo por
+// desarrollador en código. Se sacó a propósito de la lista cerrada —no
+// solo se le quitó la UI del panel— para que ni el endpoint ni esta
+// validación puedan aceptarla nunca, aunque alguien la llame directo.
 
 describe('PAGE_BLOCK_KEYS / isPageBlockKey', () => {
-	it('es la lista cerrada de 3 keys del contrato', () => {
-		expect([...PAGE_BLOCK_KEYS]).toEqual([
-			'nosotros.history',
-			'nosotros.team',
-			'proyectos.list',
-		]);
+	it('es la lista cerrada de 2 keys del contrato', () => {
+		expect([...PAGE_BLOCK_KEYS]).toEqual(['nosotros.team', 'proyectos.list']);
 	});
 
 	it('reconoce las keys válidas', () => {
-		expect(isPageBlockKey('nosotros.history')).toBe(true);
+		expect(isPageBlockKey('nosotros.team')).toBe(true);
 		expect(isPageBlockKey('proyectos.list')).toBe(true);
 	});
 
-	it('rechaza una key fuera de la lista', () => {
+	it('rechaza una key fuera de la lista, incluida nosotros.history (D-18)', () => {
+		expect(isPageBlockKey('nosotros.history')).toBe(false);
 		expect(isPageBlockKey('nosotros.mission')).toBe(false);
 		expect(isPageBlockKey('')).toBe(false);
 		expect(isPageBlockKey(null)).toBe(false);
@@ -37,54 +39,13 @@ describe('validatePageBlockData — key desconocida', () => {
 	it('rechaza una key que no está en la lista cerrada', () => {
 		expect(validatePageBlockData('proyectos.destacados', {}).ok).toBe(false);
 	});
-});
 
-describe('validatePageBlockData — nosotros.history', () => {
-	it('acepta { body: "texto markdown" }', () => {
+	it('rechaza nosotros.history aunque el body tenga forma válida (D-18)', () => {
 		expect(
 			validatePageBlockData('nosotros.history', {
-				body: 'LEAD UTP nació en **2023**.\n\nDesde entonces...',
-			}),
-		).toEqual({ ok: true });
-	});
-
-	it('rechaza un string pelado (data siempre es objeto, nunca escalar)', () => {
-		expect(validatePageBlockData('nosotros.history', 'texto suelto').ok).toBe(
-			false,
-		);
-	});
-
-	it('rechaza null', () => {
-		expect(validatePageBlockData('nosotros.history', null).ok).toBe(false);
-	});
-
-	it('rechaza un array', () => {
-		expect(validatePageBlockData('nosotros.history', []).ok).toBe(false);
-	});
-
-	it('rechaza sin body', () => {
-		expect(validatePageBlockData('nosotros.history', {}).ok).toBe(false);
-	});
-
-	it('rechaza un body que no es texto', () => {
-		expect(validatePageBlockData('nosotros.history', { body: 42 }).ok).toBe(
-			false,
-		);
-	});
-
-	it('rechaza un body vacío o solo espacios', () => {
-		expect(validatePageBlockData('nosotros.history', { body: '' }).ok).toBe(
-			false,
-		);
-		expect(
-			validatePageBlockData('nosotros.history', { body: '   \n  ' }).ok,
+				body: 'LEAD UTP nació en 2023.',
+			}).ok,
 		).toBe(false);
-	});
-
-	it('nombra el campo en el error (ruta del campo, contrato §5)', () => {
-		const result = validatePageBlockData('nosotros.history', { body: 42 });
-		expect(result.ok).toBe(false);
-		if (!result.ok) expect(result.error).toContain('body');
 	});
 });
 
