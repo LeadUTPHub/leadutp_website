@@ -83,7 +83,7 @@ const fieldClasses = [
 				class:list={[...fieldClasses, 'min-h-11']}
 			>
 				{!required && <option value="" selected={!value}>Sin pilar</option>}
-				{options.map((option) => (
+				{options.map((option: SelectOption) => (
 					<option value={option.value} selected={option.value === value}>
 						{option.label}
 					</option>
