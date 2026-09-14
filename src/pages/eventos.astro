@@ -1,25 +1,24 @@
 ---
-// Sprint 1 (piloto): los eventos próximos viven en Luma (fuente única
-// de verdad, sin sync). "Eventos pasados" queda vacío hasta Sprint 4
-// (galerías "así se vivió el evento"). Ver .sprints/BACKLOG.md Sprint 1
-// y MEMORY.md D-P4/D-P5.
-//
-// T3.5: además del embed, se listan los punteros a Luma curados
-// (published && featured) como tarjetas completas. Build-time, con
-// cliente anon (RLS ya limita a published=true) — si Supabase falla,
-// degrada a lista vacía y el embed queda solo (regla inquebrantable 4).
+// Cambio de alcance (2026-09-14, post-Sprint 5, ver MEMORY.md D-16):
+// se quita el embed/link genérico a Luma de "Próximos eventos". Ya no
+// hay botón "Ver eventos en Luma" ni iframe — la sección es SOLO la
+// lista de punteros published && no vencidos (selectUpcomingPointers.ts;
+// ya no exige `featured`, a diferencia de la regla T3.5 anterior). Cada
+// tarjeta (EventPointerCard) conserva su propio link de inscripción a
+// `lumaUrl`. Build-time, con cliente anon (RLS ya limita a
+// published=true) — si Supabase falla, degrada a lista vacía (regla
+// inquebrantable 4).
 //
 // T4.6: "Eventos realizados" muestra las galerías `published` (más
 // recientes primero) con sus fotos, mismo criterio de degradación:
 // si Supabase falla, degrada al estado vacío curado que ya existía
 // (link a /vida-lead), nunca un error.
 import EventPointerCard from '../components/events/EventPointerCard.astro';
-import EventsLuma from '../components/events/EventsLuma.astro';
 import GalleryEventCard from '../components/events/GalleryEventCard.astro';
 import Container from '../components/ui/Container.astro';
 import SectionHeader from '../components/ui/SectionHeader.astro';
 import type { GalleryPhoto, GalleryWithPhotoCount } from '../domain/ports/ContentRepository';
-import { selectFeaturedPointers } from '../domain/selectFeaturedPointers';
+import { selectUpcomingPointers } from '../domain/selectUpcomingPointers';
 import { getContentRepository } from '../infra/container';
 import { renderMarkdown } from '../infra/markdown/renderMarkdown';
 import Layout from '../layouts/Layout.astro';
@@ -32,22 +31,14 @@ interface GalleryWithPhotos extends Omit<GalleryWithPhotoCount, 'body'> {
 const MAX_GALLERIES = 4;
 const MAX_PHOTOS_PER_GALLERY = 5;
 
-// PUBLIC_LUMA_CALENDAR_URL no es secreto (es una URL pública); se
-// resuelve por env var con este valor como default para no depender
-// de que el .env local la tenga cargada. PUBLIC_LUMA_EMBED_URL sí
-// requiere el snippet real del panel de Luma — sin ella, solo botón.
-const calendarUrl =
-	import.meta.env.PUBLIC_LUMA_CALENDAR_URL || 'https://luma.com/leadutp_';
-const embedUrl = import.meta.env.PUBLIC_LUMA_EMBED_URL;
-
-let featuredPointers: Awaited<ReturnType<typeof selectFeaturedPointers>> = [];
+let upcomingPointers: Awaited<ReturnType<typeof selectUpcomingPointers>> = [];
 try {
 	const pointers = await getContentRepository().listPointers();
-	featuredPointers = selectFeaturedPointers(pointers);
+	upcomingPointers = selectUpcomingPointers(pointers);
 } catch {
-	// Degradación elegante: la sección de Luma (botón + embed) queda
-	// intacta, solo se omiten las tarjetas curadas.
-	featuredPointers = [];
+	// Degradación elegante: la sección cae al estado vacío curado, nunca
+	// un error (regla inquebrantable 4).
+	upcomingPointers = [];
 }
 
 let recentGalleries: GalleryWithPhotos[] = [];
@@ -119,20 +110,23 @@ try {
 			<SectionHeader
 				id="proximos-eventos-title"
 				title="Próximos eventos"
-				description="Centralizamos nuestro calendario en Luma — ahí ves fecha, cupos y te inscribes."
+				description="Descubre nuestras próximas experiencias y regístrate directamente en Luma."
 			/>
-			<div class="mt-7 sm:mt-8">
-				<EventsLuma calendarUrl={calendarUrl} embedUrl={embedUrl} />
-			</div>
 			{
-				featuredPointers.length > 0 && (
+				upcomingPointers.length > 0 ? (
 					<ul class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-						{featuredPointers.map((pointer) => (
+						{upcomingPointers.map((pointer) => (
 							<li>
 								<EventPointerCard pointer={pointer} />
 							</li>
 						))}
 					</ul>
+				) : (
+					<div class="mt-7 sm:mt-8 text-center">
+						<p class="text-foreground-secondary mx-auto max-w-lg text-sm leading-6 sm:text-base">
+							Todavía no publicamos eventos próximos. Vuelve pronto.
+						</p>
+					</div>
 				)
 			}
 		</Container>

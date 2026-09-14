@@ -261,9 +261,9 @@ try {
 </AdminLayout>
 
 <script>
-	// Sin framework: un custom element por la misma razón que
-	// EventsLumaEmbed (src/components/events/EventsLuma.astro) — el
-	// panel no tiene React/Vue instalado, y esto no lo justifica.
+	// Sin framework: un custom element porque el panel no tiene
+	// React/Vue instalado, y esto no lo justifica (mismo patrón que el
+	// resto de las pantallas de /administrator).
 	interface PointerFormPayload {
 		title: string;
 		lumaUrl: string;
