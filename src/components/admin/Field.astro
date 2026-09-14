@@ -5,6 +5,15 @@
 //
 // T3.4: se extiende de solo `input` a `input | textarea | select` — las
 // mismas clases de DESIGN.md §5 para los tres, sin ningún token nuevo.
+//
+// BUG (Sprint 6): el `<textarea>` se escribía con la expresión en su
+// propia línea (`>\n\t{value ?? ''}\n</textarea>`). Un `<textarea>` es
+// whitespace-sensitive: ese sangrado del .astro se volvía CONTENIDO real
+// del campo, así que uno vacío nacía con tabs y un salto de línea
+// adentro y el cursor arrancaba en la línea 2. Se veía en las 4
+// pantallas del panel con textarea. `set:text` lo evita de raíz y, a
+// diferencia de pegar la expresión al `>`, no puede volver a romperse si
+// Prettier reformatea el archivo (no hay hijos que reindentar).
 interface SelectOption {
 	value: string;
 	label: string;
@@ -70,9 +79,8 @@ const fieldClasses = [
 				aria-invalid={error ? 'true' : undefined}
 				aria-describedby={error ? `${inputId}-error` : undefined}
 				class:list={[...fieldClasses, 'min-h-24 resize-y py-2']}
-			>
-				{value ?? ''}
-			</textarea>
+				set:text={value ?? ''}
+			/>
 		) : as === 'select' ? (
 			<select
 				id={inputId}

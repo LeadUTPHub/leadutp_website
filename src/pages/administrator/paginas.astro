@@ -401,21 +401,6 @@ const projectsState = stateLabel(projectsBlock);
 				label?.removeAttribute('for');
 			});
 
-			// La fila nace en blanco por contrato de addRow, no por confiar en
-			// cómo quedó renderizada la plantilla. Hace falta de verdad: un
-			// `<textarea>` de Field arrastra el sangrado del .astro como
-			// contenido (Field.astro emite `{value ?? ''}` entre saltos de
-			// línea), así que "Descripción" llegaría con tabs y un \n dentro.
-			// `parseProjectRows` igual lo recortaría al guardar, pero el
-			// director vería el cursor arrancando en la línea 2 sin motivo.
-			row
-				.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(
-					'input, textarea',
-				)
-				.forEach((field) => {
-					field.value = '';
-				});
-
 			container.appendChild(row);
 			this.querySelector<HTMLElement>(`[data-empty="${kind}"]`)?.remove();
 
