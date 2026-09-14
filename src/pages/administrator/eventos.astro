@@ -311,6 +311,16 @@ try {
 </AdminLayout>
 
 <script>
+	// La conversión de fecha vive en el dominio (limaDateTime.ts), no acá:
+	// antes se hacía con `new Date(valor).toISOString()` y getters locales,
+	// que interpretan la hora en la zona DEL NAVEGADOR del director,
+	// mientras la tarjeta pública formatea con 'America/Lima' fijo. Ver
+	// defecto B del BUG 2 en MEMORY.md.
+	import {
+		datetimeLocalToIso,
+		isoToDatetimeLocal,
+	} from '../../domain/limaDateTime';
+
 	// Sin framework: un custom element porque el panel no tiene
 	// React/Vue instalado, y esto no lo justifica (mismo patrón que el
 	// resto de las pantallas de /administrator).
@@ -326,13 +336,6 @@ try {
 		published: boolean;
 		/** Solo presente en el form para super_admin — ver el campo "Área" arriba. */
 		areaSlug?: string;
-	}
-
-	function toDatetimeLocalValue(iso: string): string {
-		const date = new Date(iso);
-		if (Number.isNaN(date.getTime())) return '';
-		const pad = (n: number) => String(n).padStart(2, '0');
-		return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 	}
 
 	class EventPointerAdmin extends HTMLElement {
@@ -415,12 +418,7 @@ try {
 
 						set('title', row.dataset.title ?? '');
 						set('lumaUrl', row.dataset.lumaUrl ?? '');
-						set(
-							'eventDate',
-							row.dataset.eventDate
-								? toDatetimeLocalValue(row.dataset.eventDate)
-								: '',
-						);
+						set('eventDate', isoToDatetimeLocal(row.dataset.eventDate ?? null));
 						set('location', row.dataset.location ?? '');
 						set('imageUrl', row.dataset.imageUrl ?? '');
 						set('shortDescription', row.dataset.shortDescription ?? '');
@@ -483,12 +481,24 @@ try {
 				const pillarSlug = String(data.get('pillarSlug') ?? '').trim() || null;
 				const isSuperAdmin = this.dataset.role === 'super_admin';
 
+				// La fecha se interpreta SIEMPRE como hora de Lima, no como hora
+				// del navegador del director (defecto B del BUG 2). Si vino algo
+				// que no se puede leer, se avisa en vez de mandarlo como "sin
+				// fecha": un evento que pierde su fecha en silencio termina
+				// mostrándose como "próximo" para siempre (isPointerUpcoming
+				// trata `null` como no vencido).
+				const eventDate = eventDateLocal
+					? datetimeLocalToIso(eventDateLocal)
+					: null;
+				if (eventDateLocal && eventDate === null) {
+					showError('La fecha y hora no son válidas. Revisa el campo.');
+					return;
+				}
+
 				const payload: PointerFormPayload = {
 					title: String(data.get('title') ?? '').trim(),
 					lumaUrl: String(data.get('lumaUrl') ?? '').trim(),
-					eventDate: eventDateLocal
-						? new Date(eventDateLocal).toISOString()
-						: null,
+					eventDate,
 					location: String(data.get('location') ?? '').trim() || null,
 					imageUrl: String(data.get('imageUrl') ?? '').trim() || null,
 					shortDescription:
