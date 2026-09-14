@@ -77,6 +77,22 @@ try {
 			</p>
 
 			{
+				/* Defecto C del BUG 2 (Sprint 6): /eventos es una página estática —
+			se arma en `pnpm build`, no por visita. Lo que se guarda acá aparece
+			en el sitio recién en el próximo despliegue, y hasta ahora nada lo
+			decía: en `pnpm dev` el cambio se ve al instante (SSR por request) y
+			en producción no, lo que hace fácil leerlo como "no se guardó".
+			/administrator/paginas ya avisaba esto desde T5.3; acá faltaba. */
+			}
+			<p
+				class="text-foreground-secondary mt-4 rounded-lg border border-white/12 bg-white/[0.04] px-4 py-3 text-sm leading-6"
+			>
+				Lo que guardes acá aparece en <span
+					class="text-foreground font-semibold">/eventos</span
+				> en el próximo despliegue del sitio, no de inmediato.
+			</p>
+
+			{
 				loadError && (
 					<p class="border-secondary/40 bg-secondary/10 text-secondary mt-6 rounded-lg border px-4 py-3 text-sm">
 						{loadError}
