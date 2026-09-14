@@ -12,7 +12,7 @@
 | 2 | Autenticación y roles | ✅ DONE (8/8) | — |
 | 3 | CRUD de eventos propios | ✅ DONE (6/6) | — |
 | 4 | Galería "así se vivió el evento" | ✅ DONE (7/7) | — |
-| 5 | Extensión a Nosotros y Proyectos | 🟡 WIP (4/6) | — |
+| 5 | Extensión a Nosotros y Proyectos | ✅ DONE (6/6) — reportado, esperando aprobación explícita del PO | — |
 | 6 | Pulido UX/UI | TODO | — |
 
 Regla de secuencia: el Sprint 2 (auth) no arranca hasta que el Sprint 1 esté validado en local — así, si Supabase se complica, Eventos ya quedó entregado de forma independiente.
@@ -119,7 +119,7 @@ Regla de secuencia: el Sprint 2 (auth) no arranca hasta que el Sprint 1 esté va
 | T5.3 | UI `/administrator/paginas` | **Given** sesión · **When** el director de su área edita historia / junta / proyectos · **Then** formularios tipados; preview del estado publicado/borrador | ✅ DONE — solo `super_admin` edita (D-13); resto del staff en modo lectura, commit `f8bd5e7` |
 | T5.4 | Loaders de `/nosotros` y `/proyectos` | **Given** `CompositeContentRepository` · **When** build · **Then** usan DB→fallback→`.data.ts`→vacío; los `.astro` de página no cambian su estructura | ✅ DONE — `resolvePageContent.ts`/`loadPageContent.ts`; snapshot (`*.fallback.json`) todavía no existe, queda para T5.5 · commit `27e3dfa` |
 | T5.5 | `prebuild` snapshot | **Given** script `prebuild` · **When** corre con Supabase OK · **Then** escribe `about.fallback.json` / `projects.fallback.json`; con Supabase caído, no borra el anterior y el build pasa | ✅ DONE — `buildPageSnapshots.ts` (política pura, 14 tests) + `scripts/generate-page-snapshots.ts` (I/O, corre con Node nativo — sin `tsx`), wireado como `prebuild` en `package.json` |
-| T5.6 | Build + validación local | **When** `pnpm build && pnpm preview` (y push como respaldo) · **Then** un director de área edita y se ve en local | TODO |
+| T5.6 | Build + validación local | **When** `pnpm build && pnpm preview` (y push como respaldo) · **Then** un director de área edita y se ve en local | ✅ DONE — `pnpm preview` no aplica (L20); validado con `pnpm build`/`pnpm dev` reales, ver retrospectiva |
 
 > **Nota de proceso (2026-09-13):** T5.1–T5.4 se hicieron en una sesión anterior (commits `5d87dbe`/`1b6abe5`/`f8bd5e7`/`27e3dfa`, 2026-09-11/12) pero esta tabla y `MEMORY.md` § Estado del sistema quedaron sin actualizar hasta ahora — corregido al reabrir el workstream. Ver también los 2 commits `perf(eventos)` (`0391b20`, `2251264`) hechos fuera de alcance de sprint, documentados en `MEMORY.md` L29.
 
@@ -151,5 +151,5 @@ Regla de secuencia: el Sprint 2 (auth) no arranca hasta que el Sprint 1 esté va
 | 2 | 2026-09-11 | local (`pnpm dev` — login/logout real con las 3 cuentas) + RLS verificada con Supabase real (T2.6) | ✅ Sí — Sprint 2 completo (8/8) | Ver entrada de cierre de Sprint 2 |
 | 3 | 2026-09-11 | local (`pnpm dev` — CRUD real de punteros con las 3 cuentas) + `pnpm build`/`pnpm lint` limpios (167/167 tests) | ✅ Sí — Sprint 3 completo (6/6) | Ver entrada de cierre de Sprint 3 |
 | 4 | 2026-09-11 | local (`pnpm dev` — flujo real de galerías/fotos con las 3 cuentas, subida real a Cloudinary) + `pnpm build`/`pnpm lint` limpios (285/285 tests) | ✅ Sí — Sprint 4 completo (7/7), 5 bugs encontrados en la validación y corregidos antes del cierre | Ver entrada de cierre de Sprint 4 |
-| 5 | — | — | — | — |
+| 5 | 2026-09-14 | local (`pnpm dev` — login/PUT real como `super_admin`, 403 real como `director`) + `pnpm build` con contenido real publicado y con una caída de Supabase simulada, ambos verificados en el HTML generado + `pnpm build`/`pnpm lint`/`tsc --noEmit` limpios (398/398 tests) | Pendiente — reportado, esperando aprobación explícita del PO | Ver entrada de cierre de Sprint 5 |
 | 6 | — | — | — | — |
