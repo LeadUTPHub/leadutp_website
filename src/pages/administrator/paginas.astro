@@ -13,7 +13,8 @@
 export const prerender = false;
 
 import AdminShell from '../../components/admin/AdminShell.astro';
-import Field from '../../components/admin/Field.astro';
+import ProjectRow from '../../components/admin/ProjectRow.astro';
+import TeamMemberRow from '../../components/admin/TeamMemberRow.astro';
 import Badge from '../../components/ui/Badge.astro';
 import Button from '../../components/ui/Button.astro';
 import SectionHeader from '../../components/ui/SectionHeader.astro';
@@ -137,37 +138,25 @@ const projectsState = stateLabel(projectsBlock);
 					<div class="flex flex-col gap-3" data-rows="team">
 						{
 							teamRows.map((row) => (
-								<div
-									class="flex flex-col gap-3 rounded-lg bg-white/[0.06] p-3 ring-1 ring-white/12 sm:flex-row sm:items-end"
-									data-row
-								>
-									<Field
-										label="Nombre"
-										name="name"
-										class="flex-1"
-										value={row.name}
-									/>
-									<Field
-										label="Cargo"
-										name="role"
-										class="flex-1"
-										value={row.role}
-									/>
-									{canWrite && (
-										<Button
-											type="button"
-											variant="ghost"
-											size="sm"
-											class="text-secondary"
-											data-remove-row
-										>
-											Quitar
-										</Button>
-									)}
-								</div>
+								<TeamMemberRow row={row} canWrite={canWrite} />
 							))
 						}
 					</div>
+
+					{
+						/* Plantilla de fila nueva. El contenido de un <template> no
+					vive en el árbol del documento, así que readRows() /
+					form.querySelectorAll('[data-row]') no lo ven nunca — solo el
+					JS que lo clona a propósito. Es lo que hace que "agregar la
+					primera fila" funcione igual que "agregar la número 5". */
+					}
+					{
+						canWrite && (
+							<template data-row-template="team">
+								<TeamMemberRow row={{ name: '', role: '' }} canWrite />
+							</template>
+						)
+					}
 
 					{
 						teamRows.length === 0 && (
@@ -241,66 +230,32 @@ const projectsState = stateLabel(projectsBlock);
 					<div class="flex flex-col gap-3" data-rows="projects">
 						{
 							projectRows.map((row) => (
-								<div
-									class="flex flex-col gap-3 rounded-lg bg-white/[0.06] p-4 ring-1 ring-white/12"
-									data-row
-								>
-									<div class="flex flex-col gap-3 sm:flex-row">
-										<Field
-											label="Nombre"
-											name="name"
-											class="flex-1"
-											value={row.name}
-										/>
-										<Field
-											label="Slug"
-											name="slug"
-											class="flex-1"
-											placeholder="cv-matcher"
-											value={row.slug}
-										/>
-									</div>
-									<Field
-										label="Descripción"
-										name="description"
-										as="textarea"
-										rows={2}
-										maxlength={600}
-										value={row.description}
-									/>
-									<div class="flex flex-col gap-3 sm:flex-row sm:items-end">
-										<Field
-											label="Estado"
-											name="status"
-											as="select"
-											required
-											options={STATUS_OPTIONS}
-											class="flex-1"
-											value={row.status}
-										/>
-										<Field
-											label="Link (opcional)"
-											name="link"
-											class="flex-1"
-											placeholder="https://…"
-											value={row.link}
-										/>
-										{canWrite && (
-											<Button
-												type="button"
-												variant="ghost"
-												size="sm"
-												class="text-secondary"
-												data-remove-row
-											>
-												Quitar
-											</Button>
-										)}
-									</div>
-								</div>
+								<ProjectRow
+									row={row}
+									canWrite={canWrite}
+									statusOptions={STATUS_OPTIONS}
+								/>
 							))
 						}
 					</div>
+
+					{
+						canWrite && (
+							<template data-row-template="projects">
+								<ProjectRow
+									row={{
+										slug: '',
+										name: '',
+										description: '',
+										status: '',
+										link: '',
+									}}
+									canWrite
+									statusOptions={STATUS_OPTIONS}
+								/>
+							</template>
+						)
+					}
 
 					{
 						projectRows.length === 0 && (
@@ -405,47 +360,76 @@ const projectsState = stateLabel(projectsBlock);
 			});
 		}
 
-		/** Clona la última fila del grupo y la vacía. Si no queda ninguna,
-		 * recarga: construir el HTML de la fila a mano acá duplicaría el
-		 * markup del .astro y se desincronizaría al primer cambio. */
+		/**
+		 * Crea una fila nueva desde el <template data-row-template> que el
+		 * .astro renderiza siempre, haya 0 o N filas cargadas.
+		 *
+		 * BUG (encontrado en la validación de Sprint 6): esto antes clonaba
+		 * "la última fila existente" como plantilla, y cuando no había
+		 * ninguna caía en `window.location.reload()`. Como hoy las dos
+		 * listas arrancan vacías de verdad (about.team es [] y no hay
+		 * bloque proyectos.list), ese era el caso NORMAL, no el borde: el
+		 * clic recargaba a la misma pantalla vacía y el botón parecía
+		 * muerto — sin un solo error de consola. Peor, era un candado sin
+		 * salida: el único camino para agregar una fila exigía que ya
+		 * existiera una, así que la junta directiva y los proyectos no se
+		 * podían cargar NUNCA desde el panel.
+		 *
+		 * La plantilla vive en el .astro (no como string de HTML acá) para
+		 * conservar la única ventaja que tenía el clonado: un solo lugar
+		 * donde está el markup de la fila, imposible de desincronizar.
+		 */
 		private addRow(kind: string) {
 			const container = this.querySelector<HTMLElement>(
 				`[data-rows="${kind}"]`,
 			);
-			if (!container) return;
+			const template = this.querySelector<HTMLTemplateElement>(
+				`[data-row-template="${kind}"]`,
+			);
+			if (!container || !template) return;
 
-			const rows = container.querySelectorAll<HTMLElement>('[data-row]');
-			const last = rows[rows.length - 1];
-			if (!last) {
-				window.location.reload();
-				return;
-			}
+			const fragment = template.content.cloneNode(true) as DocumentFragment;
+			const row = fragment.querySelector<HTMLElement>('[data-row]');
+			if (!row) return;
 
-			const clone = last.cloneNode(true) as HTMLElement;
-			clone
+			// Los `id`/`for` que genera Field son fijos por `name`, así que se
+			// repetirían entre filas: se limpian para no dejar ids duplicados
+			// (un id repetido manda el click del label siempre a la 1ª fila).
+			row.querySelectorAll<HTMLElement>('[id]').forEach((el) => {
+				const label = row.querySelector(`label[for="${el.id}"]`);
+				el.removeAttribute('id');
+				label?.removeAttribute('for');
+			});
+
+			// La fila nace en blanco por contrato de addRow, no por confiar en
+			// cómo quedó renderizada la plantilla. Hace falta de verdad: un
+			// `<textarea>` de Field arrastra el sangrado del .astro como
+			// contenido (Field.astro emite `{value ?? ''}` entre saltos de
+			// línea), así que "Descripción" llegaría con tabs y un \n dentro.
+			// `parseProjectRows` igual lo recortaría al guardar, pero el
+			// director vería el cursor arrancando en la línea 2 sin motivo.
+			row
 				.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(
 					'input, textarea',
 				)
 				.forEach((field) => {
 					field.value = '';
 				});
-			clone.querySelectorAll<HTMLSelectElement>('select').forEach((select) => {
-				select.selectedIndex = 0;
-			});
-			// Los `id`/`for` de Field se repiten al clonar: se limpian para no
-			// dejar ids duplicados (rompe el click en el label).
-			clone.querySelectorAll<HTMLElement>('[id]').forEach((el) => {
-				const label = clone.querySelector(`label[for="${el.id}"]`);
-				el.removeAttribute('id');
-				label?.removeAttribute('for');
-			});
 
-			container.appendChild(clone);
+			container.appendChild(row);
 			this.querySelector<HTMLElement>(`[data-empty="${kind}"]`)?.remove();
 
-			clone
+			row
 				.querySelectorAll<HTMLButtonElement>('[data-remove-row]')
 				.forEach((button) => this.bindRemove(button));
+
+			// El foco en el primer campo hace evidente que la fila apareció
+			// (y es el siguiente paso real del usuario de todas formas).
+			row
+				.querySelector<HTMLInputElement | HTMLTextAreaElement>(
+					'input, textarea',
+				)
+				?.focus();
 		}
 
 		private readRows(form: HTMLFormElement, names: string[]) {
