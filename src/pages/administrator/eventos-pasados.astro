@@ -1,8 +1,10 @@
 ---
-// T4.5 — lista de galerías + creación. La edición (metadata + fotos)
-// vive en /administrator/galerias/[id].astro — crear acá solo pide los
-// datos mínimos y redirige ahí para subir fotos (el folder de Cloudinary
-// necesita que la galería ya exista, ver T4.2).
+// T4.5 — lista de galerías + creación (pantalla renombrada a "Eventos
+// pasados" el 2026-09-14, MEMORY.md D-17 — solo nombre/ruta, la lógica y
+// el schema siguen hablando de "galería"). La edición (metadata + fotos)
+// vive en /administrator/eventos-pasados/[id].astro — crear acá solo
+// pide los datos mínimos y redirige ahí para subir fotos (el folder de
+// Cloudinary necesita que la galería ya exista, ver T4.2).
 export const prerender = false;
 
 import { canEdit } from '../../domain/canEdit';
@@ -46,20 +48,20 @@ let loadError: string | null = null;
 try {
 	galleries = await getContentRepositoryForRequest(Astro).listGalleries();
 } catch {
-	loadError = 'No se pudieron cargar las galerías. Intenta de nuevo en unos minutos.';
+	loadError = 'No se pudieron cargar los eventos pasados. Intenta de nuevo en unos minutos.';
 }
 ---
 
-<AdminLayout title="Galerías — Panel LEAD UTP">
+<AdminLayout title="Eventos pasados — Panel LEAD UTP">
 	<AdminShell profile={profile}>
 		<gallery-list-admin data-role={profile.role}>
 			<SectionHeader
-				id="galerias-title"
-				title="Galerías"
+				id="eventos-pasados-title"
+				title="Eventos pasados"
 				description={'"Así se vivió el evento" — fotos de eventos ya realizados, visibles en /eventos.'}
 			>
 				<Button slot="action" type="button" data-open-create>
-					Nueva galería
+					Nuevo evento pasado
 				</Button>
 			</SectionHeader>
 
@@ -75,8 +77,9 @@ try {
 				!loadError && galleries.length === 0 && (
 					<div class="mt-8 rounded-2xl border border-white/10 bg-white/[0.04] px-6 py-10 text-center">
 						<p class="text-foreground-secondary text-sm">
-							Todavía no hay galerías. Empieza creando la primera con "Nueva
-							galería" — después de crearla vas a poder subir sus fotos.
+							Todavía no hay eventos pasados. Empieza creando el primero con
+							"Nuevo evento pasado" — después de crearlo vas a poder subir sus
+							fotos.
 						</p>
 					</div>
 				)
@@ -118,7 +121,7 @@ try {
 									</div>
 
 									<div class="flex shrink-0 flex-wrap gap-2">
-										<Button href={`/administrator/galerias/${gallery.id}`} variant="ghost" size="sm">
+										<Button href={`/administrator/eventos-pasados/${gallery.id}`} variant="ghost" size="sm">
 											{editable ? 'Editar' : 'Ver'}
 										</Button>
 										{editable && (
@@ -146,7 +149,7 @@ try {
 				id="gallery-dialog"
 				class="text-foreground bg-canvas-navy w-full max-w-lg rounded-2xl p-6 ring-1 ring-white/12 backdrop:bg-black/60"
 			>
-				<h3 class="font-display text-xl font-bold tracking-[-0.03em]">Nueva galería</h3>
+				<h3 class="font-display text-xl font-bold tracking-[-0.03em]">Nuevo evento pasado</h3>
 
 				<form id="gallery-form" class="mt-5 flex flex-col gap-4" novalidate>
 					<Field label="Título" name="title" required maxlength={140} />
@@ -237,7 +240,7 @@ try {
 					if (response.ok) {
 						window.location.reload();
 					} else {
-						window.alert('No se pudo borrar la galería. Intenta de nuevo.');
+						window.alert('No se pudo borrar. Intenta de nuevo.');
 					}
 				});
 			});
@@ -272,7 +275,7 @@ try {
 				if (response.ok) {
 					const created = await response.json();
 					// Redirige directo al editor: ahí es donde se suben las fotos.
-					window.location.href = `/administrator/galerias/${created.gallery.id}`;
+					window.location.href = `/administrator/eventos-pasados/${created.gallery.id}`;
 					return;
 				}
 

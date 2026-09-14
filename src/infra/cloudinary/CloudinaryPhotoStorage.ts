@@ -39,7 +39,7 @@ const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
  * hace cumplir tampoco (Cloudinary lo ignora en silencio, confirmado
  * subiendo un archivo de 10MB con max_file_size=1MB: 200 OK). El límite
  * de tamaño se sigue exponiendo en `maxFileSize` — pero es el CLIENTE
- * quien lo hace cumplir antes de subir (ver galerias/[id].astro), no
+ * quien lo hace cumplir antes de subir (ver eventos-pasados/[id].astro), no
  * Cloudinary.
  */
 export class CloudinaryPhotoStorage implements PhotoStorage {

@@ -1,9 +1,10 @@
 ---
 // T4.5 — edición de una galería: metadata + gestión de fotos (subir con
-// progreso, reordenar, editar alt, borrar). El folder de Cloudinary ya
-// quedó fijo desde la creación (T4.2: lead-utp/<área>/<slug>), por eso
-// crear la galería es un paso aparte (galerias.astro) antes de poder
-// subir nada acá.
+// progreso, reordenar, editar alt, borrar). Pantalla renombrada a
+// "Eventos pasados" el 2026-09-14 (MEMORY.md D-17 — solo nombre/ruta).
+// El folder de Cloudinary ya quedó fijo desde la creación (T4.2:
+// lead-utp/<área>/<slug>), por eso crear la galería es un paso aparte
+// (eventos-pasados.astro) antes de poder subir nada acá.
 export const prerender = false;
 
 import { canEdit } from '../../../domain/canEdit';
@@ -22,11 +23,11 @@ if (!profile) {
 }
 
 const id = Astro.params.id;
-if (!id) return Astro.redirect('/administrator/galerias');
+if (!id) return Astro.redirect('/administrator/eventos-pasados');
 
 const repo = getContentRepositoryForRequest(Astro);
 const gallery = await repo.getGallery(id);
-if (!gallery) return Astro.redirect('/administrator/galerias');
+if (!gallery) return Astro.redirect('/administrator/eventos-pasados');
 
 const photos = await repo.listPhotos(id);
 const editable = canEdit(profile, { ownerId: gallery.ownerId, areaSlug: gallery.areaSlug });
@@ -39,8 +40,8 @@ const photoStorage = getPhotoStorage();
 	<AdminShell profile={profile}>
 		<gallery-editor-admin data-gallery-id={gallery.id} data-editable={String(editable)}>
 			<SectionHeader id="gallery-editor-title" title={gallery.title}>
-				<Button slot="action" href="/administrator/galerias" variant="outline">
-					Volver a galerías
+				<Button slot="action" href="/administrator/eventos-pasados" variant="outline">
+					Volver a eventos pasados
 				</Button>
 			</SectionHeader>
 			<Badge tone={gallery.published ? 'optional' : 'primary'} class="mt-3">
@@ -53,7 +54,7 @@ const photoStorage = getPhotoStorage();
 						id="gallery-meta-heading"
 						class="font-display text-xl font-bold tracking-[-0.03em]"
 					>
-						Datos de la galería
+						Datos del evento pasado
 					</h3>
 
 					{
@@ -103,14 +104,14 @@ const photoStorage = getPhotoStorage();
 
 								<div class="mt-2 flex justify-between gap-3">
 									<Button type="button" variant="ghost" class="text-secondary" data-delete-gallery>
-										Borrar galería
+										Borrar evento pasado
 									</Button>
 									<Button type="submit">Guardar</Button>
 								</div>
 							</form>
 						) : (
 							<p class="text-foreground-secondary mt-4 text-sm">
-								No podés editar esta galería (no es de tu área).
+								No podés editar este evento pasado (no es de tu área).
 							</p>
 						)
 					}
@@ -146,7 +147,7 @@ const photoStorage = getPhotoStorage();
 					{
 						photos.length === 0 ? (
 							<p class="text-foreground-muted mt-6 text-sm">
-								Todavía no hay fotos en esta galería.
+								Todavía no hay fotos en este evento pasado.
 							</p>
 						) : (
 							<ul class="mt-6 flex flex-col gap-3">
@@ -392,7 +393,7 @@ const photoStorage = getPhotoStorage();
 			button?.addEventListener('click', async () => {
 				if (
 					!window.confirm(
-						'¿Borrar esta galería y todas sus fotos? No se puede deshacer.',
+						'¿Borrar este evento pasado y todas sus fotos? No se puede deshacer.',
 					)
 				) {
 					return;
@@ -401,9 +402,9 @@ const photoStorage = getPhotoStorage();
 					method: 'DELETE',
 				});
 				if (response.ok) {
-					window.location.href = '/administrator/galerias';
+					window.location.href = '/administrator/eventos-pasados';
 				} else {
-					window.alert('No se pudo borrar la galería.');
+					window.alert('No se pudo borrar.');
 				}
 			});
 		}

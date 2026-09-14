@@ -88,7 +88,7 @@ No hay componente de input en `src/components/ui/` todavía. Se crea `src/compon
 ### 6.2 `/administrator` (dashboard)
 | Aspecto | Aplicación |
 |---|---|
-| `AdminLayout` | Barra superior navy con logo + nombre del usuario + `Button ghost` "Salir". Navegación lateral (`--color-canvas-deep`) con iconos lucide: Eventos, Galerías, Páginas, (Usuarios solo super_admin) |
+| `AdminLayout` | Barra superior navy con logo + nombre del usuario + `Button ghost` "Salir". Navegación lateral (`--color-canvas-deep`) con iconos lucide: Eventos, Eventos pasados, Páginas, (Usuarios solo super_admin) |
 | Cuerpo | `SectionHeader` "Hola, {nombre}" + `Badge` con el rol + área. Tarjetas de acceso rápido (`.card-lift`) a cada módulo con conteo |
 | Vacío | Si el usuario no tiene nada creado: tarjeta guía "Empieza subiendo tu primer evento" (flujo primera vez, Sprint 6) |
 
@@ -100,7 +100,7 @@ No hay componente de input en `src/components/ui/` todavía. Se crea `src/compon
 | Form | `Field` título · `Field` URL de Luma (con validación visible) · `Field` fecha/hora · `Field` ubicación · `Field` imagen (URL) · `textarea` descripción corta (máx. 280) · `select` de pilar · switch `featured` · switch `published` · `Button primary` Guardar / `Button outline` Cancelar |
 | Aviso | Nota fija: "La inscripción y el cupo se gestionan en Luma — el link de arriba lleva ahí. El resto de la tarjeta (fecha, ubicación, imagen, descripción) lo cargas tú." |
 
-### 6.4 `/administrator/galerias` ("así se vivió el evento")
+### 6.4 `/administrator/eventos-pasados` ("así se vivió el evento")
 | Aspecto | Aplicación |
 |---|---|
 | Lista | Igual patrón que 6.3, con miniatura (primera foto, `buildCloudinaryUrl(publicId, 160)`) |

@@ -36,7 +36,7 @@ const roleLabel = ROLE_LABELS[profile.role];
 // lectura para ver qué dice hoy la web pública.
 const navItems: { label: string; href?: string }[] = [
 	{ label: 'Eventos', href: '/administrator/eventos' },
-	{ label: 'Galerías', href: '/administrator/galerias' },
+	{ label: 'Eventos pasados', href: '/administrator/eventos-pasados' },
 	{ label: 'Páginas', href: '/administrator/paginas' },
 	...(profile.role === 'super_admin' ? [{ label: 'Usuarios' }] : []),
 ];
