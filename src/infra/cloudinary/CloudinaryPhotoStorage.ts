@@ -1,5 +1,8 @@
 import { buildCloudinaryUrl } from '../../domain/buildCloudinaryUrl';
-import type { PhotoStorage, SignedUpload } from '../../domain/ports/PhotoStorage';
+import type {
+	PhotoStorage,
+	SignedUpload,
+} from '../../domain/ports/PhotoStorage';
 import { buildSignature } from './buildSignature';
 
 export interface CloudinaryEnv {
@@ -64,12 +67,19 @@ export class CloudinaryPhotoStorage implements PhotoStorage {
 	}
 
 	deliveryUrl(publicId: string, width: number): string {
-		return buildCloudinaryUrl({ cloudName: this.env.cloudName, publicId, width });
+		return buildCloudinaryUrl({
+			cloudName: this.env.cloudName,
+			publicId,
+			width,
+		});
 	}
 
 	async destroy(publicId: string): Promise<void> {
 		const timestamp = Math.floor(Date.now() / 1000);
-		const signature = buildSignature({ public_id: publicId, timestamp }, this.env.apiSecret);
+		const signature = buildSignature(
+			{ public_id: publicId, timestamp },
+			this.env.apiSecret,
+		);
 
 		const form = new FormData();
 		form.set('public_id', publicId);

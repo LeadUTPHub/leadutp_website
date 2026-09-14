@@ -48,7 +48,8 @@ let loadError: string | null = null;
 try {
 	galleries = await getContentRepositoryForRequest(Astro).listGalleries();
 } catch {
-	loadError = 'No se pudieron cargar los eventos pasados. Intenta de nuevo en unos minutos.';
+	loadError =
+		'No se pudieron cargar los eventos pasados. Intenta de nuevo en unos minutos.';
 }
 ---
 
@@ -104,7 +105,7 @@ try {
 											{gallery.title}
 										</p>
 										<div class="mt-1 flex flex-wrap items-center gap-2">
-											<span class="inline-flex items-center gap-1.5 text-xs text-foreground-secondary">
+											<span class="text-foreground-secondary inline-flex items-center gap-1.5 text-xs">
 												<span
 													class:list={[
 														'h-2 w-2 shrink-0 rounded-full bg-gradient-to-br',
@@ -116,12 +117,18 @@ try {
 											<Badge tone={gallery.published ? 'optional' : 'primary'}>
 												{gallery.published ? 'Publicado' : 'Borrador'}
 											</Badge>
-											<span class="text-foreground-muted text-xs">{photoLabel}</span>
+											<span class="text-foreground-muted text-xs">
+												{photoLabel}
+											</span>
 										</div>
 									</div>
 
 									<div class="flex shrink-0 flex-wrap gap-2">
-										<Button href={`/administrator/eventos-pasados/${gallery.id}`} variant="ghost" size="sm">
+										<Button
+											href={`/administrator/eventos-pasados/${gallery.id}`}
+											variant="ghost"
+											size="sm"
+										>
 											{editable ? 'Editar' : 'Ver'}
 										</Button>
 										{editable && (
@@ -150,7 +157,10 @@ try {
 				aria-labelledby="gallery-dialog-title"
 				class="text-foreground bg-canvas-navy w-full max-w-lg rounded-2xl p-6 ring-1 ring-white/12 backdrop:bg-black/60"
 			>
-				<h3 id="gallery-dialog-title" class="font-display text-xl font-bold tracking-[-0.03em]">
+				<h3
+					id="gallery-dialog-title"
+					class="font-display text-xl font-bold tracking-[-0.03em]"
+				>
 					Nuevo evento pasado
 				</h3>
 
@@ -166,7 +176,12 @@ try {
 						Solo minúsculas, números y guiones — se usa en la carpeta de
 						Cloudinary y no se puede editar después.
 					</p>
-					<Field label="Fecha del evento" name="happenedOn" type="text" placeholder="2026-05-10" />
+					<Field
+						label="Fecha del evento"
+						name="happenedOn"
+						type="text"
+						placeholder="2026-05-10"
+					/>
 					{
 						// UN solo selector "Pilar" para todos los roles — no dos. Para
 						// super_admin (sin área propia) este mismo valor fija también
@@ -187,12 +202,24 @@ try {
 					/>
 					<Field label="Texto (markdown)" name="body" as="textarea" rows={4} />
 
-					<label class="text-foreground-secondary flex items-center gap-2 text-sm">
-						<input type="checkbox" name="published" class="accent-optional-3 h-4 w-4 rounded" />
+					<label
+						class="text-foreground-secondary flex items-center gap-2 text-sm"
+					>
+						<input
+							type="checkbox"
+							name="published"
+							class="accent-optional-3 h-4 w-4 rounded"
+						/>
 						Publicado
 					</label>
 
-					<p id="gallery-form-error" class="text-secondary text-sm" role="alert" hidden />
+					<p
+						id="gallery-form-error"
+						class="text-secondary text-sm"
+						role="alert"
+						hidden
+					>
+					</p>
 
 					<div class="mt-2 flex justify-end gap-3">
 						<Button type="button" variant="outline" data-close-dialog>
@@ -215,8 +242,11 @@ try {
 			const dialog = this.querySelector<HTMLDialogElement>('#gallery-dialog');
 			const form = this.querySelector<HTMLFormElement>('#gallery-form');
 			const errorEl = this.querySelector<HTMLElement>('#gallery-form-error');
-			const openCreateBtn = this.querySelector<HTMLButtonElement>('[data-open-create]');
-			const submitBtn = form?.querySelector<HTMLButtonElement>('button[type="submit"]');
+			const openCreateBtn =
+				this.querySelector<HTMLButtonElement>('[data-open-create]');
+			const submitBtn = form?.querySelector<HTMLButtonElement>(
+				'button[type="submit"]',
+			);
 			if (!dialog || !form || !errorEl || !openCreateBtn || !submitBtn) return;
 
 			openCreateBtn.addEventListener('click', () => {
@@ -225,33 +255,46 @@ try {
 				dialog.showModal();
 			});
 
-			this.querySelectorAll<HTMLButtonElement>('[data-close-dialog]').forEach((button) => {
-				button.addEventListener('click', () => dialog.close());
-			});
+			this.querySelectorAll<HTMLButtonElement>('[data-close-dialog]').forEach(
+				(button) => {
+					button.addEventListener('click', () => dialog.close());
+				},
+			);
 
-			this.querySelectorAll<HTMLButtonElement>('[data-delete]').forEach((button) => {
-				button.addEventListener('click', async () => {
-					const id = button.dataset.galleryId;
-					const title = button.dataset.galleryTitle;
-					if (!id) return;
-					if (!window.confirm(`¿Borrar "${title}"? Se borran también sus fotos. No se puede deshacer.`)) {
-						return;
-					}
-
-					try {
-						const response = await fetch(`/administrator/api/galleries/${id}`, {
-							method: 'DELETE',
-						});
-						if (response.ok) {
-							window.location.reload();
-						} else {
-							window.alert('No se pudo borrar. Intenta de nuevo.');
+			this.querySelectorAll<HTMLButtonElement>('[data-delete]').forEach(
+				(button) => {
+					button.addEventListener('click', async () => {
+						const id = button.dataset.galleryId;
+						const title = button.dataset.galleryTitle;
+						if (!id) return;
+						if (
+							!window.confirm(
+								`¿Borrar "${title}"? Se borran también sus fotos. No se puede deshacer.`,
+							)
+						) {
+							return;
 						}
-					} catch {
-						window.alert('No se pudo conectar. Revisa tu conexión e intenta de nuevo.');
-					}
-				});
-			});
+
+						try {
+							const response = await fetch(
+								`/administrator/api/galleries/${id}`,
+								{
+									method: 'DELETE',
+								},
+							);
+							if (response.ok) {
+								window.location.reload();
+							} else {
+								window.alert('No se pudo borrar. Intenta de nuevo.');
+							}
+						} catch {
+							window.alert(
+								'No se pudo conectar. Revisa tu conexión e intenta de nuevo.',
+							);
+						}
+					});
+				},
+			);
 
 			form.addEventListener('submit', async (event) => {
 				event.preventDefault();
@@ -291,10 +334,12 @@ try {
 
 					const body = await response.json().catch(() => null);
 					errorEl.textContent =
-						body?.error ?? 'No se pudo crear. Revisa los datos e intenta de nuevo.';
+						body?.error ??
+						'No se pudo crear. Revisa los datos e intenta de nuevo.';
 					errorEl.hidden = false;
 				} catch {
-					errorEl.textContent = 'No se pudo conectar. Revisa tu conexión e intenta de nuevo.';
+					errorEl.textContent =
+						'No se pudo conectar. Revisa tu conexión e intenta de nuevo.';
 					errorEl.hidden = false;
 				} finally {
 					submitBtn.disabled = false;

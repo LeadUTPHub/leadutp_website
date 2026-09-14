@@ -45,10 +45,15 @@ try {
 	// "Primera vez" mira lo que ESTE usuario creó, no el total del staff
 	// (la lista no se filtra por rol, ver T3.4 — cualquiera del staff ve
 	// todo, así que un total > 0 no dice nada sobre si YO ya subí algo).
-	ownEventCount = pointers.filter((pointer) => pointer.ownerId === profile.id).length;
-	ownGalleryCount = galleries.filter((gallery) => gallery.ownerId === profile.id).length;
+	ownEventCount = pointers.filter(
+		(pointer) => pointer.ownerId === profile.id,
+	).length;
+	ownGalleryCount = galleries.filter(
+		(gallery) => gallery.ownerId === profile.id,
+	).length;
 } catch {
-	loadError = 'No se pudieron cargar los módulos. Intenta de nuevo en unos minutos.';
+	loadError =
+		'No se pudieron cargar los módulos. Intenta de nuevo en unos minutos.';
 }
 
 const isFirstTime = !loadError && ownEventCount === 0 && ownGalleryCount === 0;
@@ -61,21 +66,28 @@ const modules = [
 	{
 		label: 'Eventos',
 		href: '/administrator/eventos',
-		description: 'Punteros a Luma que se muestran junto al calendario en /eventos.',
+		description:
+			'Punteros a Luma que se muestran junto al calendario en /eventos.',
 		countLabel: countLabel(pointerCount, 'evento cargado', 'eventos cargados'),
 	},
 	{
 		label: 'Eventos pasados',
 		href: '/administrator/eventos-pasados',
 		description: '"Así se vivió el evento" — fotos de eventos ya realizados.',
-		countLabel: countLabel(galleryCount, 'galería cargada', 'galerías cargadas'),
+		countLabel: countLabel(
+			galleryCount,
+			'galería cargada',
+			'galerías cargadas',
+		),
 	},
 	{
 		label: 'Páginas',
 		href: '/administrator/paginas',
 		description: 'Contenido de /nosotros (junta directiva) y /proyectos.',
 		countLabel:
-			profile.role === 'super_admin' ? 'Editable por ti' : 'Solo lectura para tu rol',
+			profile.role === 'super_admin'
+				? 'Editable por ti'
+				: 'Solo lectura para tu rol',
 	},
 ];
 ---

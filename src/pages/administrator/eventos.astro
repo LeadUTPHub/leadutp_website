@@ -51,7 +51,8 @@ try {
 	// Degradación elegante (regla inquebrantable 4): la pantalla sigue
 	// usable (se puede seguir intentando crear), solo se avisa que la
 	// lista no cargó.
-	loadError = 'No se pudieron cargar los eventos. Intenta de nuevo en unos minutos.';
+	loadError =
+		'No se pudieron cargar los eventos. Intenta de nuevo en unos minutos.';
 }
 ---
 
@@ -69,9 +70,9 @@ try {
 			</SectionHeader>
 
 			<p class="text-foreground-muted mt-4 text-sm leading-6">
-				La inscripción y el cupo se gestionan en Luma — el link de arriba
-				lleva ahí. El resto de la tarjeta (fecha, ubicación, imagen,
-				descripción) lo cargas tú.
+				La inscripción y el cupo se gestionan en Luma — el link de arriba lleva
+				ahí. El resto de la tarjeta (fecha, ubicación, imagen, descripción) lo
+				cargas tú.
 			</p>
 
 			{
@@ -120,7 +121,7 @@ try {
 											{pointer.title}
 										</p>
 										<div class="mt-1 flex flex-wrap items-center gap-2">
-											<span class="inline-flex items-center gap-1.5 text-xs text-foreground-secondary">
+											<span class="text-foreground-secondary inline-flex items-center gap-1.5 text-xs">
 												<span
 													class:list={[
 														'h-2 w-2 shrink-0 rounded-full bg-gradient-to-br',
@@ -132,7 +133,9 @@ try {
 											<Badge tone={pointer.published ? 'optional' : 'primary'}>
 												{pointer.published ? 'Publicado' : 'Borrador'}
 											</Badge>
-											{pointer.featured && <Badge tone="optional">Destacado</Badge>}
+											{pointer.featured && (
+												<Badge tone="optional">Destacado</Badge>
+											)}
 										</div>
 									</div>
 
@@ -179,7 +182,10 @@ try {
 				aria-labelledby="pointer-dialog-title"
 				class="text-foreground bg-canvas-navy w-full max-w-lg rounded-2xl p-6 ring-1 ring-white/12 backdrop:bg-black/60"
 			>
-				<h3 id="pointer-dialog-title" class="font-display text-xl font-bold tracking-[-0.03em]">
+				<h3
+					id="pointer-dialog-title"
+					class="font-display text-xl font-bold tracking-[-0.03em]"
+				>
 					Nuevo evento
 				</h3>
 
@@ -193,7 +199,11 @@ try {
 						placeholder="https://luma.com/..."
 					/>
 					<div class="grid gap-4 sm:grid-cols-2">
-						<Field label="Fecha y hora" name="eventDate" type="datetime-local" />
+						<Field
+							label="Fecha y hora"
+							name="eventDate"
+							type="datetime-local"
+						/>
 						<Field label="Ubicación" name="location" />
 					</div>
 					<Field
@@ -228,7 +238,9 @@ try {
 					/>
 
 					<div class="flex flex-wrap gap-5">
-						<label class="text-foreground-secondary flex items-center gap-2 text-sm">
+						<label
+							class="text-foreground-secondary flex items-center gap-2 text-sm"
+						>
 							<input
 								type="checkbox"
 								name="featured"
@@ -236,7 +248,9 @@ try {
 							/>
 							Destacado
 						</label>
-						<label class="text-foreground-secondary flex items-center gap-2 text-sm">
+						<label
+							class="text-foreground-secondary flex items-center gap-2 text-sm"
+						>
 							<input
 								type="checkbox"
 								name="published"
@@ -246,7 +260,12 @@ try {
 						</label>
 					</div>
 
-					<p id="pointer-form-error" class="text-secondary text-sm" role="alert" hidden>
+					<p
+						id="pointer-form-error"
+						class="text-secondary text-sm"
+						role="alert"
+						hidden
+					>
 					</p>
 
 					<div class="mt-2 flex justify-end gap-3">
@@ -292,12 +311,25 @@ try {
 			this.dataset.ready = 'true';
 
 			const dialog = this.querySelector<HTMLDialogElement>('#pointer-dialog');
-			const dialogTitle = this.querySelector<HTMLElement>('#pointer-dialog-title');
+			const dialogTitle = this.querySelector<HTMLElement>(
+				'#pointer-dialog-title',
+			);
 			const form = this.querySelector<HTMLFormElement>('#pointer-form');
 			const errorEl = this.querySelector<HTMLElement>('#pointer-form-error');
-			const openCreateBtn = this.querySelector<HTMLButtonElement>('[data-open-create]');
-			const submitBtn = form?.querySelector<HTMLButtonElement>('button[type="submit"]');
-			if (!dialog || !dialogTitle || !form || !errorEl || !openCreateBtn || !submitBtn) return;
+			const openCreateBtn =
+				this.querySelector<HTMLButtonElement>('[data-open-create]');
+			const submitBtn = form?.querySelector<HTMLButtonElement>(
+				'button[type="submit"]',
+			);
+			if (
+				!dialog ||
+				!dialogTitle ||
+				!form ||
+				!errorEl ||
+				!openCreateBtn ||
+				!submitBtn
+			)
+				return;
 
 			let mode: 'create' | 'edit' = 'create';
 			let editingId: string | null = null;
@@ -324,73 +356,93 @@ try {
 				dialog.showModal();
 			});
 
-			this.querySelectorAll<HTMLButtonElement>('[data-open-edit]').forEach((button) => {
-				button.addEventListener('click', () => {
-					const row = button.closest<HTMLElement>('[data-pointer-id]');
-					if (!row) return;
+			this.querySelectorAll<HTMLButtonElement>('[data-open-edit]').forEach(
+				(button) => {
+					button.addEventListener('click', () => {
+						const row = button.closest<HTMLElement>('[data-pointer-id]');
+						if (!row) return;
 
-					mode = 'edit';
-					editingId = row.dataset.pointerId ?? null;
-					resetForm();
-					dialogTitle.textContent = 'Editar evento';
+						mode = 'edit';
+						editingId = row.dataset.pointerId ?? null;
+						resetForm();
+						dialogTitle.textContent = 'Editar evento';
 
-					const set = (name: string, value: string) => {
-						const field = form.elements.namedItem(name);
-						if (field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement) {
-							field.value = value;
-						} else if (field instanceof HTMLSelectElement) {
-							field.value = value;
+						const set = (name: string, value: string) => {
+							const field = form.elements.namedItem(name);
+							if (
+								field instanceof HTMLInputElement ||
+								field instanceof HTMLTextAreaElement
+							) {
+								field.value = value;
+							} else if (field instanceof HTMLSelectElement) {
+								field.value = value;
+							}
+						};
+						const setChecked = (name: string, checked: boolean) => {
+							const field = form.elements.namedItem(name);
+							if (field instanceof HTMLInputElement) field.checked = checked;
+						};
+
+						set('title', row.dataset.title ?? '');
+						set('lumaUrl', row.dataset.lumaUrl ?? '');
+						set(
+							'eventDate',
+							row.dataset.eventDate
+								? toDatetimeLocalValue(row.dataset.eventDate)
+								: '',
+						);
+						set('location', row.dataset.location ?? '');
+						set('imageUrl', row.dataset.imageUrl ?? '');
+						set('shortDescription', row.dataset.shortDescription ?? '');
+						set('pillarSlug', row.dataset.pillarSlug ?? '');
+						setChecked('featured', row.dataset.featured === 'true');
+						setChecked('published', row.dataset.published === 'true');
+
+						dialog.showModal();
+					});
+				},
+			);
+
+			this.querySelectorAll<HTMLButtonElement>('[data-close-dialog]').forEach(
+				(button) => {
+					button.addEventListener('click', () => dialog.close());
+				},
+			);
+
+			this.querySelectorAll<HTMLButtonElement>('[data-delete]').forEach(
+				(button) => {
+					button.addEventListener('click', async () => {
+						const row = button.closest<HTMLElement>('[data-pointer-id]');
+						const id = row?.dataset.pointerId;
+						if (!id) return;
+						if (
+							!window.confirm(
+								`¿Borrar "${row.dataset.title}"? No se puede deshacer.`,
+							)
+						) {
+							return;
 						}
-					};
-					const setChecked = (name: string, checked: boolean) => {
-						const field = form.elements.namedItem(name);
-						if (field instanceof HTMLInputElement) field.checked = checked;
-					};
 
-					set('title', row.dataset.title ?? '');
-					set('lumaUrl', row.dataset.lumaUrl ?? '');
-					set(
-						'eventDate',
-						row.dataset.eventDate ? toDatetimeLocalValue(row.dataset.eventDate) : '',
-					);
-					set('location', row.dataset.location ?? '');
-					set('imageUrl', row.dataset.imageUrl ?? '');
-					set('shortDescription', row.dataset.shortDescription ?? '');
-					set('pillarSlug', row.dataset.pillarSlug ?? '');
-					setChecked('featured', row.dataset.featured === 'true');
-					setChecked('published', row.dataset.published === 'true');
-
-					dialog.showModal();
-				});
-			});
-
-			this.querySelectorAll<HTMLButtonElement>('[data-close-dialog]').forEach((button) => {
-				button.addEventListener('click', () => dialog.close());
-			});
-
-			this.querySelectorAll<HTMLButtonElement>('[data-delete]').forEach((button) => {
-				button.addEventListener('click', async () => {
-					const row = button.closest<HTMLElement>('[data-pointer-id]');
-					const id = row?.dataset.pointerId;
-					if (!id) return;
-					if (!window.confirm(`¿Borrar "${row.dataset.title}"? No se puede deshacer.`)) {
-						return;
-					}
-
-					try {
-						const response = await fetch(`/administrator/api/event-pointers/${id}`, {
-							method: 'DELETE',
-						});
-						if (response.ok) {
-							window.location.reload();
-						} else {
-							window.alert('No se pudo borrar el evento. Intenta de nuevo.');
+						try {
+							const response = await fetch(
+								`/administrator/api/event-pointers/${id}`,
+								{
+									method: 'DELETE',
+								},
+							);
+							if (response.ok) {
+								window.location.reload();
+							} else {
+								window.alert('No se pudo borrar el evento. Intenta de nuevo.');
+							}
+						} catch {
+							window.alert(
+								'No se pudo conectar. Revisa tu conexión e intenta de nuevo.',
+							);
 						}
-					} catch {
-						window.alert('No se pudo conectar. Revisa tu conexión e intenta de nuevo.');
-					}
-				});
-			});
+					});
+				},
+			);
 
 			form.addEventListener('submit', async (event) => {
 				event.preventDefault();
@@ -404,10 +456,13 @@ try {
 				const payload: PointerFormPayload = {
 					title: String(data.get('title') ?? '').trim(),
 					lumaUrl: String(data.get('lumaUrl') ?? '').trim(),
-					eventDate: eventDateLocal ? new Date(eventDateLocal).toISOString() : null,
+					eventDate: eventDateLocal
+						? new Date(eventDateLocal).toISOString()
+						: null,
 					location: String(data.get('location') ?? '').trim() || null,
 					imageUrl: String(data.get('imageUrl') ?? '').trim() || null,
-					shortDescription: String(data.get('shortDescription') ?? '').trim() || null,
+					shortDescription:
+						String(data.get('shortDescription') ?? '').trim() || null,
 					pillarSlug,
 					featured: data.get('featured') === 'on',
 					published: data.get('published') === 'on',
@@ -415,7 +470,9 @@ try {
 					// super_admin (sin área propia) ese mismo valor también fija
 					// areaSlug al crear. En 'edit' el endpoint no acepta areaSlug
 					// (docs/API_CONTRACTS.md §2), así que solo se manda al crear.
-					...(mode === 'create' && isSuperAdmin && pillarSlug && { areaSlug: pillarSlug }),
+					...(mode === 'create' &&
+						isSuperAdmin &&
+						pillarSlug && { areaSlug: pillarSlug }),
 				};
 
 				const url =
@@ -438,9 +495,14 @@ try {
 					}
 
 					const body = await response.json().catch(() => null);
-					showError(body?.error ?? 'No se pudo guardar. Revisa los datos e intenta de nuevo.');
+					showError(
+						body?.error ??
+							'No se pudo guardar. Revisa los datos e intenta de nuevo.',
+					);
 				} catch {
-					showError('No se pudo conectar. Revisa tu conexión e intenta de nuevo.');
+					showError(
+						'No se pudo conectar. Revisa tu conexión e intenta de nuevo.',
+					);
 				} finally {
 					submitBtn.disabled = false;
 				}

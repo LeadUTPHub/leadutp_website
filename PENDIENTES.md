@@ -63,9 +63,9 @@ La Home tenía un link "Conoce nuestras alianzas" apuntando a `/alianzas`, ruta 
 
 El sitio sigue en `leadutp.vercel.app`. Definir y conectar un dominio propio cuando esté disponible.
 
-### 12. Formato desactualizado en algunos archivos
+### 12. Formato desactualizado en muchos archivos
 
-`pnpm format:check` marca 7 archivos que no coinciden con el Prettier instalado hoy (`HomeHeroCarousel.astro`, `HomePillars.astro`, `404.astro`, `convocatorias.astro`, `eventos.astro`, `pilares/index.astro`, `vida-lead.astro`) — parece un desfase de versión de Prettier/plugins desde la última vez que se formatearon, no algo introducido ahora. Correr `pnpm format` cuando se vaya a tocar alguno de esos archivos igual, para no mezclar un reformateo grande con un cambio de contenido puntual (así se hizo con `HomeAlliances.astro` e `internacional.astro`, que ya salieron de esta lista).
+`pnpm format:check` marca **102 archivos** que no coinciden con el Prettier instalado hoy (subió de 7 a esta cifra entre el 2026-09-08 y el cierre de Sprint 6, 2026-09-14 — la mayoría son archivos de sprints anteriores del panel de administración que nunca pasaron por `pnpm format`, no un desfase de versión puntual como se pensaba al escribir esto la primera vez). Sigue sin ser urgente ni algo para corregir de una sola vez: reformatear 100+ archivos de golpe mezclaría un diff enorme sin cambio de contenido con el trabajo real de cualquier PR. Se sigue aplicando el mismo criterio de antes — correr `pnpm format` (o `pnpm exec prettier --write <archivo>`) solo sobre los archivos que se vayan a tocar de todos modos, nunca un reformateo masivo aparte. Sprint 6 (T6.6) formateó los ~15 archivos que tocó esa sesión; quedan los demás.
 
 ### 13. Logos de alianzas: ¿monocromo blanco como en la página anterior?
 

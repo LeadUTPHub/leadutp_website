@@ -32,19 +32,40 @@
  *   node --env-file-if-exists=.env scripts/generate-page-snapshots.ts
  */
 
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import {
+	existsSync,
+	mkdirSync,
+	readFileSync,
+	rmSync,
+	writeFileSync,
+} from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createClient } from '@supabase/supabase-js';
-import type { AboutSnapshotContent, FetchOutcome } from '../src/infra/content/buildPageSnapshots.ts';
-import { buildAboutSnapshot, buildProjectsSnapshot } from '../src/infra/content/buildPageSnapshots.ts';
+import type {
+	AboutSnapshotContent,
+	FetchOutcome,
+} from '../src/infra/content/buildPageSnapshots.ts';
+import {
+	buildAboutSnapshot,
+	buildProjectsSnapshot,
+} from '../src/infra/content/buildPageSnapshots.ts';
 import type { TeamMember } from '../src/data/about/about.types.ts';
 import type { Project } from '../src/data/projects/projects.types.ts';
-import { PAGE_BLOCK_KEYS, validatePageBlockData } from '../src/domain/validatePageBlockData.ts';
+import {
+	PAGE_BLOCK_KEYS,
+	validatePageBlockData,
+} from '../src/domain/validatePageBlockData.ts';
 
 const ROOT_DIR = dirname(dirname(fileURLToPath(import.meta.url)));
-const ABOUT_SNAPSHOT_PATH = join(ROOT_DIR, 'src/data/about/about.fallback.json');
-const PROJECTS_SNAPSHOT_PATH = join(ROOT_DIR, 'src/data/projects/projects.fallback.json');
+const ABOUT_SNAPSHOT_PATH = join(
+	ROOT_DIR,
+	'src/data/about/about.fallback.json',
+);
+const PROJECTS_SNAPSHOT_PATH = join(
+	ROOT_DIR,
+	'src/data/projects/projects.fallback.json',
+);
 
 function log(message: string): void {
 	console.log(`[prebuild] ${message}`);
@@ -110,7 +131,9 @@ async function fetchPublishedBlocks(
 		.in('key', PAGE_BLOCK_KEYS);
 
 	if (error) {
-		warn(`Supabase respondió con un error leyendo page_blocks: ${error.message}`);
+		warn(
+			`Supabase respondió con un error leyendo page_blocks: ${error.message}`,
+		);
 		return null;
 	}
 
@@ -141,7 +164,9 @@ function outcomeFor<T>(
 	const raw = rows.get(key);
 	const result = validatePageBlockData(key, raw);
 	if (!result.ok) {
-		warn(`page_blocks."${key}" tiene una forma inválida (${result.error}), se ignora.`);
+		warn(
+			`page_blocks."${key}" tiene una forma inválida (${result.error}), se ignora.`,
+		);
 		return { ok: false };
 	}
 	return { ok: true, value: unwrap(raw) };
@@ -157,14 +182,19 @@ async function main(): Promise<void> {
 			'PUBLIC_SUPABASE_URL/PUBLIC_SUPABASE_PUBLISHABLE_KEY no configuradas — se deja cada snapshot existente tal cual (si hay uno).',
 		);
 	} else {
-		rows = await fetchPublishedBlocks(url, publishableKey).catch((error: unknown) => {
-			const message = error instanceof Error ? error.message : String(error);
-			warn(`No se pudo leer page_blocks de Supabase: ${message}. Se deja cada snapshot existente tal cual.`);
-			return null;
-		});
+		rows = await fetchPublishedBlocks(url, publishableKey).catch(
+			(error: unknown) => {
+				const message = error instanceof Error ? error.message : String(error);
+				warn(
+					`No se pudo leer page_blocks de Supabase: ${message}. Se deja cada snapshot existente tal cual.`,
+				);
+				return null;
+			},
+		);
 	}
 
-	const currentAbout = readJsonIfExists<AboutSnapshotContent>(ABOUT_SNAPSHOT_PATH);
+	const currentAbout =
+		readJsonIfExists<AboutSnapshotContent>(ABOUT_SNAPSHOT_PATH);
 	const nextAbout = buildAboutSnapshot({
 		current: currentAbout,
 		team: outcomeFor(rows, 'nosotros.team', (raw) => raw as TeamMember[]),

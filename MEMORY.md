@@ -275,6 +275,31 @@ Ambos bugs se encontraron **porque el PO insistió en probar el flujo real** (RL
 
 **Sprint 5: ✅ DONE, 6/6 + 1 bug corregido en validación — aprobado por el PO.** Commits: `5d87dbe` (T5.1) → `1b6abe5` (T5.2) → `f8bd5e7` (T5.3) → `27e3dfa` (T5.4) → `dcc00a1`/dos perf commits fuera de sprint → `af67c73` (docs: sincroniza BACKLOG/MEMORY con T5.1-T5.4) → `bde5577` (T5.5) → `be4b6e4` (docs: T5.6) → `d3c21fc` (fix: L31, banner de feedback invisible) → cierre de docs (este commit). Sprint 6 no arranca sin confirmación explícita del PO.
 
+### Sprint 6 · Pulido UX/UI — cierre 2026-09-14
+
+**Abierto el mismo día** que se cerraron y aprobaron los 3 cambios de alcance fuera del backlog original (D-16/D-17/D-18). Alcance ampliado a pedido explícito del PO con T6.7/T6.8 antes de T6.1.
+
+**Qué se hizo, tarea por tarea:**
+
+| Tarea | Detalle |
+|---|---|
+| T6.8 | `astro check` en `Field.astro:86:19` (implicit `any`, preexistente desde Sprint 5): el checker de Astro no propagaba el tipo `SelectOption[]` a través del default `= []` en la desestructuración de `Astro.props`. Fix: anotación explícita del parámetro. Cero cambio de runtime. |
+| T6.7 | Investigado el flake de L22/L28 a fondo — **el diagnóstico original estaba mal**. No es una carrera de sesiones de Auth (esa mitigación ya estaba 100% aplicada, cero `getUser()` en el repo). Reproducido el fallo real 3 veces con la traza completa: `Error: Test timed out in 5000ms` en tests con 2-3 llamadas de red reales seguidas. `fileParallelism: false` no ayudó (probado, revertido). Fix real: `vitest.config.ts` nuevo, `testTimeout: 15000`. 6/6 corridas limpias después. Ver **L32**. |
+| T6.1 | Auditoría visual contra `DESIGN.md`. 1 hallazgo real: badge "Destacado" en `/administrator/eventos` usaba `tone="secondary"` (rojo, error/atención) en vez de `tone="optional"` (informativo) — corregido. `DESIGN.md` §3 corregido para reflejar el patrón real de "Borrar" (`ghost` + `text-secondary`, nunca usado `variant="secondary"`). |
+| T6.2 | Estados de error de red: **9 de 10 `fetch()` del cliente sin `try/catch`** — una caída de red dejaba el formulario colgado, en un caso (alt de foto) ni revisaba `response.ok`. Corregido en `eventos.astro`, `eventos-pasados.astro`, `eventos-pasados/[id].astro`, mismo patrón que `paginas.astro` ya tenía. Ver **L33**. |
+| T6.3 | El dashboard (`/administrator`) quedó vacío desde Sprint 2, con texto ya falso desde Sprint 3. Reescrito: tarjetas de acceso rápido con conteo real a cada módulo + tarjeta guía "Empieza subiendo tu primer evento" cuando el usuario (por `ownerId` propio) no creó nada. |
+| T6.4 | 2 inputs sin label real (uno sin nada, otro con solo `placeholder`), 2 `<dialog>` sin `aria-labelledby` — corregidos. Foco visible confirmado con Tab real en Chrome. **Hallazgo no corregido a propósito**: `--color-secondary` da ~4.16:1 de contraste, bajo el 4.5:1 de AA — es un token compartido con todo el sitio, decisión de marca a futuro. Ver **L34**. |
+| T6.5 | `CONTEXT.md`/`PENDIENTES.md` reescritos: ya no describen el panel como "en desarrollo, Sprint 0 no iniciado" (llevaban desde el cierre de Sprint 2 sin actualizar). Punto 1 de `PENDIENTES.md` (22 eventos ficticios) marcado ✅ RESUELTO. Los 3 cambios de alcance y los 2 pendientes sin fecha (rediseño de "Eventos pasados", contraste de color) documentados explícitamente. |
+| T6.6 | Build final desde cero: 15 HTML públicos, 0 rutas `/administrator` en el estático, exactamente 1 función, `pnpm test`/`lint`/`tsc`/`astro check` en verde. Auditoría extra de `pnpm format:check` (no es parte del DoD): encontró **112 archivos** desactualizados, no los 7 que documentaba `PENDIENTES.md` #12 desde 2026-09-08 — se formatearon los que tocó esta sesión, se corrigió la cifra real en `PENDIENTES.md` en vez de dejarla desactualizada otra vez. |
+
+**Verificación real, no solo tests, en cada tarea que lo permitía:** clic real en Chrome interceptando `window.fetch` para forzar caídas de red (T6.2), Tab real para confirmar foco visible (T6.4), 2 cuentas reales (director sin contenido propio / super_admin con una galería real) para el flujo de primera vez (T6.3), árbol de accesibilidad real para confirmar los labels (T6.4).
+
+**Hallazgo colateral durante T6.6, sin impacto real:** un `git stash`/`git stash pop` de prueba dejó transitoriamente 223 archivos de `.vercel/output/**` staged en el índice (nunca llegaron a commitearse ni a tocar el working tree) — resuelto con `git reset`. Sin causa raíz clara identificada (el stash reportó "no local changes to save"); no volvió a pasar. Registrado por si se repite.
+
+**Nota para quien abra el PR final:** al revisar `main` se encontró que `CONTEXT.md`/`PENDIENTES.md` fueron **eliminados de `main` y agregados a su `.gitignore`** en un commit anterior (`bbce23e`, vía PR #9) — pero `cms-admin` los sigue teniendo trackeados y sin ignorar. El merge final va a necesitar decidir qué lado gana (probablemente el de `cms-admin`, ya que este sprint los actualizó de verdad) — no es un bloqueante de Sprint 6, pero sí algo a resolver explícitamente al mergear, no a dejar que el merge lo decida solo.
+
+**Sprint 6: ✅ DONE, 8/8 (incluye T6.7/T6.8 agregadas por el PO).** Commits: `1612fbf` (docs: aprueba los 3 cambios de alcance + abre Sprint 6) → `af8c43c` (T6.8) → `06e12c7` (T6.7) → `a76d99a` (T6.1+T6.2) → `cad7f8f` (T6.3) → `f45f871` (T6.4) → `a90b1b4` (T6.5) → cierre de docs (este commit, T6.6). **Reportado, esperando aprobación explícita del PO** — con eso, el panel queda listo para el último paso fuera de este proceso: abrir el PR de `cms-admin` hacia `main`.
+
 ## Errores / correcciones
 
 | # | Fecha | Qué pasó | Corrección |

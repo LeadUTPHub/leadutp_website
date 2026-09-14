@@ -82,7 +82,11 @@ const fieldClasses = [
 				aria-describedby={error ? `${inputId}-error` : undefined}
 				class:list={[...fieldClasses, 'min-h-11']}
 			>
-				{!required && <option value="" selected={!value}>Sin pilar</option>}
+				{!required && (
+					<option value="" selected={!value}>
+						Sin pilar
+					</option>
+				)}
 				{options.map((option: SelectOption) => (
 					<option value={option.value} selected={option.value === value}>
 						{option.label}

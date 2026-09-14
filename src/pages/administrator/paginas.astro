@@ -107,7 +107,7 @@ const projectsState = stateLabel(projectsBlock);
 
 			{
 				!canWrite && !loadError && (
-					<p class="mt-6 rounded-lg border border-white/12 bg-white/[0.04] px-4 py-3 text-sm text-foreground-secondary">
+					<p class="text-foreground-secondary mt-6 rounded-lg border border-white/12 bg-white/[0.04] px-4 py-3 text-sm">
 						Estás viendo esta pantalla en modo lectura. El contenido de Nosotros
 						y Proyectos es institucional: lo edita la presidencia (super admin).
 					</p>
@@ -129,13 +129,30 @@ const projectsState = stateLabel(projectsBlock);
 					Se muestra al final de /nosotros. Sin miembros, la sección no aparece.
 				</p>
 
-				<form class="mt-4 flex flex-col gap-4" data-form="nosotros.team" novalidate>
+				<form
+					class="mt-4 flex flex-col gap-4"
+					data-form="nosotros.team"
+					novalidate
+				>
 					<div class="flex flex-col gap-3" data-rows="team">
 						{
 							teamRows.map((row) => (
-								<div class="flex flex-col gap-3 rounded-lg bg-white/[0.06] p-3 ring-1 ring-white/12 sm:flex-row sm:items-end" data-row>
-									<Field label="Nombre" name="name" class="flex-1" value={row.name} />
-									<Field label="Cargo" name="role" class="flex-1" value={row.role} />
+								<div
+									class="flex flex-col gap-3 rounded-lg bg-white/[0.06] p-3 ring-1 ring-white/12 sm:flex-row sm:items-end"
+									data-row
+								>
+									<Field
+										label="Nombre"
+										name="name"
+										class="flex-1"
+										value={row.name}
+									/>
+									<Field
+										label="Cargo"
+										name="role"
+										class="flex-1"
+										value={row.role}
+									/>
 									{canWrite && (
 										<Button
 											type="button"
@@ -163,14 +180,21 @@ const projectsState = stateLabel(projectsBlock);
 					{
 						canWrite && (
 							<div>
-								<Button type="button" variant="outline" size="sm" data-add-row="team">
+								<Button
+									type="button"
+									variant="outline"
+									size="sm"
+									data-add-row="team"
+								>
 									Agregar miembro
 								</Button>
 							</div>
 						)
 					}
 
-					<label class="text-foreground-secondary flex items-center gap-2 text-sm">
+					<label
+						class="text-foreground-secondary flex items-center gap-2 text-sm"
+					>
 						<input
 							type="checkbox"
 							name="published"
@@ -209,13 +233,25 @@ const projectsState = stateLabel(projectsBlock);
 					estado vacío.
 				</p>
 
-				<form class="mt-4 flex flex-col gap-4" data-form="proyectos.list" novalidate>
+				<form
+					class="mt-4 flex flex-col gap-4"
+					data-form="proyectos.list"
+					novalidate
+				>
 					<div class="flex flex-col gap-3" data-rows="projects">
 						{
 							projectRows.map((row) => (
-								<div class="flex flex-col gap-3 rounded-lg bg-white/[0.06] p-4 ring-1 ring-white/12" data-row>
+								<div
+									class="flex flex-col gap-3 rounded-lg bg-white/[0.06] p-4 ring-1 ring-white/12"
+									data-row
+								>
 									<div class="flex flex-col gap-3 sm:flex-row">
-										<Field label="Nombre" name="name" class="flex-1" value={row.name} />
+										<Field
+											label="Nombre"
+											name="name"
+											class="flex-1"
+											value={row.name}
+										/>
 										<Field
 											label="Slug"
 											name="slug"
@@ -289,7 +325,9 @@ const projectsState = stateLabel(projectsBlock);
 						)
 					}
 
-					<label class="text-foreground-secondary flex items-center gap-2 text-sm">
+					<label
+						class="text-foreground-secondary flex items-center gap-2 text-sm"
+					>
 						<input
 							type="checkbox"
 							name="published"
@@ -336,8 +374,9 @@ const projectsState = stateLabel(projectsBlock);
 
 			this.querySelectorAll<HTMLFormElement>('[data-form]').forEach((form) => {
 				const key = form.dataset.form!;
-				const publishedInput =
-					form.querySelector<HTMLInputElement>('input[name="published"]');
+				const publishedInput = form.querySelector<HTMLInputElement>(
+					'input[name="published"]',
+				);
 				wasPublished.set(key, publishedInput?.checked ?? false);
 
 				form.addEventListener('submit', (event) => {
@@ -383,11 +422,13 @@ const projectsState = stateLabel(projectsBlock);
 			}
 
 			const clone = last.cloneNode(true) as HTMLElement;
-			clone.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(
-				'input, textarea',
-			).forEach((field) => {
-				field.value = '';
-			});
+			clone
+				.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(
+					'input, textarea',
+				)
+				.forEach((field) => {
+					field.value = '';
+				});
 			clone.querySelectorAll<HTMLSelectElement>('select').forEach((select) => {
 				select.selectedIndex = 0;
 			});

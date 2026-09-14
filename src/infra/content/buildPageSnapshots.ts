@@ -31,7 +31,10 @@ export type FetchOutcome<T> = { ok: true; value: T | null } | { ok: false };
 
 /** `undefined` de salida = "no persistir esta key" (a diferencia de `null`
  * de entrada en `FetchOutcome`, que es "confirmado sin publicar"). */
-function resolveField<T>(current: T | undefined, fetch: FetchOutcome<T>): T | undefined {
+function resolveField<T>(
+	current: T | undefined,
+	fetch: FetchOutcome<T>,
+): T | undefined {
 	if (!fetch.ok) return current;
 	return fetch.value ?? undefined;
 }

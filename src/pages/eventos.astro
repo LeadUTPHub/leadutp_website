@@ -17,7 +17,10 @@ import EventPointerCard from '../components/events/EventPointerCard.astro';
 import GalleryEventCard from '../components/events/GalleryEventCard.astro';
 import Container from '../components/ui/Container.astro';
 import SectionHeader from '../components/ui/SectionHeader.astro';
-import type { GalleryPhoto, GalleryWithPhotoCount } from '../domain/ports/ContentRepository';
+import type {
+	GalleryPhoto,
+	GalleryWithPhotoCount,
+} from '../domain/ports/ContentRepository';
 import { selectUpcomingPointers } from '../domain/selectUpcomingPointers';
 import { getContentRepository } from '../infra/container';
 import { renderMarkdown } from '../infra/markdown/renderMarkdown';
@@ -122,7 +125,7 @@ try {
 						))}
 					</ul>
 				) : (
-					<div class="mt-7 sm:mt-8 text-center">
+					<div class="mt-7 text-center sm:mt-8">
 						<p class="text-foreground-secondary mx-auto max-w-lg text-sm leading-6 sm:text-base">
 							Todavía no publicamos eventos próximos. Vuelve pronto.
 						</p>
@@ -134,7 +137,7 @@ try {
 
 	<section
 		id="eventos-pasados"
-		class="mt-16 hairline-t pt-8 pb-24 sm:mt-20 sm:pt-10 lg:mt-22 lg:pb-28"
+		class="hairline-t mt-16 pt-8 pb-24 sm:mt-20 sm:pt-10 lg:mt-22 lg:pb-28"
 		aria-labelledby="eventos-pasados-title"
 	>
 		<Container>
@@ -151,7 +154,7 @@ try {
 						))}
 					</div>
 				) : (
-					<div class="mt-7 sm:mt-8 text-center">
+					<div class="mt-7 text-center sm:mt-8">
 						<p class="text-foreground-secondary mx-auto max-w-lg text-sm leading-6 sm:text-base">
 							Todavía no publicamos acá el resumen de eventos pasados. Mientras
 							tanto, mira las fotos de nuestros encuentros anteriores en{' '}
