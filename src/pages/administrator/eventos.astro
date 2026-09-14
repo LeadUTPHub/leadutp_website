@@ -7,6 +7,7 @@
 export const prerender = false;
 
 import { canEdit } from '../../domain/canEdit';
+import { isPointerUpcoming } from '../../domain/selectUpcomingPointers';
 import type { EventPointer } from '../../domain/ports/ContentRepository';
 import AdminShell from '../../components/admin/AdminShell.astro';
 import Field from '../../components/admin/Field.astro';
@@ -102,6 +103,11 @@ try {
 								ownerId: pointer.ownerId,
 								areaSlug: pointer.areaSlug,
 							});
+							// Defecto A del BUG 2 (Sprint 6): un puntero publicado con
+							// fecha pasada queda fuera de "Próximos eventos" y antes nada
+							// lo decía — se veía "Publicado" y punto, indistinguible de un
+							// guardado roto. Misma regla que aplica el sitio público.
+							const vencido = !isPointerUpcoming(pointer);
 							return (
 								<li
 									class="flex flex-col gap-3 rounded-lg bg-white/[0.06] p-4 ring-1 ring-white/12 sm:flex-row sm:items-center sm:justify-between"
@@ -136,7 +142,15 @@ try {
 											{pointer.featured && (
 												<Badge tone="optional">Destacado</Badge>
 											)}
+											{vencido && <Badge tone="secondary">Vencido</Badge>}
 										</div>
+										{pointer.published && vencido && (
+											<p class="text-foreground-muted mt-1.5 text-xs">
+												Su fecha ya pasó, así que no aparece en “Próximos
+												eventos” del sitio. Cambia la fecha si el evento todavía
+												no ocurrió.
+											</p>
+										)}
 									</div>
 
 									<div class="flex shrink-0 flex-wrap gap-2">
