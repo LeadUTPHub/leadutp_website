@@ -12,7 +12,7 @@
 | 2 | Autenticación y roles | ✅ DONE (8/8) | — |
 | 3 | CRUD de eventos propios | ✅ DONE (6/6) | — |
 | 4 | Galería "así se vivió el evento" | ✅ DONE (7/7) | — |
-| 5 | Extensión a Nosotros y Proyectos | TODO | — |
+| 5 | Extensión a Nosotros y Proyectos | 🟡 WIP (4/6) | — |
 | 6 | Pulido UX/UI | TODO | — |
 
 Regla de secuencia: el Sprint 2 (auth) no arranca hasta que el Sprint 1 esté validado en local — así, si Supabase se complica, Eventos ya quedó entregado de forma independiente.
@@ -114,12 +114,14 @@ Regla de secuencia: el Sprint 2 (auth) no arranca hasta que el Sprint 1 esté va
 
 | ID | Tarea | Given / When / Then | Estado |
 |---|---|---|---|
-| T5.1 | Tipos compartidos dominio ↔ `page_blocks` | **Given** `src/data/about/about.types.ts` y `projects.types.ts` · **When** se define el validador de `data` jsonb por `key` · **Then** un `data` mal formado se rechaza en el endpoint | TODO |
-| T5.2 | Repo + endpoints `/administrator/api/pages/:key` | **Given** contrato · **When** GET/PUT · **Then** RLS por `area_slug`; `PUT` valida forma | TODO |
-| T5.3 | UI `/administrator/paginas` | **Given** sesión · **When** el director de su área edita historia / junta / proyectos · **Then** formularios tipados; preview del estado publicado/borrador | TODO |
-| T5.4 | Loaders de `/nosotros` y `/proyectos` | **Given** `CompositeContentRepository` · **When** build · **Then** usan DB→fallback→`.data.ts`→vacío; los `.astro` de página no cambian su estructura | TODO |
+| T5.1 | Tipos compartidos dominio ↔ `page_blocks` | **Given** `src/data/about/about.types.ts` y `projects.types.ts` · **When** se define el validador de `data` jsonb por `key` · **Then** un `data` mal formado se rechaza en el endpoint | ✅ DONE — `validatePageBlockData.ts` (34 tests), commit `5d87dbe` |
+| T5.2 | Repo + endpoints `/administrator/api/pages/:key` | **Given** contrato · **When** GET/PUT · **Then** RLS por `area_slug`; `PUT` valida forma | ✅ DONE — `getPageBlock`/`savePageBlock` (upsert en 2 pasos, no `.upsert()`, ver MEMORY.md) + endpoint `[key].ts`, commit `1b6abe5` |
+| T5.3 | UI `/administrator/paginas` | **Given** sesión · **When** el director de su área edita historia / junta / proyectos · **Then** formularios tipados; preview del estado publicado/borrador | ✅ DONE — solo `super_admin` edita (D-13); resto del staff en modo lectura, commit `f8bd5e7` |
+| T5.4 | Loaders de `/nosotros` y `/proyectos` | **Given** `CompositeContentRepository` · **When** build · **Then** usan DB→fallback→`.data.ts`→vacío; los `.astro` de página no cambian su estructura | ✅ DONE — `resolvePageContent.ts`/`loadPageContent.ts`; snapshot (`*.fallback.json`) todavía no existe, queda para T5.5 · commit `27e3dfa` |
 | T5.5 | `prebuild` snapshot | **Given** script `prebuild` · **When** corre con Supabase OK · **Then** escribe `about.fallback.json` / `projects.fallback.json`; con Supabase caído, no borra el anterior y el build pasa | TODO |
 | T5.6 | Build + validación local | **When** `pnpm build && pnpm preview` (y push como respaldo) · **Then** un director de área edita y se ve en local | TODO |
+
+> **Nota de proceso (2026-09-13):** T5.1–T5.4 se hicieron en una sesión anterior (commits `5d87dbe`/`1b6abe5`/`f8bd5e7`/`27e3dfa`, 2026-09-11/12) pero esta tabla y `MEMORY.md` § Estado del sistema quedaron sin actualizar hasta ahora — corregido al reabrir el workstream. Ver también los 2 commits `perf(eventos)` (`0391b20`, `2251264`) hechos fuera de alcance de sprint, documentados en `MEMORY.md` L29.
 
 ---
 
