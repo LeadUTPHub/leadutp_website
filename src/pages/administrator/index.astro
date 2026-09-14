@@ -1,11 +1,18 @@
 ---
-// T2.5 — dashboard shell. Sin CRUD de contenido todavía (eso es
-// Sprint 3+); solo confirma login exitoso + saludo por rol + logout.
+// T2.5 — dashboard shell (login exitoso + saludo por rol + logout).
+// T6.3 (Sprint 6, flujo "primera vez"): DESIGN.md §6.2 pedía tarjetas de
+// acceso rápido a cada módulo con conteo, y una guía cuando el usuario
+// todavía no creó nada — quedó pendiente desde que se escribió (antes de
+// que existieran Eventos/Eventos pasados/Páginas). Se completa acá, sin
+// features nuevas: solo apunta a lo que Sprints 3-5 ya construyeron.
 export const prerender = false;
 
 import AdminShell from '../../components/admin/AdminShell.astro';
+import Badge from '../../components/ui/Badge.astro';
+import Button from '../../components/ui/Button.astro';
 import SectionHeader from '../../components/ui/SectionHeader.astro';
 import AdminLayout from '../../layouts/AdminLayout.astro';
+import { getContentRepositoryForRequest } from '../../infra/container';
 
 const { profile } = Astro.locals;
 
@@ -20,6 +27,69 @@ const ROLE_LABELS: Record<typeof profile.role, string> = {
 	subdirector: 'Subdirector',
 	super_admin: 'Super Admin',
 };
+
+let pointerCount = 0;
+let galleryCount = 0;
+let ownEventCount = 0;
+let ownGalleryCount = 0;
+let loadError: string | null = null;
+
+try {
+	const repo = getContentRepositoryForRequest(Astro);
+	const [pointers, galleries] = await Promise.all([
+		repo.listPointers(),
+		repo.listGalleries(),
+	]);
+	pointerCount = pointers.length;
+	galleryCount = galleries.length;
+	// "Primera vez" mira lo que ESTE usuario creó, no el total del staff
+	// (la lista no se filtra por rol, ver T3.4 — cualquiera del staff ve
+	// todo, así que un total > 0 no dice nada sobre si YO ya subí algo).
+	ownEventCount = pointers.filter(
+		(pointer) => pointer.ownerId === profile.id,
+	).length;
+	ownGalleryCount = galleries.filter(
+		(gallery) => gallery.ownerId === profile.id,
+	).length;
+} catch {
+	loadError =
+		'No se pudieron cargar los módulos. Intenta de nuevo en unos minutos.';
+}
+
+const isFirstTime = !loadError && ownEventCount === 0 && ownGalleryCount === 0;
+
+function countLabel(count: number, singular: string, plural: string): string {
+	return count === 1 ? `1 ${singular}` : `${count} ${plural}`;
+}
+
+const modules = [
+	{
+		label: 'Eventos',
+		href: '/administrator/eventos',
+		description:
+			'Punteros a Luma que se muestran junto al calendario en /eventos.',
+		countLabel: countLabel(pointerCount, 'evento cargado', 'eventos cargados'),
+	},
+	{
+		label: 'Eventos pasados',
+		href: '/administrator/eventos-pasados',
+		description: '"Así se vivió el evento" — fotos de eventos ya realizados.',
+		countLabel: countLabel(
+			galleryCount,
+			'galería cargada',
+			'galerías cargadas',
+		),
+	},
+	{
+		label: 'Páginas',
+		href: '/administrator/paginas',
+		description: 'Contenido de /nosotros (junta directiva) y /proyectos.',
+		countLabel:
+			profile.role === 'super_admin'
+				? 'Editable por ti'
+				: 'Solo lectura para tu rol',
+	},
+];
 ---
 
 <AdminLayout title="Panel — LEAD UTP">
@@ -27,7 +97,77 @@ const ROLE_LABELS: Record<typeof profile.role, string> = {
 		<SectionHeader
 			id="dashboard-title"
 			title={`Hola, ${ROLE_LABELS[profile.role]}`}
-			description="Este panel todavía no administra contenido — eso llega en los próximos sprints. Por ahora, esto confirma que tu login y tu rol funcionan correctamente."
+			description="Accesos rápidos a lo que administras desde acá. Todo lo que publiques se ve en el sitio en el próximo despliegue."
 		/>
+
+		{
+			loadError && (
+				<p class="border-secondary/40 bg-secondary/10 text-secondary mt-6 rounded-lg border px-4 py-3 text-sm">
+					{loadError}
+				</p>
+			)
+		}
+
+		{
+			isFirstTime && (
+				<div class="from-optional-3/15 card-lift mt-6 rounded-2xl border border-white/10 bg-linear-to-b to-white/[0.02] p-6 sm:p-7">
+					<Badge tone="optional">Primera vez</Badge>
+					<h2 class="font-display text-foreground mt-3 text-xl font-bold tracking-[-0.03em]">
+						Empieza subiendo tu primer evento
+					</h2>
+					<p class="text-foreground-secondary mt-2 max-w-xl text-sm leading-6">
+						Cargas la tarjeta del evento en <strong>Eventos</strong> (título,
+						link de inscripción en Luma, fecha, imagen) y, cuando ya haya
+						pasado, subes sus fotos en <strong>Eventos pasados</strong> para
+						armar el recuerdo que se ve en /eventos.
+					</p>
+					<div class="mt-4">
+						<Button href="/administrator/eventos">Ir a Eventos</Button>
+					</div>
+				</div>
+			)
+		}
+
+		<ul class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+			{
+				modules.map((mod) => (
+					<li>
+						<a
+							href={mod.href}
+							class="card-lift bg-surface hover:bg-surface-raised focus-visible:outline-optional-3 flex h-full flex-col rounded-xl border border-white/10 p-5 transition focus-visible:outline-3 focus-visible:outline-offset-3"
+						>
+							<span class="font-display text-foreground text-xl font-bold tracking-[-0.03em]">
+								{mod.label}
+							</span>
+							<span class="text-foreground-secondary mt-2 text-sm leading-6">
+								{mod.description}
+							</span>
+							<span class="text-foreground-muted mt-auto pt-4 text-xs font-semibold tracking-[0.04em] uppercase">
+								{mod.countLabel}
+							</span>
+						</a>
+					</li>
+				))
+			}
+			{
+				profile.role === 'super_admin' && (
+					<li>
+						<div class="flex h-full flex-col rounded-xl border border-white/10 p-5 opacity-60">
+							<div class="flex items-center gap-2">
+								<span class="font-display text-foreground text-xl font-bold tracking-[-0.03em]">
+									Usuarios
+								</span>
+								<Badge tone="primary" class="text-[0.6rem]">
+									Pronto
+								</Badge>
+							</div>
+							<span class="text-foreground-secondary mt-2 text-sm leading-6">
+								Gestión de directores y subdirectores.
+							</span>
+						</div>
+					</li>
+				)
+			}
+		</ul>
 	</AdminShell>
 </AdminLayout>

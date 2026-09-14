@@ -16,4 +16,8 @@ export class NoopPhotoStorage implements PhotoStorage {
 	deliveryUrl(publicId: string, width: number): string {
 		return `about:blank#noop-${publicId}-${width}`;
 	}
+
+	async destroy(publicId: string): Promise<void> {
+		void publicId;
+	}
 }

@@ -1,0 +1,42 @@
+---
+// Una fila del formulario de Junta directiva (/administrator/paginas).
+//
+// Existe como componente propio por una razón concreta, no por estética:
+// la pantalla necesita este markup en DOS lugares — la lista de filas ya
+// cargadas y el <template data-row-template="team"> desde el que el JS
+// crea una fila nueva. Tenerlo una sola vez acá es lo que evita que esos
+// dos se desincronicen al primer cambio (ese era justamente el riesgo que
+// el addRow() anterior intentaba esquivar clonando la última fila
+// existente — y que dejaba el botón muerto cuando no había ninguna).
+import Button from '../ui/Button.astro';
+import Field from './Field.astro';
+import type { TeamRow } from '../../domain/pageBlockForms';
+
+interface Props {
+	row: TeamRow;
+	canWrite: boolean;
+}
+
+const { row, canWrite } = Astro.props;
+---
+
+<div
+	class="flex flex-col gap-3 rounded-lg bg-white/[0.06] p-3 ring-1 ring-white/12 sm:flex-row sm:items-end"
+	data-row
+>
+	<Field label="Nombre" name="name" class="flex-1" value={row.name} />
+	<Field label="Cargo" name="role" class="flex-1" value={row.role} />
+	{
+		canWrite && (
+			<Button
+				type="button"
+				variant="ghost"
+				size="sm"
+				class="text-secondary"
+				data-remove-row
+			>
+				Quitar
+			</Button>
+		)
+	}
+</div>

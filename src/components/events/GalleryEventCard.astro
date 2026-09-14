@@ -1,0 +1,125 @@
+---
+// T4.6 — tarjeta pública de una galería ("así se vivió el evento").
+// Mismo lenguaje visual que LifeEventCard.astro (src/components/life/)
+// — plate número, año, título, foto líder + grid de las demás — pero
+// para Gallery/GalleryPhoto (Supabase), no para el LifeEvent estático
+// de /vida-lead. Degradación (DISENO_TECNICO.md §5.2): si una imagen de
+// Cloudinary no carga, cae a un placeholder local; el texto de la
+// galería nunca depende de que las imágenes carguen.
+// bodyHtml ya viene renderizado (markdown -> HTML sanitizado) desde
+// eventos.astro — este componente no importa `src/infra/**` directo
+// (ARCHITECTURE.md §2: componentes solo importan puertos + container.ts,
+// nunca un adaptador/utilitario concreto), solo recibe el resultado.
+import eventPlaceholder from '../../assets/events/event-placeholder.svg';
+import { buildCloudinaryUrl } from '../../domain/buildCloudinaryUrl';
+import type { GalleryPhoto } from '../../domain/ports/ContentRepository';
+
+interface GalleryWithPhotos {
+	id: string;
+	title: string;
+	/** HTML ya renderizado y sanitizado desde markdown (ver eventos.astro). */
+	bodyHtml: string | null;
+	happenedOn: string | null;
+	photos: GalleryPhoto[];
+}
+
+interface Props {
+	gallery: GalleryWithPhotos;
+	index: number;
+}
+
+const { gallery, index } = Astro.props;
+const cloudName = import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME;
+
+const plate = String(index + 1).padStart(2, '0');
+const year = gallery.happenedOn ? new Date(gallery.happenedOn).getFullYear() : null;
+const count = gallery.photos.length;
+const photoLabel = `${count} ${count === 1 ? 'fotografía' : 'fotografías'}`;
+
+const [lead, ...rest] = gallery.photos;
+
+const restColsClass =
+	rest.length >= 4
+		? 'sm:grid-cols-3 lg:grid-cols-4'
+		: rest.length === 3
+			? 'sm:grid-cols-3'
+			: 'sm:grid-cols-2';
+
+function deliveryUrl(publicId: string, width: number): string {
+	return cloudName
+		? buildCloudinaryUrl({ cloudName, publicId, width })
+		: eventPlaceholder.src;
+}
+---
+
+<article class="border-t border-white/12 pt-7 sm:pt-9">
+	<header class="flex flex-wrap items-end justify-between gap-x-6 gap-y-1">
+		<p class="font-display text-xs font-bold tracking-[0.22em] uppercase">
+			<span
+				class="from-secondary to-optional-1 inline-block bg-linear-to-r bg-clip-text text-transparent"
+				>N.º {plate}</span
+			>
+		</p>
+		{
+			(year || count > 0) && (
+				<p class="text-foreground-secondary text-[0.72rem] font-semibold tracking-[0.16em] uppercase">
+					{year}
+					{year && count > 0 && ' · '}
+					{count > 0 && <span class="text-foreground-muted">{photoLabel}</span>}
+				</p>
+			)
+		}
+		<h2
+			class="font-display text-foreground mt-3 w-full text-4xl leading-[0.95] font-bold tracking-[-0.055em] sm:text-5xl lg:text-6xl"
+		>
+			{gallery.title}
+		</h2>
+	</header>
+
+	{
+		gallery.bodyHtml && (
+			<div
+				class="text-foreground-secondary [&_a]:text-foreground [&_a]:underline [&_a]:decoration-white/30 [&_a]:underline-offset-4 hover:[&_a]:decoration-white/60 mt-4 max-w-2xl text-sm leading-6 sm:text-base"
+				set:html={gallery.bodyHtml}
+			/>
+		)
+	}
+
+	{
+		lead && (
+			<figure
+				class="group bg-surface-raised mt-6 aspect-[16/10] overflow-hidden rounded-lg ring-1 ring-white/8 ring-inset sm:mt-8 lg:aspect-[64/27]"
+			>
+				<img
+					src={deliveryUrl(lead.cloudinaryPublicId, 1200)}
+					data-placeholder-src={eventPlaceholder.src}
+					alt={lead.alt ?? ''}
+					class="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03] motion-reduce:transition-none"
+					loading="lazy"
+					decoding="async"
+					onerror="this.onerror=null; this.src=this.dataset.placeholderSrc;"
+				/>
+			</figure>
+		)
+	}
+
+	{
+		rest.length > 0 && (
+			<div class:list={['mt-2 grid grid-cols-2 gap-2', restColsClass]}>
+				{rest.map((photo) => (
+					<figure class="group bg-surface-raised aspect-[4/3] overflow-hidden rounded-lg ring-1 ring-white/8 ring-inset">
+						<img
+							src={deliveryUrl(photo.cloudinaryPublicId, 480)}
+							data-placeholder-src={eventPlaceholder.src}
+							alt={photo.alt ?? ''}
+							class="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03] motion-reduce:transition-none"
+							loading="lazy"
+							decoding="async"
+							onerror="this.onerror=null; this.src=this.dataset.placeholderSrc;"
+						/>
+					</figure>
+				))}
+			</div>
+		)
+	}
+</article>

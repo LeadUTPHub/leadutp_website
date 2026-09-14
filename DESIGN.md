@@ -43,7 +43,7 @@
 
 | Componente | Ruta | Uso en el panel |
 |---|---|---|
-| `Button.astro` | `src/components/ui/` | Todas las acciones. `variant="primary"` guardar/crear/login · `variant="secondary"` borrar · `variant="outline"` cancelar/secundario · `variant="ghost"` acciones de fila · `size` `sm`/`md`/`lg` |
+| `Button.astro` | `src/components/ui/` | Todas las acciones. `variant="primary"` guardar/crear/login · `variant="outline"` cancelar/secundario · `variant="ghost"` acciones de fila **y borrar** (`class="text-secondary"` encima, nunca `variant="secondary"` — así quedó implementado en las 4 pantallas de contenido, T6.1 corrigió esta fila para que coincida) · `size` `sm`/`md`/`lg` |
 | `Badge.astro` | `src/components/ui/` | `tone="primary"` Borrador · `tone="optional"` Publicado · `tone="secondary"` Error/Atención |
 | `Container.astro` | `src/components/ui/` | Ancho y gutters de cada vista (`max-w-7xl px-5 md:px-8 lg:px-10`) |
 | `SectionHeader.astro` | `src/components/ui/` | Cabecera de cada sección del panel, con slot `action` para el botón "Nuevo" |
@@ -88,7 +88,7 @@ No hay componente de input en `src/components/ui/` todavía. Se crea `src/compon
 ### 6.2 `/administrator` (dashboard)
 | Aspecto | Aplicación |
 |---|---|
-| `AdminLayout` | Barra superior navy con logo + nombre del usuario + `Button ghost` "Salir". Navegación lateral (`--color-canvas-deep`) con iconos lucide: Eventos, Galerías, Páginas, (Usuarios solo super_admin) |
+| `AdminLayout` | Barra superior navy con logo + nombre del usuario + `Button ghost` "Salir". Navegación lateral (`--color-canvas-deep`) con iconos lucide: Eventos, Eventos pasados, Páginas, (Usuarios solo super_admin) |
 | Cuerpo | `SectionHeader` "Hola, {nombre}" + `Badge` con el rol + área. Tarjetas de acceso rápido (`.card-lift`) a cada módulo con conteo |
 | Vacío | Si el usuario no tiene nada creado: tarjeta guía "Empieza subiendo tu primer evento" (flujo primera vez, Sprint 6) |
 
@@ -97,10 +97,10 @@ No hay componente de input en `src/components/ui/` todavía. Se crea `src/compon
 |---|---|
 | Cabecera | `SectionHeader` "Eventos" + slot `action`: `Button primary` "Nuevo evento" |
 | Lista | Filas tipo tarjeta (`bg-white/[0.06] ring-1 ring-white/12 rounded-lg`): título, chip de área (color del pilar), `Badge` Borrador/Publicado, acciones `ghost` (Editar, Abrir en Luma, Borrar) |
-| Form | `Field` título · `Field` URL de Luma (con validación visible) · `select` de pilar · switch `featured` · switch `published` · `Button primary` Guardar / `Button outline` Cancelar |
-| Aviso | Nota fija: "La fecha, el lugar y la inscripción viven en Luma. Aquí solo enlazas." |
+| Form | `Field` título · `Field` URL de Luma (con validación visible) · `Field` fecha/hora · `Field` ubicación · `Field` imagen (URL) · `textarea` descripción corta (máx. 280) · `select` de pilar · switch `featured` · switch `published` · `Button primary` Guardar / `Button outline` Cancelar |
+| Aviso | Nota fija: "La inscripción y el cupo se gestionan en Luma — el link de arriba lleva ahí. El resto de la tarjeta (fecha, ubicación, imagen, descripción) lo cargas tú." |
 
-### 6.4 `/administrator/galerias` ("así se vivió el evento")
+### 6.4 `/administrator/eventos-pasados` ("así se vivió el evento")
 | Aspecto | Aplicación |
 |---|---|
 | Lista | Igual patrón que 6.3, con miniatura (primera foto, `buildCloudinaryUrl(publicId, 160)`) |
@@ -110,8 +110,7 @@ No hay componente de input en `src/components/ui/` todavía. Se crea `src/compon
 ### 6.5 `/administrator/paginas` (Nosotros / Proyectos)
 | Aspecto | Aplicación |
 |---|---|
-| Navegación | Tabs (`hairline-b`) por `key`: Historia · Junta directiva · Proyectos |
-| Historia | `textarea` largo (markdown), contador |
+| Navegación | Tabs (`hairline-b`) por `key`: Junta directiva · Proyectos (Historia se sacó el 2026-09-14, D-18 — queda fija en `about.data.ts`, sin UI) |
 | Junta | lista repetible de `{ name, role }` con `Field` × 2 y botón añadir/quitar fila |
 | Proyectos | lista repetible de `{ name, description, status, link? }`; `status` = `select` (`activo`/`finalizado`/`planificado`) |
 | Publicar | switch `published` por bloque + aviso "Borrador no se ve en la web" |

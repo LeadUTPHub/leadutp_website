@@ -1,0 +1,72 @@
+---
+// Una fila del formulario de Proyectos (/administrator/paginas).
+// Mismo motivo que TeamMemberRow.astro: este markup lo usan la lista de
+// filas guardadas y el <template data-row-template="projects"> del que
+// sale una fila nueva. Una sola fuente, sin duplicar.
+import Button from '../ui/Button.astro';
+import Field from './Field.astro';
+import type { ProjectRow } from '../../domain/pageBlockForms';
+
+interface Props {
+	row: ProjectRow;
+	canWrite: boolean;
+	statusOptions: { value: string; label: string }[];
+}
+
+const { row, canWrite, statusOptions } = Astro.props;
+---
+
+<div
+	class="flex flex-col gap-3 rounded-lg bg-white/[0.06] p-4 ring-1 ring-white/12"
+	data-row
+>
+	<div class="flex flex-col gap-3 sm:flex-row">
+		<Field label="Nombre" name="name" class="flex-1" value={row.name} />
+		<Field
+			label="Slug"
+			name="slug"
+			class="flex-1"
+			placeholder="cv-matcher"
+			value={row.slug}
+		/>
+	</div>
+	<Field
+		label="Descripción"
+		name="description"
+		as="textarea"
+		rows={2}
+		maxlength={600}
+		value={row.description}
+	/>
+	<div class="flex flex-col gap-3 sm:flex-row sm:items-end">
+		<Field
+			label="Estado"
+			name="status"
+			as="select"
+			required
+			options={statusOptions}
+			class="flex-1"
+			value={row.status}
+		/>
+		<Field
+			label="Link (opcional)"
+			name="link"
+			class="flex-1"
+			placeholder="https://…"
+			value={row.link}
+		/>
+		{
+			canWrite && (
+				<Button
+					type="button"
+					variant="ghost"
+					size="sm"
+					class="text-secondary"
+					data-remove-row
+				>
+					Quitar
+				</Button>
+			)
+		}
+	</div>
+</div>

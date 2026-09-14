@@ -1,0 +1,556 @@
+---
+// T3.4 — UI de punteros a Luma. La RLS ya decide qué puede editar/crear
+// cada rol (ARCHITECTURE.md §4); acá solo se oculta el botón Editar/Borrar
+// en las filas que `canEdit()` (dominio puro, T3.1) dice que no le tocan
+// al actor — la RLS es la autorización real, esto es solo UX (evita
+// mostrar una acción que el servidor rechazaría con 404).
+export const prerender = false;
+
+import { canEdit } from '../../domain/canEdit';
+import { isPointerUpcoming } from '../../domain/selectUpcomingPointers';
+import type { EventPointer } from '../../domain/ports/ContentRepository';
+import AdminShell from '../../components/admin/AdminShell.astro';
+import Field from '../../components/admin/Field.astro';
+import Badge from '../../components/ui/Badge.astro';
+import Button from '../../components/ui/Button.astro';
+import SectionHeader from '../../components/ui/SectionHeader.astro';
+import { pillars } from '../../data/pillars';
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { getContentRepositoryForRequest } from '../../infra/container';
+
+const { profile } = Astro.locals;
+if (!profile) {
+	return Astro.redirect('/administrator/login');
+}
+
+// Mismos placeholders que HomePillars.astro (PENDIENTES.md) — duplicados
+// a propósito acá porque esa constante no está exportada; si cambia una,
+// cambia la otra.
+const pillarGradients: Record<string, string> = {
+	'desarrollo-profesional': 'from-[#f2545c] to-[#a81021]',
+	liderazgo: 'from-[#8f6ff7] to-[#4a2bb0]',
+	'excelencia-femenina': 'from-[#d946c9] to-[#7c1687]',
+	'desarrollo-del-capitulo': 'from-[#3e82f7] to-[#0f2f9e]',
+	'excelencia-academica': 'from-[#f8ac3c] to-[#c1540a]',
+	'lead-academia': 'from-[#22d189] to-[#0a7350]',
+};
+
+const pillarOptions = pillars.map((pillar) => ({
+	value: pillar.slug,
+	label: pillar.name,
+}));
+
+function areaName(slug: string): string {
+	return pillars.find((pillar) => pillar.slug === slug)?.name ?? slug;
+}
+
+let pointers: EventPointer[] = [];
+let loadError: string | null = null;
+try {
+	pointers = await getContentRepositoryForRequest(Astro).listPointers();
+} catch {
+	// Degradación elegante (regla inquebrantable 4): la pantalla sigue
+	// usable (se puede seguir intentando crear), solo se avisa que la
+	// lista no cargó.
+	loadError =
+		'No se pudieron cargar los eventos. Intenta de nuevo en unos minutos.';
+}
+---
+
+<AdminLayout title="Eventos — Panel LEAD UTP">
+	<AdminShell profile={profile}>
+		<event-pointer-admin data-role={profile.role}>
+			<SectionHeader
+				id="eventos-title"
+				title="Eventos"
+				description="Tarjetas de evento de la sección “Próximos eventos” de /eventos. El link de inscripción siempre es de Luma; el resto lo cargas tú."
+			>
+				<Button slot="action" type="button" data-open-create>
+					Nuevo evento
+				</Button>
+			</SectionHeader>
+
+			<p class="text-foreground-muted mt-4 text-sm leading-6">
+				La inscripción y el cupo se gestionan en Luma — el link de arriba lleva
+				ahí. El resto de la tarjeta (fecha, ubicación, imagen, descripción) lo
+				cargas tú.
+			</p>
+
+			{
+				/* Defecto C del BUG 2 (Sprint 6): /eventos es una página estática —
+			se arma en `pnpm build`, no por visita. Lo que se guarda acá aparece
+			en el sitio recién en el próximo despliegue, y hasta ahora nada lo
+			decía: en `pnpm dev` el cambio se ve al instante (SSR por request) y
+			en producción no, lo que hace fácil leerlo como "no se guardó".
+			/administrator/paginas ya avisaba esto desde T5.3; acá faltaba. */
+			}
+			<p
+				class="text-foreground-secondary mt-4 rounded-lg border border-white/12 bg-white/[0.04] px-4 py-3 text-sm leading-6"
+			>
+				Lo que guardes acá aparece en <span
+					class="text-foreground font-semibold">/eventos</span
+				> en el próximo despliegue del sitio, no de inmediato.
+			</p>
+
+			{
+				loadError && (
+					<p class="border-secondary/40 bg-secondary/10 text-secondary mt-6 rounded-lg border px-4 py-3 text-sm">
+						{loadError}
+					</p>
+				)
+			}
+
+			{
+				!loadError && pointers.length === 0 && (
+					<div class="mt-8 rounded-2xl border border-white/10 bg-white/[0.04] px-6 py-10 text-center">
+						<p class="text-foreground-secondary text-sm">
+							Todavía no hay eventos cargados. Empieza subiendo el primero con
+							"Nuevo evento".
+						</p>
+					</div>
+				)
+			}
+
+			{
+				!loadError && pointers.length > 0 && (
+					<ul class="mt-8 flex flex-col gap-3">
+						{pointers.map((pointer) => {
+							const editable = canEdit(profile, {
+								ownerId: pointer.ownerId,
+								areaSlug: pointer.areaSlug,
+							});
+							// Defecto A del BUG 2 (Sprint 6): un puntero publicado con
+							// fecha pasada queda fuera de "Próximos eventos" y antes nada
+							// lo decía — se veía "Publicado" y punto, indistinguible de un
+							// guardado roto. Misma regla que aplica el sitio público.
+							const vencido = !isPointerUpcoming(pointer);
+							return (
+								<li
+									class="flex flex-col gap-3 rounded-lg bg-white/[0.06] p-4 ring-1 ring-white/12 sm:flex-row sm:items-center sm:justify-between"
+									data-pointer-id={pointer.id}
+									data-title={pointer.title}
+									data-luma-url={pointer.lumaUrl}
+									data-event-date={pointer.eventDate ?? ''}
+									data-location={pointer.location ?? ''}
+									data-image-url={pointer.imageUrl ?? ''}
+									data-short-description={pointer.shortDescription ?? ''}
+									data-pillar-slug={pointer.pillarSlug ?? ''}
+									data-featured={String(pointer.featured)}
+									data-published={String(pointer.published)}
+								>
+									<div class="min-w-0">
+										<p class="text-foreground truncate text-sm font-semibold">
+											{pointer.title}
+										</p>
+										<div class="mt-1 flex flex-wrap items-center gap-2">
+											<span class="text-foreground-secondary inline-flex items-center gap-1.5 text-xs">
+												<span
+													class:list={[
+														'h-2 w-2 shrink-0 rounded-full bg-gradient-to-br',
+														pillarGradients[pointer.areaSlug],
+													]}
+												/>
+												{areaName(pointer.areaSlug)}
+											</span>
+											<Badge tone={pointer.published ? 'optional' : 'primary'}>
+												{pointer.published ? 'Publicado' : 'Borrador'}
+											</Badge>
+											{pointer.featured && (
+												<Badge tone="optional">Destacado</Badge>
+											)}
+											{vencido && <Badge tone="secondary">Vencido</Badge>}
+										</div>
+										{pointer.published && vencido && (
+											<p class="text-foreground-muted mt-1.5 text-xs">
+												Su fecha ya pasó, así que no aparece en “Próximos
+												eventos” del sitio. Cambia la fecha si el evento todavía
+												no ocurrió.
+											</p>
+										)}
+									</div>
+
+									<div class="flex shrink-0 flex-wrap gap-2">
+										<Button
+											href={pointer.lumaUrl}
+											target="_blank"
+											variant="ghost"
+											size="sm"
+										>
+											Abrir en Luma
+										</Button>
+										{editable && (
+											<Button
+												type="button"
+												variant="ghost"
+												size="sm"
+												data-open-edit
+											>
+												Editar
+											</Button>
+										)}
+										{editable && (
+											<Button
+												type="button"
+												variant="ghost"
+												size="sm"
+												class="text-secondary"
+												data-delete
+											>
+												Borrar
+											</Button>
+										)}
+									</div>
+								</li>
+							);
+						})}
+					</ul>
+				)
+			}
+
+			<dialog
+				id="pointer-dialog"
+				aria-labelledby="pointer-dialog-title"
+				class="text-foreground bg-canvas-navy w-full max-w-lg rounded-2xl p-6 ring-1 ring-white/12 backdrop:bg-black/60"
+			>
+				<h3
+					id="pointer-dialog-title"
+					class="font-display text-xl font-bold tracking-[-0.03em]"
+				>
+					Nuevo evento
+				</h3>
+
+				<form id="pointer-form" class="mt-5 flex flex-col gap-4" novalidate>
+					<Field label="Título" name="title" required maxlength={120} />
+					<Field
+						label="URL de Luma"
+						name="lumaUrl"
+						type="url"
+						required
+						placeholder="https://luma.com/..."
+					/>
+					<div class="grid gap-4 sm:grid-cols-2">
+						<Field
+							label="Fecha y hora"
+							name="eventDate"
+							type="datetime-local"
+						/>
+						<Field label="Ubicación" name="location" />
+					</div>
+					<Field
+						label="Imagen (URL)"
+						name="imageUrl"
+						type="url"
+						placeholder="https://..."
+					/>
+					<Field
+						label="Descripción corta"
+						name="shortDescription"
+						as="textarea"
+						maxlength={280}
+					/>
+					{
+						// UN solo selector "Pilar" para todos los roles — no dos. Para
+						// super_admin (sin área propia) este mismo valor fija también
+						// areaSlug al guardar (ver el submit handler). No hay un caso
+						// de uso real hoy donde area_slug y pillar_slug deban diferir
+						// para este panel, así que dos selectores con la misma lista
+						// de opciones era confuso sin aportar nada (mismo ajuste que
+						// eventos-pasados.astro). Para director/subdirector, pillarSlug sigue
+						// siendo una etiqueta de contenido opcional, independiente de
+						// su área ya fija por su perfil.
+					}
+					<Field
+						label="Pilar"
+						name="pillarSlug"
+						as="select"
+						options={pillarOptions}
+						required={profile.role === 'super_admin'}
+					/>
+
+					<div class="flex flex-wrap gap-5">
+						<label
+							class="text-foreground-secondary flex items-center gap-2 text-sm"
+						>
+							<input
+								type="checkbox"
+								name="featured"
+								class="accent-optional-3 h-4 w-4 rounded"
+							/>
+							Destacado
+						</label>
+						<label
+							class="text-foreground-secondary flex items-center gap-2 text-sm"
+						>
+							<input
+								type="checkbox"
+								name="published"
+								class="accent-optional-3 h-4 w-4 rounded"
+							/>
+							Publicado
+						</label>
+					</div>
+
+					<p
+						id="pointer-form-error"
+						class="text-secondary text-sm"
+						role="alert"
+						hidden
+					>
+					</p>
+
+					<div class="mt-2 flex justify-end gap-3">
+						<Button type="button" variant="outline" data-close-dialog>
+							Cancelar
+						</Button>
+						<Button type="submit">Guardar</Button>
+					</div>
+				</form>
+			</dialog>
+		</event-pointer-admin>
+	</AdminShell>
+</AdminLayout>
+
+<script>
+	// La conversión de fecha vive en el dominio (limaDateTime.ts), no acá:
+	// antes se hacía con `new Date(valor).toISOString()` y getters locales,
+	// que interpretan la hora en la zona DEL NAVEGADOR del director,
+	// mientras la tarjeta pública formatea con 'America/Lima' fijo. Ver
+	// defecto B del BUG 2 en MEMORY.md.
+	import {
+		datetimeLocalToIso,
+		isoToDatetimeLocal,
+	} from '../../domain/limaDateTime';
+
+	// Sin framework: un custom element porque el panel no tiene
+	// React/Vue instalado, y esto no lo justifica (mismo patrón que el
+	// resto de las pantallas de /administrator).
+	interface PointerFormPayload {
+		title: string;
+		lumaUrl: string;
+		eventDate: string | null;
+		location: string | null;
+		imageUrl: string | null;
+		shortDescription: string | null;
+		pillarSlug: string | null;
+		featured: boolean;
+		published: boolean;
+		/** Solo presente en el form para super_admin — ver el campo "Área" arriba. */
+		areaSlug?: string;
+	}
+
+	class EventPointerAdmin extends HTMLElement {
+		connectedCallback() {
+			if (this.dataset.ready === 'true') return;
+			this.dataset.ready = 'true';
+
+			const dialog = this.querySelector<HTMLDialogElement>('#pointer-dialog');
+			const dialogTitle = this.querySelector<HTMLElement>(
+				'#pointer-dialog-title',
+			);
+			const form = this.querySelector<HTMLFormElement>('#pointer-form');
+			const errorEl = this.querySelector<HTMLElement>('#pointer-form-error');
+			const openCreateBtn =
+				this.querySelector<HTMLButtonElement>('[data-open-create]');
+			const submitBtn = form?.querySelector<HTMLButtonElement>(
+				'button[type="submit"]',
+			);
+			if (
+				!dialog ||
+				!dialogTitle ||
+				!form ||
+				!errorEl ||
+				!openCreateBtn ||
+				!submitBtn
+			)
+				return;
+
+			let mode: 'create' | 'edit' = 'create';
+			let editingId: string | null = null;
+
+			const showError = (message: string) => {
+				errorEl.textContent = message;
+				errorEl.hidden = false;
+			};
+			const clearError = () => {
+				errorEl.textContent = '';
+				errorEl.hidden = true;
+			};
+
+			const resetForm = () => {
+				form.reset();
+				clearError();
+			};
+
+			openCreateBtn.addEventListener('click', () => {
+				mode = 'create';
+				editingId = null;
+				resetForm();
+				dialogTitle.textContent = 'Nuevo evento';
+				dialog.showModal();
+			});
+
+			this.querySelectorAll<HTMLButtonElement>('[data-open-edit]').forEach(
+				(button) => {
+					button.addEventListener('click', () => {
+						const row = button.closest<HTMLElement>('[data-pointer-id]');
+						if (!row) return;
+
+						mode = 'edit';
+						editingId = row.dataset.pointerId ?? null;
+						resetForm();
+						dialogTitle.textContent = 'Editar evento';
+
+						const set = (name: string, value: string) => {
+							const field = form.elements.namedItem(name);
+							if (
+								field instanceof HTMLInputElement ||
+								field instanceof HTMLTextAreaElement
+							) {
+								field.value = value;
+							} else if (field instanceof HTMLSelectElement) {
+								field.value = value;
+							}
+						};
+						const setChecked = (name: string, checked: boolean) => {
+							const field = form.elements.namedItem(name);
+							if (field instanceof HTMLInputElement) field.checked = checked;
+						};
+
+						set('title', row.dataset.title ?? '');
+						set('lumaUrl', row.dataset.lumaUrl ?? '');
+						set('eventDate', isoToDatetimeLocal(row.dataset.eventDate ?? null));
+						set('location', row.dataset.location ?? '');
+						set('imageUrl', row.dataset.imageUrl ?? '');
+						set('shortDescription', row.dataset.shortDescription ?? '');
+						set('pillarSlug', row.dataset.pillarSlug ?? '');
+						setChecked('featured', row.dataset.featured === 'true');
+						setChecked('published', row.dataset.published === 'true');
+
+						dialog.showModal();
+					});
+				},
+			);
+
+			this.querySelectorAll<HTMLButtonElement>('[data-close-dialog]').forEach(
+				(button) => {
+					button.addEventListener('click', () => dialog.close());
+				},
+			);
+
+			this.querySelectorAll<HTMLButtonElement>('[data-delete]').forEach(
+				(button) => {
+					button.addEventListener('click', async () => {
+						const row = button.closest<HTMLElement>('[data-pointer-id]');
+						const id = row?.dataset.pointerId;
+						if (!id) return;
+						if (
+							!window.confirm(
+								`¿Borrar "${row.dataset.title}"? No se puede deshacer.`,
+							)
+						) {
+							return;
+						}
+
+						try {
+							const response = await fetch(
+								`/administrator/api/event-pointers/${id}`,
+								{
+									method: 'DELETE',
+								},
+							);
+							if (response.ok) {
+								window.location.reload();
+							} else {
+								window.alert('No se pudo borrar el evento. Intenta de nuevo.');
+							}
+						} catch {
+							window.alert(
+								'No se pudo conectar. Revisa tu conexión e intenta de nuevo.',
+							);
+						}
+					});
+				},
+			);
+
+			form.addEventListener('submit', async (event) => {
+				event.preventDefault();
+				clearError();
+
+				const data = new FormData(form);
+				const eventDateLocal = String(data.get('eventDate') ?? '').trim();
+				const pillarSlug = String(data.get('pillarSlug') ?? '').trim() || null;
+				const isSuperAdmin = this.dataset.role === 'super_admin';
+
+				// La fecha se interpreta SIEMPRE como hora de Lima, no como hora
+				// del navegador del director (defecto B del BUG 2). Si vino algo
+				// que no se puede leer, se avisa en vez de mandarlo como "sin
+				// fecha": un evento que pierde su fecha en silencio termina
+				// mostrándose como "próximo" para siempre (isPointerUpcoming
+				// trata `null` como no vencido).
+				const eventDate = eventDateLocal
+					? datetimeLocalToIso(eventDateLocal)
+					: null;
+				if (eventDateLocal && eventDate === null) {
+					showError('La fecha y hora no son válidas. Revisa el campo.');
+					return;
+				}
+
+				const payload: PointerFormPayload = {
+					title: String(data.get('title') ?? '').trim(),
+					lumaUrl: String(data.get('lumaUrl') ?? '').trim(),
+					eventDate,
+					location: String(data.get('location') ?? '').trim() || null,
+					imageUrl: String(data.get('imageUrl') ?? '').trim() || null,
+					shortDescription:
+						String(data.get('shortDescription') ?? '').trim() || null,
+					pillarSlug,
+					featured: data.get('featured') === 'on',
+					published: data.get('published') === 'on',
+					// Un solo selector "Pilar" para todos los roles — para
+					// super_admin (sin área propia) ese mismo valor también fija
+					// areaSlug al crear. En 'edit' el endpoint no acepta areaSlug
+					// (docs/API_CONTRACTS.md §2), así que solo se manda al crear.
+					...(mode === 'create' &&
+						isSuperAdmin &&
+						pillarSlug && { areaSlug: pillarSlug }),
+				};
+
+				const url =
+					mode === 'create'
+						? '/administrator/api/event-pointers'
+						: `/administrator/api/event-pointers/${editingId}`;
+				const method = mode === 'create' ? 'POST' : 'PATCH';
+
+				submitBtn.disabled = true;
+				try {
+					const response = await fetch(url, {
+						method,
+						headers: { 'content-type': 'application/json' },
+						body: JSON.stringify(payload),
+					});
+
+					if (response.ok) {
+						window.location.reload();
+						return;
+					}
+
+					const body = await response.json().catch(() => null);
+					showError(
+						body?.error ??
+							'No se pudo guardar. Revisa los datos e intenta de nuevo.',
+					);
+				} catch {
+					showError(
+						'No se pudo conectar. Revisa tu conexión e intenta de nuevo.',
+					);
+				} finally {
+					submitBtn.disabled = false;
+				}
+			});
+		}
+	}
+
+	if (!customElements.get('event-pointer-admin')) {
+		customElements.define('event-pointer-admin', EventPointerAdmin);
+	}
+</script>

@@ -2,8 +2,12 @@
 import Badge from '../components/ui/Badge.astro';
 import Button from '../components/ui/Button.astro';
 import Container from '../components/ui/Container.astro';
-import { projects } from '../data/projects';
+import { loadProjects } from '../infra/content/loadPageContent';
 import Layout from '../layouts/Layout.astro';
+
+// T5.4 — cadena Supabase → snapshot → projects.data.ts → vacío. El único
+// cambio de esta página es de dónde sale `projects`; el render es idéntico.
+const { projects } = await loadProjects();
 
 const statusLabels = {
 	activo: 'Activo',
