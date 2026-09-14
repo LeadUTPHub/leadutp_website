@@ -13,7 +13,7 @@
 | 3 | CRUD de eventos propios | ✅ DONE (6/6) | — |
 | 4 | Galería "así se vivió el evento" | ✅ DONE (7/7) | — |
 | 5 | Extensión a Nosotros y Proyectos | ✅ DONE (6/6) — aprobado por el PO | — |
-| 6 | Pulido UX/UI | TODO | — |
+| 6 | Pulido UX/UI | 🟡 WIP | — |
 
 Regla de secuencia: el Sprint 2 (auth) no arranca hasta que el Sprint 1 esté validado en local — así, si Supabase se complica, Eventos ya quedó entregado de forma independiente.
 
@@ -127,16 +127,22 @@ Regla de secuencia: el Sprint 2 (auth) no arranca hasta que el Sprint 1 esté va
 
 ## Sprint 6 · Pulido UX/UI
 
+> **Abierto el 2026-09-14**, tras el cierre y aprobación de Sprint 5 y de los 3 cambios de alcance fuera del backlog original (D-16/D-17/D-18, ver MEMORY.md). Alcance ampliado a pedido explícito del PO con T6.7/T6.8 **antes** de T6.1.
+
 **Meta / DoD:** panel consistente con `DESIGN.md` pantalla por pantalla, estados de carga/vacío/error en todo el panel, flujo "primera vez", accesibilidad básica, `CONTEXT.md`/`PENDIENTES.md` actualizados. Checklist final para el PR a `main`.
 
 | ID | Tarea | Given / When / Then | Estado |
 |---|---|---|---|
+| T6.7 | Estabilizar el flake intermitente de tests (L22/L28) | **Given** `rls.integration.test.ts`/`.galleries.test.ts`/`.pointers.test.ts`/`.pageBlocks.test.ts`/`middleware.test.ts` autenticando los mismos 3 usuarios de prueba en paralelo · **When** se investiga la causa raíz (ya documentada: estado de sesión compartido en `getUser()`/storage entre clientes concurrentes) · **Then** se aplica la mitigación conocida donde alcance (`getSession()` en vez de `getUser()`) o se separa la suite de integración, y se confirma con varias corridas seguidas que la intermitencia baja o desaparece — si no es razonable eliminarla del todo, se deja documentada como aceptada, no como sorpresa | TODO |
+| T6.8 | Corregir el error preexistente de `astro check` en `Field.astro:86:19` | **Given** `implicit any` reportado desde antes de Sprint 5 (confirmado con `git stash` que no lo introdujo ningún cambio de esta sesión) · **When** se tipa el parámetro faltante · **Then** `astro check` pasa a 0 errores, sin cambiar el comportamiento del componente | TODO |
 | T6.1 | Auditoría visual contra `DESIGN.md` | **Given** cada pantalla del panel · **When** se revisa · **Then** cero color/fuente fuera de los tokens documentados | TODO |
 | T6.2 | Estados carga / vacío / error | **Given** cada vista y acción · **When** la dependencia tarda, no hay datos, o falla · **Then** hay un estado explícito (no spinner infinito, no pantalla en blanco, no 500) | TODO |
 | T6.3 | Flujo "primera vez" | **Given** un director que nunca usó el panel · **When** entra · **Then** entiende sin ayuda dónde subir su evento y sus fotos | TODO |
 | T6.4 | Accesibilidad | **Given** login y formularios de carga · **When** se navega con teclado · **Then** foco visible (`outline-optional-3`), labels asociados, contraste AA | TODO |
 | T6.5 | Documentación | **Given** el panel funcional · **When** se actualizan `CONTEXT.md` y `PENDIENTES.md` (Luma + panel ya no pendientes) + guía "cómo se administra" · **Then** coherentes entre sí | TODO |
-| T6.6 | Test de build final | **When** `pnpm build` · **Then** 10 HTML públicos estáticos; funciones solo `/administrator/**`; `pnpm test` y `pnpm lint` verdes | TODO |
+| T6.6 | Test de build final | **When** `pnpm build` · **Then** páginas públicas estáticas (hoy 15, no las 10 originales del backlog — el número creció con `/pilares/[slug]` y las tarjetas de eventos/galerías; funciones solo `/administrator/**`; `pnpm test` y `pnpm lint` verdes | TODO |
+
+> **Nota (T6.6):** el "10 HTML públicos" original de este backlog quedó desactualizado por sprints anteriores (hoy son 15, ver `build-boundary.test.ts` → `EXPECTED_STATIC_HTML_COUNT`) — corregido acá al abrir el sprint para no repetir el número viejo en el DoD final.
 
 ---
 
