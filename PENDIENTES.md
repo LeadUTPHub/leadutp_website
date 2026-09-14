@@ -1,6 +1,6 @@
 # Pendientes — LEAD UTP Website
 
-> Última actualización: 2026-09-14
+> Última actualización: 2026-09-14 (punto 17 agregado)
 
 Lista de tareas abiertas para seguir avanzando en el sitio. Para contexto general del stack y la estructura del proyecto, ver [`CONTEXT.md`](./CONTEXT.md).
 
@@ -87,6 +87,12 @@ Calculado en la auditoría de accesibilidad del panel de administración (T6.4, 
 ### 16. Rediseño visual de la tarjeta de "Eventos pasados"
 
 Anotado explícitamente por el PO al cerrar el cambio de alcance que renombró "Galerías" a "Eventos pasados" en el panel (2026-09-14, `MEMORY.md` D-17) — **sin fecha definida, no es urgente**. Aplica tanto a la tarjeta de lista en `/administrator/eventos-pasados` como, potencialmente, a `GalleryEventCard.astro` en `/eventos` público (que muestra estas galerías como "Eventos realizados"). No se tocó nada de esto en el cambio de alcance ni en el Sprint 6 — quedó deliberadamente fuera de esos alcances hasta que el PO defina qué cambiar.
+
+### 17. Subida directa de imagen vía Cloudinary para eventos (`/administrator/eventos`)
+
+Hoy `imageUrl` de un puntero a Luma es una URL de texto plano que el director pega a mano (ver `MEMORY.md` D-10, Sprint 3) — deliberadamente diferido en ese momento porque Sprint 4 (galerías) iba a construir el flujo de subida firmada de forma reutilizable. Ese flujo **ya existe y funciona**: `buildSignature()` (`src/infra/cloudinary/buildSignature.ts`), `CloudinaryPhotoStorage` (`src/infra/cloudinary/CloudinaryPhotoStorage.ts`) y el endpoint `POST /administrator/api/uploads/sign`, todos en uso real desde `/administrator/eventos-pasados`. No se volvió a extender a `/administrator/eventos` después de Sprint 4 — quedó sin decisión pendiente, ni resuelto ni descartado, hasta que el PO lo confirmó explícitamente (2026-09-14) como pendiente sin fecha.
+
+No es trabajo nuevo desde cero: es reusar ese mismo flujo de firma/subida/borrado en el formulario de eventos, mismo patrón que ya corre en Eventos pasados.
 
 ## Dónde preguntar
 
