@@ -34,14 +34,18 @@ const { stats } = Astro.props;
 					</p>
 				</div>
 
-				<dl class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+				<dl class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 					{stats.map((stat) => (
-						<div class="bg-surface card-lift flex flex-col gap-4 rounded-2xl border border-white/10 p-6 sm:p-7">
+						<div class="bg-surface border-secondary/15 hover:border-secondary/35 hover:shadow-secondary/10 relative flex flex-col gap-4 overflow-hidden rounded-2xl border p-6 transition-[border-color,box-shadow] duration-200 hover:shadow-lg motion-reduce:transition-none sm:p-7">
+							<span
+								class="bg-secondary/70 absolute inset-x-0 top-0 h-0.5"
+								aria-hidden="true"
+							/>
 							{stat.icon && (
-								<span class="inline-flex size-12 items-center justify-center rounded-2xl bg-white/[0.06] ring-1 ring-white/10">
+								<span class="bg-secondary/15 ring-secondary/30 inline-flex size-12 items-center justify-center rounded-2xl ring-1">
 									<Icon
 										name={`lucide:${stat.icon}`}
-										class="text-optional-3 size-6"
+										class="text-secondary size-6"
 										aria-hidden="true"
 									/>
 								</span>
