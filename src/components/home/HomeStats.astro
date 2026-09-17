@@ -1,0 +1,124 @@
+---
+import { Icon } from 'astro-icon/components';
+import { formatCountValue } from '../../domain/homeStatsCounter';
+import type { HomeStat } from '../../data/home/home.data';
+import Container from '../ui/Container.astro';
+
+interface Props {
+	stats: HomeStat[];
+}
+
+const { stats } = Astro.props;
+---
+
+{
+	stats.length > 0 && (
+		<section
+			class="hairline-t py-16 sm:py-20 lg:py-24"
+			aria-labelledby="stats-title"
+		>
+			<Container>
+				<div class="max-w-2xl">
+					<p class="text-secondary text-[0.7rem] font-bold tracking-[0.18em] uppercase">
+						En números
+					</p>
+					<h2
+						id="stats-title"
+						class="font-display text-foreground mt-3 text-3xl font-semibold tracking-[-0.05em] sm:text-4xl"
+					>
+						LEAD UTP en números
+					</h2>
+					<p class="text-foreground-secondary mt-3 text-base leading-7">
+						El impacto de una comunidad que crece con cada evento, proyecto y
+						persona que se suma.
+					</p>
+				</div>
+
+				<dl class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+					{stats.map((stat) => (
+						<div class="bg-surface card-lift flex flex-col gap-4 rounded-2xl border border-white/10 p-6 sm:p-7">
+							{stat.icon && (
+								<span class="inline-flex size-12 items-center justify-center rounded-2xl bg-white/[0.06] ring-1 ring-white/10">
+									<Icon
+										name={`lucide:${stat.icon}`}
+										class="text-optional-3 size-6"
+										aria-hidden="true"
+									/>
+								</span>
+							)}
+							<dd
+								class="font-display text-foreground text-4xl font-bold tracking-[-0.04em] tabular-nums sm:text-5xl"
+								data-stat-counter
+								data-target={stat.value}
+								data-suffix={stat.suffix ?? ''}
+							>
+								{formatCountValue(1, {
+									target: stat.value,
+									suffix: stat.suffix,
+								})}
+							</dd>
+							<dt class="text-foreground-secondary text-sm leading-6">
+								{stat.label}
+							</dt>
+						</div>
+					))}
+				</dl>
+			</Container>
+		</section>
+	)
+}
+
+<script>
+	import { animate, inView } from 'motion';
+	import { easeOutCubic, formatCountValue } from '../../domain/homeStatsCounter';
+
+	const counters =
+		document.querySelectorAll<HTMLElement>('[data-stat-counter]');
+
+	if (counters.length > 0) {
+		const prefersReducedMotion = window.matchMedia(
+			'(prefers-reduced-motion: reduce)',
+		).matches;
+
+		counters.forEach((el) => {
+			const parsedTarget = Number(el.dataset.target ?? '0');
+			const options = {
+				target: Number.isFinite(parsedTarget) ? parsedTarget : 0,
+				prefix: el.dataset.prefix ?? '',
+				suffix: el.dataset.suffix ?? '',
+			};
+			const render = (progress: number) => {
+				el.textContent = formatCountValue(progress, options);
+			};
+
+			// prefers-reduced-motion: se pinta el valor final de inmediato,
+			// sin animación (ya viene renderizado desde el servidor, pero lo
+			// reafirmamos por si el prefijo/sufijo cambiara en el futuro).
+			if (prefersReducedMotion) {
+				render(1);
+				return;
+			}
+
+			// La sección vive debajo del pliegue: reseteamos a 0 antes de que
+			// el usuario la vea, para animar 0 -> valor final al entrar en
+			// viewport. Los usuarios sin JS conservan el valor final del SSR.
+			render(0);
+
+			let hasAnimated = false;
+			inView(
+				el,
+				() => {
+					// Solo una vez: no se re-anima al hacer scroll arriba y abajo.
+					if (hasAnimated) return;
+					hasAnimated = true;
+					animate(0, 1, {
+						duration: 1.6,
+						ease: easeOutCubic,
+						onUpdate: (progress) => render(progress),
+					});
+				},
+				{ amount: 0.5 },
+			);
+		});
+	}
+</script>
