@@ -80,3 +80,40 @@ export const homeAlliances = [
 	{ name: 'Levo Learning', logo: logoLevoLearning, logoAlt: 'Levo Learning' },
 	{ name: 'DSC UTP', logo: logoDscUtp, logoAlt: 'DSC UTP' },
 ] satisfies HomeAlliance[];
+
+/**
+ * Estadística de impacto para la sección "LEAD UTP en números" del Home.
+ * `value` es el entero final; el conteo animado se calcula en el cliente
+ * (ver HomeStats.astro) sobre este valor, nunca aquí. `icon` es el nombre de
+ * un icono del set lucide (astro-icon), p. ej. 'users'.
+ */
+export interface HomeStat {
+	id: string;
+	value: number;
+	suffix?: string;
+	label: string;
+	icon?: string;
+}
+
+/**
+ * Testimonio de la comunidad para el Home. Sin `photoUrl` se muestra un
+ * avatar de iniciales (ver src/domain/testimonialAvatar.ts). `imageIsTemporary`
+ * marca una foto provisional, con el mismo tratamiento que el resto del sitio.
+ */
+export interface HomeTestimonial {
+	id: string;
+	name: string;
+	projectOrRole: string;
+	quote: string;
+	photoUrl?: string;
+	imageIsTemporary?: boolean;
+}
+
+// Sin cifras reales confirmadas todavía: el array vacío oculta la sección por
+// completo (convención de contenido vacío, igual que about.team). Reemplazar
+// por datos reales cuando la directiva los confirme — nunca datos ficticios
+// en producción.
+export const homeStats: HomeStat[] = [];
+
+// Sin testimonios reales recopilados todavía: array vacío = sección oculta.
+export const homeTestimonials: HomeTestimonial[] = [];
